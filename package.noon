@@ -1,0 +1,6 @@
+name          krix
+main          js/main.js
+dependencies
+              jsmediatags   ^3.4.0
+              lodash        ^4.17.4
+              noon          >=1.0.13
