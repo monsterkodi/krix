@@ -4,3 +4,4 @@ dependencies
               jsmediatags   ^3.4.0
               lodash        ^4.17.4
               noon          >=1.0.13
+              walkdir       0.0.11

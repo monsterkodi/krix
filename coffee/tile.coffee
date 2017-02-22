@@ -7,10 +7,11 @@
 
 log  = require '/Users/kodi/s/ko/js/tools/log'
 post = require './post'
+path = require 'path'
 
 class Tile
     
-    constructor: (@file, @tag, elem) ->
+    constructor: (@file, elem, @tag) ->
             
         @id = @file
         @div = document.createElement 'div'
@@ -20,14 +21,14 @@ class Tile
         @pad = document.createElement 'div'
         @pad.className = "krixTilePad"
         @div.appendChild @pad
-        if @tag.tags.picture?
+        if @tag?.tags.picture?
             img = document.createElement 'img'
             pic = @tag.tags.picture
             data = new Buffer(pic.data).toString('base64')
             img.setAttribute 'src', "data:#{pic.format};base64,#{data}"
             img.setAttribute 'alt', @file
             img.className = "krixTileImg"
-        else
+        else if @tag?
             img = document.createElement 'div'
             img.style.display = 'inline-block'
             img.style.overflow = "hidden"
@@ -40,16 +41,36 @@ class Tile
             sqr.innerHTML = @tag.tags.artist + "<br>" + @tag.tags.title
             sqr.className = "krixTileImg"
             img.appendChild sqr
+        else
+            img = document.createElement 'div'
+            img.style.display = 'inline-block'
+            img.style.overflow = "hidden"
+            img.className = "krixTileImg"
+
+            sqr = document.createElement 'div'
+            sqr.style.padding = "5px"
+            sqr.style.backgroundColor = "#4444aa"
+            sqr.style.overflow = "hidden"
+            sqr.innerHTML = path.basename @file
+            sqr.className = "krixTileImg"
+            img.appendChild sqr
+            
         @pad.appendChild img
         elem.appendChild @div
 
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
     
+    del: ->
+        if @div?
+            @div.removeEventListener "click", @onClick
+            @div.removeEventListener "dblclick", @onDblClick
+        @unFocus() if @hasFocus()
+    
     hasFocus: () -> @pad.classList.contains 'krixTilePadFocus'
     
     unFocus: () => 
-        @pad.classList.remove 'krixTilePadFocus'
+        @pad?.classList.remove 'krixTilePadFocus'
         post.removeListener 'unfocus', @unFocus
     
     setFocus: () ->
@@ -82,16 +103,24 @@ class Tile
                     num -= 1
                     div = div[sib]
                 div
-        div?.tile
+        div?.tile or @
             
     focusNeighbor: (nb) ->
         tile = @neighbor nb
-        tile?.setFocus()            
+        tile?.setFocus()  
         
-    onDblClick: (event) => post.emit 'play_file', @id
-    onClick:    (event) => 
+    play: -> post.emit 'playFile', @file
+    open: -> post.emit 'openFile', @file
+    add:  -> post.emit 'addFile',  @file
+        
+    onDblClick: => 
+        if not @tag?
+            post.emit 'loadDir', @file
+        else
+            @play()
+    onClick: => 
         @setFocus()
         if event.shiftKey
-            post.emit 'add_file', @id
-        
+            @add()
+                
 module.exports = Tile

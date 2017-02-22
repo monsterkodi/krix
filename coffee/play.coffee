@@ -12,10 +12,13 @@ childp = require 'child_process'
 class Play
     
     constructor: () ->
-        post.on 'play_file', @playFile
-        post.on 'add_file',  @addFile
-        
+        post.on 'playFile', @playFile
+        post.on 'addFile',  @addFile
+        post.on 'nextSong', @nextSong
+        post.on 'prevSong', @prevSong
+    
     playFile: (file) =>
+        log "Play.playFile file:#{file}"
         # childp.exec "mpc clear && mpc add \"#{file}\" && mpc play", (err) ->
             # log "play: #{file}"
         childp.exec "mpc clear", (err) ->
@@ -25,8 +28,11 @@ class Play
                 childp.exec "mpc play", (err) ->
                     # log 'play'
 
-    addFile: (file) =>
-        childp.exec "mpc add \"#{file}\"", (err) ->
-            # log 'play: add ', file, err
+    addFile: (file) => @mpc "add \"#{file}\""
+    nextSong: => @mpc 'next'
+    prevSong: => @mpc 'prev'
+      
+    mpc: (arg) -> childp.exec "mpc #{arg}", (err) ->
+        log "[ERROR] mpc #{arg}", err if err
         
 module.exports = Play
