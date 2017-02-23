@@ -34,12 +34,12 @@ class Krix
         
         @style '.krixTile', "display: inline-block; padding: 0; margin: 0;"
         @style '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px; "
-        @style '.krixTilePadFocus', "background-color: #444;"
-        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #44a;"
-        @style '.krixTileSqrDir', "padding:  5px; background-color: #228; overflow:  hidden;"
-        @style '.krixTileSqrFile', "padding:  5px; background-color: #222; overflow:  hidden;"
-        @style '.krixTilePad:hover', "border-color: #444;"
-        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #44a;"
+        @style '.krixTilePadFocus', "background-color: #44a;"
+        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #444;"
+        @style '.krixTileSqrDir', "padding:  5px; overflow: hidden; border-radius: 5px; background-color: #111;"
+        @style '.krixTileSqrFile', "padding:  5px; overflow: hidden; background-color: #333;"
+        @style '.krixTilePad:hover', "border-color: #44a;"
+        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #444;"
   
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
@@ -149,13 +149,14 @@ class Krix
     
     modKeyComboEventDown: (mod, key, combo, event) ->
         switch key
-            when '-'     then @setTileNum @tileNum + 1
-            when '='     then @setTileNum @tileNum - 1
-            when 'home'  then @getFirstTile().setFocus()
-            when 'end'   then @getLastTile().setFocus()
-            when 'space' then @getFocusTile().add()
-            when 'n'     then post.emit 'nextSong'
-            when 'p'     then post.emit 'prevSong'
+            when '-'         then @setTileNum @tileNum + 1
+            when '='         then @setTileNum @tileNum - 1
+            when 'home'      then @getFirstTile().setFocus()
+            when 'end'       then @getLastTile().setFocus()
+            when 'space'     then @getFocusTile().add()
+            when 'n'         then post.emit 'nextSong'
+            when 'p'         then post.emit 'prevSong'
+            when 'backspace' then @getFocusTile().delete()
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @getFocusTile().focusNeighbor key
             when 'enter' 

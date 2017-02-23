@@ -23,7 +23,7 @@ class Main extends Stage
         @elem.style.left = '0'
         @elem.style.right = '0'
         @elem.style.bottom = '0'
-        @elem.style.background = "#111"
+        @elem.style.background = "#000"
         @elem.style.overflow = "scroll"
         @view.appendChild @elem
         

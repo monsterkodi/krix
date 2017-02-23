@@ -5,6 +5,7 @@
 #    000     000   000   0000000   0000000 
 
 jsmediatags = require 'jsmediatags'
+log         = require './tools/log'
 
 class Tags
             

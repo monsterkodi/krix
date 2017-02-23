@@ -45,7 +45,7 @@ class Tile
 
             sqr = document.createElement 'div'
             sqr.classList.add "krixTileSqrDir"
-            sqr.classList.add "krixTileImg"
+            # sqr.classList.add "krixTileImg"
             sqr.innerHTML = path.basename @file
             img.appendChild sqr
              
@@ -143,6 +143,25 @@ class Tile
     play: -> post.emit 'playFile', @file
     open: -> post.emit 'openFile', @file
     add:  -> post.emit 'addFile',  @file
+    delete: -> 
+        log 'delete', @absFilePath()
+        if @isFile()
+            fs.unlink @absFilePath(), (err) =>
+                if err
+                    log "[ERROR] deleting file #{@absFilePath()} failed!", err
+                else
+                    @focusNeighbor 'right'
+                    @del()
+                    @div.remove()
+        else
+            rimraf = require 'rimraf'
+            rimraf @absFilePath(), (err) =>
+                if err
+                    log "[ERROR] deleting directory #{@absFilePath()} failed!", err
+                else
+                    @focusNeighbor 'right'
+                    @del()
+                    @div.remove()
         
     onDblClick: => 
         if not @tag?
