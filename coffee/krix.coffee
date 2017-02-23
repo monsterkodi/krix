@@ -5,16 +5,16 @@
 #   000  000   000   000  000   000 000 
 #   000   000  000   000  000  000   000
 
-_      = require 'lodash'
 fs     = require 'fs'
 path   = require 'path'
-tags   = require 'jsmediatags'
-log    = require '/Users/kodi/s/ko/js/tools/log'
-Tile   = require './tile'
-Play   = require './play'
-post   = require './post'
 walk   = require 'walkdir'
 childp = require 'child_process'
+_      = require 'lodash'
+log    = require './tools/log'
+Tile   = require './tile'
+Play   = require './play'
+tags   = require './tags' 
+post   = require './post'
 
 MIN_TILE_SIZE = 50
 MAX_TILE_SIZE = 500
@@ -32,10 +32,14 @@ class Krix
         
         @tiles.addEventListener "dblclick", @onDblClick
         
-        @setStyleRule '.krixTile', "display: inline-block; padding: 0; margin: 0;"
-        @setStyleRule '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px; "
-        @setStyleRule '.krixTilePadFocus', "background-color: #444;"
-        @setStyleRule '.krixTilePad:hover', "border-color: #444;"
+        @style '.krixTile', "display: inline-block; padding: 0; margin: 0;"
+        @style '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px; "
+        @style '.krixTilePadFocus', "background-color: #444;"
+        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #44a;"
+        @style '.krixTileSqrDir', "padding:  5px; background-color: #228; overflow:  hidden;"
+        @style '.krixTileSqrFile', "padding:  5px; background-color: #222; overflow:  hidden;"
+        @style '.krixTilePad:hover', "border-color: #444;"
+        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #44a;"
   
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
@@ -65,30 +69,32 @@ class Krix
     # 0000000   0000000   000   000  0000000  
 
     loadDir: (dir) =>
-        # log "Krix.loadDir dir:#{dir}"
         @walker?.stop()
+        tags.clearQueue()
         post.emit 'unfocus'
         for node in @tiles.childNodes
             node.tile.del()
         @tiles.removeChild @tiles.lastChild while @tiles.lastChild
         @tilesDir = path.join @musicDir, dir
         if dir.length and dir != '.'
-            tile = new Tile path.dirname(dir), @tiles
+            tile = new Tile path.dirname(dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir
+            tile.setText path.dirname(dir), path.basename(dir)
             tile.setFocus()
+            
         @walker = walk @tilesDir, max_depth: 1
+        
         @walker.on 'file', (file) =>
+            return if path.basename(file).startsWith '.'
             musicPath = file.substr @musicDir.length+1
-            addTile = (f, tag) =>
-                # log 'addTile', f
-                new Tile f, @tiles, tag
-            fp = path.join dir, file
-            # console.log "Krix.loadDir file:#{file} musicPath #{musicPath}"
-            cb = (fp) -> (tag) -> addTile fp, tag
-            tags.read file, onSuccess: cb musicPath
-        @walker.on 'directory', (d) =>
-            musicPath = d.substr @musicDir.length+1
-            # console.log "Krix.loadDir d:#{d} musicPath: #{musicPath}"
-            tile = new Tile musicPath, @tiles
+            new Tile musicPath, @tiles, 
+                isFile: true
+                musicDir: @musicDir
+            
+        @walker.on 'directory', (dir) =>
+            dirname = path.basename(dir)
+            return if dirname.startsWith('.') or dirname == 'iTunes'
+            musicPath = dir.substr @musicDir.length+1
+            tile = new Tile musicPath, @tiles, musicDir: @musicDir
             tile.setFocus() if not @focusTile
         
     # 000000000  000  000      00000000   0000000
@@ -105,12 +111,6 @@ class Krix
     tilesWidth: -> @tiles.clientWidth
     tilesHeight: -> @tiles.clientHeight
     
-    # tileForElem: (elem) ->
-        # if elem.classList.contains 'krixTile'
-            # return elem
-        # return @tileForElem elem.parentNode if elem.parentNode != document
-        # return null
-              
     #  0000000  000  0000000  00000000
     # 000       000     000   000     
     # 0000000   000    000    0000000 
@@ -123,15 +123,13 @@ class Krix
         @tileSize = Math.floor size
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
-        # log "setTileSize", @tileSize
-        @setStyleRule '.krixTileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
+        @style '.krixTileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
         
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
-        # log "setTileNum", @tileNum
         @setTileSize (@tilesWidth() / @tileNum)-22
         
-    setStyleRule: (selector, rule) ->
+    style: (selector, rule) ->
         for i in [0...document.styleSheets[0].cssRules.length]
             r = document.styleSheets[0].cssRules[i]
             if r?.selectorText == selector
@@ -156,15 +154,19 @@ class Krix
             when 'home'  then @getFirstTile().setFocus()
             when 'end'   then @getLastTile().setFocus()
             when 'space' then @getFocusTile().add()
-            when 'enter' 
-                if not combo then @getFocusTile().play()
-                else @getFocusTile().open()
             when 'n'     then post.emit 'nextSong'
             when 'p'     then post.emit 'prevSong'
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @getFocusTile().focusNeighbor key
+            when 'enter' 
+                if @getFocusTile().isDir()
+                    if combo == 'enter' then @getFocusTile().open()
+                    else @getFocusTile().play()
+                else
+                    if combo == 'enter' then @getFocusTile().play()
+                    else @getFocusTile().open()
 
-        log "down", mod, key, combo
+        # log "down", mod, key, combo
 
     modKeyComboEventUp: (mod, key, combo, event) -> # log "up", mod, key, combo
 

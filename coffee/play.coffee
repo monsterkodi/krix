@@ -5,17 +5,25 @@
 # 000        000      000   000     000   
 # 000        0000000  000   000     000   
 
-log    = require '/Users/kodi/s/ko/js/tools/log'
-post   = require './post'
-childp = require 'child_process' 
+childp    = require 'child_process' 
+komponist = require 'komponist'
+log       = require './tools/log'
+post      = require './post'
 
 class Play
     
     constructor: () ->
+        
+        @mpcc = komponist.createConnection 6600, 'localhost', -> log 'connected to mpc server'
+        @mpcc.on 'changed', @onServerChange
+        
         post.on 'playFile', @playFile
         post.on 'addFile',  @addFile
         post.on 'nextSong', @nextSong
         post.on 'prevSong', @prevSong
+    
+    onServerChange: (change) =>
+        log "Play.onServerChange change:", change
     
     playFile: (file) =>
         log "Play.playFile file:#{file}"
@@ -28,11 +36,14 @@ class Play
                 childp.exec "mpc play", (err) ->
                     # log 'play'
 
-    addFile: (file) => @mpc "add \"#{file}\""
+    addFile: (file) => @mpc "add", [file]
     nextSong: => @mpc 'next'
     prevSong: => @mpc 'prev'
-      
-    mpc: (arg) -> childp.exec "mpc #{arg}", (err) ->
-        log "[ERROR] mpc #{arg}", err if err
+        
+    mpc: (cmmd, args=[]) -> 
+        # log 'mpc command', cmmd, args
+        @mpcc.command cmmd, args, (err) ->
+            log "[ERROR] mpc command failed: #{cmmd} #{args}", err if err
+            
         
 module.exports = Play

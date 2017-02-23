@@ -6,7 +6,7 @@
 #   000   000  000   000  000  000   000
 
 Stage = require '/Users/kodi/s/ko/js/area/stage'
-log   = require '/Users/kodi/s/ko/js/tools/log'
+log   = require './tools/log'
 Krix  = require './krix'
 
 class Main extends Stage
