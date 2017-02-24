@@ -28,9 +28,12 @@ class Song
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
         
         post.on 'currentSong', @onCurrentSong
+        post.emit 'current'
         
     onCurrentSong: (song) =>
         log "Song.onCurrentSong file:#{song.file}"
-        @tile = new Tile song.file, @elem, isFile: true
+        @tile?.del()
+        if song.file?
+            @tile = new Tile song.file, @elem, isFile: true
     
 module.exports = Song

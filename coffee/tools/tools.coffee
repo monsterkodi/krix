@@ -170,7 +170,7 @@ module.exports =
         if idOrClass.startsWith '.'
             e.getElementsByClassName(idOrClass.substr(1).split('.').join " ")[0]
         else
-            e.getElementById idOrClass
+            document.getElementById idOrClass
 
     absPos: (event) ->
         event = if event? then event else window.event

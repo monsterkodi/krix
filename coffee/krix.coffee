@@ -26,6 +26,12 @@ class Krix
                 
         @brws.loadDir ""
     
+    del: ->
+        post.stop()
+        @ctrl?.del()
+        @brws?.del()
+        @play?.del()
+        
     openFile: (file) =>
         absPath = path.join @brws.musicDir, file
         stat = fs.statSync absPath 

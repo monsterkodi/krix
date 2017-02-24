@@ -70,6 +70,7 @@ class Tile
             @div.removeEventListener "click", @onClick
             @div.removeEventListener "dblclick", @onDblClick
         @unFocus() if @hasFocus()
+        @div?.remove()
         
     #    0000000   0000000   000   000  00000000  00000000 
     #   000       000   000  000   000  000       000   000

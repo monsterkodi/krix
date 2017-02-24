@@ -37,7 +37,6 @@ class Brws
         
         @musicDir = resolve "~/Music"
         Tile.musicDir = @musicDir
-        # log "Brws.constructor @musicDir:#{@musicDir}"
         
         @setTileNum @tilesWidth() / 120
         
@@ -59,6 +58,10 @@ class Brws
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
         post.on 'loadDir',   @loadDir
+        post.on 'home',      @goHome
+        post.on 'up',        @goUp
+        
+    del: -> @tiles.remove()
         
     # 000       0000000    0000000   0000000  
     # 000      000   000  000   000  000   000
@@ -66,17 +69,18 @@ class Brws
     # 000      000   000  000   000  000   000
     # 0000000   0000000   000   000  0000000  
 
-    loadDir: (dir) =>
+    goUp:   => @loadDir path.dirname @dir
+    goHome: => @loadDir ''
+    
+    loadDir: (@dir) =>
         @walker?.stop()
         tags.clearQueue()
         post.emit 'unfocus'
-        for node in @tiles.childNodes
-            node.tile.del()
-        @tiles.removeChild @tiles.lastChild while @tiles.lastChild
-        @tilesDir = path.join @musicDir, dir
-        if dir.length and dir != '.'
-            tile = new Tile path.dirname(dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
-            tile.setText path.dirname(dir), path.basename(dir)
+        @tiles.lastChild.tile.del() while @tiles.lastChild
+        @tilesDir = path.join @musicDir, @dir
+        if @dir.length and @dir != '.'
+            tile = new Tile path.dirname(@dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
+            tile.setText path.dirname(@dir), path.basename(@dir)
             tile.setFocus()
             
         @walker = walk @tilesDir, max_depth: 1

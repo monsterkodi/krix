@@ -13,5 +13,6 @@ class Post extends EventEmitter
     
     constructor: () -> Event.singleton = @
     @instance:   () -> Post.singleton or new Post()
+    stop:        () -> @removeAllListeners()
         
 module.exports = Post.instance()

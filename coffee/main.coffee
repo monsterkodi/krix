@@ -21,8 +21,8 @@ class Main extends Stage
         @view.focus()
         
     stop: ->
-        @elem.remove()
-        @pause()
+        @krix.del()
+        # @pause()
         
     resized: (w,h) -> @krix.resized w, h
 
