@@ -7,6 +7,7 @@
 
 childp    = require 'child_process' 
 komponist = require 'komponist'
+_         = require 'lodash'
 log       = require './tools/log'
 post      = require './post'
 
@@ -24,26 +25,41 @@ class Play
     
     onServerChange: (change) =>
         log "Play.onServerChange change:", change
+        switch change
+            when 'player'
+                # @mpc 'status', (status) =>
+                    # log 'current songid', status.songid
+                    # @mpc 'playlistid', status.songid, (song) ->
+                        # log 'song', song
+                @mpc 'currentsong', (info) ->
+                    log 'emit currentSong', info
+                    post.emit 'currentSong', info
+                    
+            when 'playlist'
+                @mpc 'playlist', (playlist) ->
+                    for f in playlist
+                        log f.file
     
     playFile: (file) =>
         log "Play.playFile file:#{file}"
-        # childp.exec "mpc clear && mpc add \"#{file}\" && mpc play", (err) ->
-            # log "play: #{file}"
-        childp.exec "mpc clear", (err) ->
-            # log 'clear'
-            childp.exec "mpc add \"#{file}\"", (err) ->
-                # log 'add', file
-                childp.exec "mpc play", (err) ->
-                    # log 'play'
+
+        @mpc 'clear'
+        @mpc 'add', [file]
+        @mpc 'play'
 
     addFile: (file) => @mpc "add", [file]
     nextSong: => @mpc 'next'
     prevSong: => @mpc 'prev'
-        
-    mpc: (cmmd, args=[]) -> 
-        # log 'mpc command', cmmd, args
-        @mpcc.command cmmd, args, (err) ->
-            log "[ERROR] mpc command failed: #{cmmd} #{args}", err if err
-            
+    
+    # mpq: (cmmd, args=[]) -> @mpc cmmd, args    
+    mpc: (cmmd, args=[], cb=null) -> 
+        if _.isFunction args
+            cb = args
+            args = []
+        @mpcc.command cmmd, args, (err, result) ->
+            if err?
+                log "[ERROR] mpc command failed: #{cmmd} #{args}", err
+            else
+                cb? result            
         
 module.exports = Play

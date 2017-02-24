@@ -16,17 +16,7 @@ class Main extends Stage
         @view.focus()
     
     start: -> 
-                
-        @elem = document.createElement 'div'
-        @elem.style.position = 'absolute'
-        @elem.style.top = '0'
-        @elem.style.left = '0'
-        @elem.style.right = '0'
-        @elem.style.bottom = '0'
-        @elem.style.background = "#000"
-        @elem.style.overflow = "scroll"
-        @view.appendChild @elem
-        
+                        
         @krix = new Krix @view
         @view.focus()
         

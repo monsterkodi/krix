@@ -15,6 +15,7 @@ imgs = require './imgs'
 class Tile
     
     @scrollLock = false
+    @musicDir = null
     
     constructor: (@file, elem, @opt) ->
             
@@ -106,7 +107,7 @@ class Tile
     #   000       000  000      000     
     #   000       000  0000000  00000000
    
-    absFilePath: -> path.join @opt.musicDir, @file
+    absFilePath: -> path.join Tile.musicDir, @file
     isFile: -> @opt?.isFile
     isDir: -> not @isFile()
 
