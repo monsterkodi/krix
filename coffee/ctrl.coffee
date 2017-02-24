@@ -71,6 +71,16 @@ class Ctrl
             text-align: center;
         """
         
+        style "@keyframes highlight", """
+            0%,100%   {color: rgb(16,16,16);}
+            50%  {color: rgb(255,255,255);}
+        """
+        style ".highlight", """
+            animation: highlight 1.5s;
+            animation-timing-function: ease-in;
+            animation-iteration-count: 1;
+        """
+        
         @song = new Song @elem
         
         post.on 'status', @onStatus
@@ -107,6 +117,7 @@ class Ctrl
         labl = document.createElement 'div'
         labl.id = opt.id
         labl.classList.add 'label'
+        labl.classList.add 'highlight'
         @buttons.appendChild labl
         
     button: (opt) ->
@@ -129,11 +140,19 @@ class Ctrl
         $('random').classList.toggle 'buttonActive',   (status.random == '1')
         $('repeat').classList.toggle 'buttonInactive', (status.repeat == '0')
         $('repeat').classList.toggle 'buttonActive',   (status.repeat == '1')
-        $('song').innerHTML   = parseInt(status.song)+1
-        $('length').innerHTML = status.playlistlength
         
-        # log 'status', status
-        # log 'state', status.state
+        if parseInt($('song').innerHTML) != parseInt(status.song)+1
+            node = $('song')
+            clone = node.cloneNode true
+            clone.innerHTML = parseInt(status.song)+1
+            node.parentNode.replaceChild clone, node
+        
+        if parseInt($('length').innerHTML) != parseInt(status.playlistlength)
+            node = $('length')
+            clone = node.cloneNode true
+            clone.innerHTML = status.playlistlength
+            node.parentNode.replaceChild clone, node
+
         icon = switch status.state
             when 'play' then 'pause'
             when 'pause' then 'play'

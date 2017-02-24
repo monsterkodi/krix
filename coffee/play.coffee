@@ -53,6 +53,7 @@ class Play
                 @refreshStatus()
             when 'playlist'
                 log 'playlist changed'
+                @refreshStatus()
                 # @mpc 'playlist', (playlist) ->
                     # for f in playlist
                         # log f.file
