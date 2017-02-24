@@ -32,17 +32,17 @@ class Krix
         
         @tiles.addEventListener "dblclick", @onDblClick
         
-        @style '.krixTile', "display: inline-block; padding: 0; margin: 0;"
-        @style '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px;"
-        @style '.krixTilePadFocus', "background-color: #44a;"
-        @style '.krixTilePadFocus .krixTileSqrCover', "opacity: 1.0;"
-        @style '.krixTilePadDir', "border-radius: 8px;"
-        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #333;"
-        @style '.krixTileSqrDir', "padding:  5px; overflow: hidden; border-radius: 0px; background-color: rgba(0,0,0,0.7); "
-        @style '.krixTileSqrCover', "opacity: 0;"
-        @style '.krixTileImgDir', "border-radius: 5px;"
-        @style '.krixTileSqrFile', "padding:5px; overflow: hidden; background-color: rgba(0,0,100,0.7);"
-  
+        @style '.tile',                       "display: inline-block; padding: 0; margin: 0;"
+        @style '.tilePad',                    "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px;"
+        @style '.tilePadFocus',               "background-color: #44a;"
+        @style '.tilePadFocus .tileSqrCover', "opacity: 1.0;"
+        @style '.tilePadDir',                 "border-radius: 8px;"
+        @style '.tilePadFocus.tilePadDir',    "background-color: #333;"
+        @style '.tileSqrDir',                 "padding:  5px; overflow: hidden; border-radius: 0px; background-color: rgba(0,0,0,0.7);"
+        @style '.tileSqrCover',               "opacity: 0;"
+        @style '.tileArtist',                 "color: #88f;"
+        @style '.tileImgDir',                 "border-radius: 5px;"
+        @style '.tileSqrFile',                "padding:5px; overflow: hidden; background-color: rgba(0,0,100,0.7);"
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
         post.on 'loadDir',   @loadDir
@@ -128,7 +128,7 @@ class Krix
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         @style '.krixTileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
-        
+        @style '.tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
         @setTileSize (@tilesWidth() / @tileNum)-22

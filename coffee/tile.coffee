@@ -22,29 +22,35 @@ class Tile
         @div = document.createElement 'div'
         @div.tile = @
         @div.id = @id
-        @div.className = "krixTile"
+        @div.className = "tile"
         @pad = document.createElement 'div'
-        @pad.className = "krixTilePad"
+        @pad.className = "tilePad"
         @div.appendChild @pad
 
         img = document.createElement 'div'
-        img.classList.add "krixTileImg"
+        img.classList.add "tileImg"
         img.style.display = 'inline-block'
         img.style.overflow = "hidden"
 
         sqr = document.createElement 'div'
+        art = document.createElement 'div'
+        art.classList.add 'tileArtist'
+        sqr.appendChild art
+        tit = document.createElement 'div'
+        tit.classList.add 'tileTrack'
+        sqr.appendChild tit
         img.appendChild sqr
     
         if @isFile()
+            art.innerHTML = path.basename @file
             img.style.backgroundColor = "rgba(0,0,100,0.5)"
-            sqr.classList.add "krixTileSqrFile"
-            sqr.innerHTML = path.basename @file
+            sqr.classList.add "tileSqrFile"
         else
+            tit.innerHTML = path.basename @file
             img.style.backgroundColor = "rgba(0,0,0,0.5)"
-            img.classList.add "krixTileImgDir"
-            sqr.classList.add "krixTileSqrDir"
-            sqr.innerHTML = path.basename @file
-            @pad.classList.add "krixTilePadDir"
+            img.classList.add "tileImgDir"
+            sqr.classList.add "tileSqrDir"
+            @pad.classList.add "tilePadDir"
              
         @pad.appendChild img
         elem.appendChild @div
@@ -73,19 +79,26 @@ class Tile
     setCover: (coverFile) ->
         @pad.firstChild.style.backgroundImage = "url('file://#{encodeURI(coverFile)}')"
         @pad.firstChild.style.backgroundSize = "100% 100%"
-        @pad.firstChild.firstChild.classList.add 'krixTileSqrCover' if not @opt?.isUp
+        @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @opt?.isUp
 
-    setText: (title, sub) -> @pad.firstChild.firstChild.innerHTML = title + '<br>' + sub
+    setText: (top, sub) -> 
+        art = @pad.firstChild.firstChild.firstChild
+        tit = art.nextSibling
+        if sub
+            art.innerHTML = top
+            tit.innerHTML = sub
+        else
+            tit.innerHTML = top
         
     setTag: (@tag) =>
         sqr = @pad.firstChild.firstChild
-        sqr.innerHTML = @tag.tags.artist + "<br>" + @tag.tags.title
+        @setText @tag.tags.artist, @tag.tags.title
         if @tag.tags.picture?
             pic = @tag.tags.picture
             data = new Buffer(pic.data).toString('base64')
             @pad.firstChild.style.backgroundImage = "url('data:#{pic.format};base64,#{data}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
-            sqr.classList.add 'krixTileSqrCover'
+            sqr.classList.add 'tileSqrCover'
 
     #   00000000  000  000      00000000
     #   000       000  000      000     
@@ -127,16 +140,16 @@ class Tile
     #   000       000   000  000       000   000       000
     #   000        0000000    0000000   0000000   0000000 
             
-    hasFocus: -> @pad.classList.contains 'krixTilePadFocus'
+    hasFocus: -> @pad.classList.contains 'tilePadFocus'
         
     unFocus: => 
-        @pad?.classList.remove 'krixTilePadFocus'
+        @pad?.classList.remove 'tilePadFocus'
         post.removeListener 'unfocus', @unFocus
     
     setFocus: =>
         if not @hasFocus()
             post.emit 'unfocus'
-            @pad.classList.add 'krixTilePadFocus'
+            @pad.classList.add 'tilePadFocus'
             post.on 'unfocus', @unFocus
             @pad.scrollIntoViewIfNeeded()
             post.emit 'tileFocus', @
@@ -185,10 +198,11 @@ class Tile
         @setFocus()
        
     onDblClick: => 
-        if not @tag?
+        if @isDir()
             post.emit 'loadDir', @file
         else
             @play()
+            
     onClick: => 
         @setFocus()
         if event.shiftKey
