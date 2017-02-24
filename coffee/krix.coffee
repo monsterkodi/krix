@@ -40,17 +40,16 @@ class Krix
         @style '.krixTilePadFocus.krixTilePadDir', "background-color: #333;"
         @style '.krixTileSqrDir', "padding:  5px; overflow: hidden; border-radius: 0px; background-color: rgba(0,0,0,0.7); "
         @style '.krixTileSqrCover', "opacity: 0;"
-        @style '.krixTilePad:hover .krixTileSqrCover', "opacity: 1.0;"
         @style '.krixTileImgDir', "border-radius: 5px;"
         @style '.krixTileSqrFile', "padding:5px; overflow: hidden; background-color: rgba(0,0,100,0.7);"
-        @style '.krixTilePad:hover', "border-color: #44a;"
-        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #333;"
   
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
         post.on 'loadDir',   @loadDir
         post.on 'openFile',  @openFile
         
+        @tiles.addEventListener "scroll", @onScroll
+                
         @musicDir = "/Users/kodi/Music"
         @loadDir ""
     
@@ -145,6 +144,13 @@ class Krix
         if event.target.classList.contains 'krixTiles'
             if @tilesDir.length > @musicDir.length
                 @loadDir path.dirname @tilesDir.substr @musicDir.length + 1
+
+    onScroll: =>
+        Tile.scrollLock = true
+        unlock = () -> 
+            Tile.scrollLock = false
+        clearTimeout @scrollTimer
+        @scrollTimer = setTimeout unlock, 100
         
     # 000   000  00000000  000   000
     # 000  000   000        000 000 

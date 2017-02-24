@@ -14,6 +14,8 @@ imgs = require './imgs'
 
 class Tile
     
+    @scrollLock = false
+    
     constructor: (@file, elem, @opt) ->
             
         @id = @file
@@ -38,11 +40,11 @@ class Tile
             sqr.classList.add "krixTileSqrFile"
             sqr.innerHTML = path.basename @file
         else
-            @pad.classList.add "krixTilePadDir"
-            img.classList.add "krixTileImgDir"
             img.style.backgroundColor = "rgba(0,0,0,0.5)"
+            img.classList.add "krixTileImgDir"
             sqr.classList.add "krixTileSqrDir"
             sqr.innerHTML = path.basename @file
+            @pad.classList.add "krixTilePadDir"
              
         @pad.appendChild img
         elem.appendChild @div
@@ -54,6 +56,7 @@ class Tile
 
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
+        @div.addEventListener "mouseenter", @onEnter
 
     del: ->
         if @div?
@@ -130,7 +133,7 @@ class Tile
         @pad?.classList.remove 'krixTilePadFocus'
         post.removeListener 'unfocus', @unFocus
     
-    setFocus: ->
+    setFocus: =>
         if not @hasFocus()
             post.emit 'unfocus'
             @pad.classList.add 'krixTilePadFocus'
@@ -170,7 +173,17 @@ class Tile
     play: -> post.emit 'playFile', @file
     open: -> post.emit 'openFile', @file
     add:  -> post.emit 'addFile',  @file
-        
+       
+    #   00     00   0000000   000   000   0000000  00000000
+    #   000   000  000   000  000   000  000       000     
+    #   000000000  000   000  000   000  0000000   0000000 
+    #   000 0 000  000   000  000   000       000  000     
+    #   000   000   0000000    0000000   0000000   00000000
+       
+    onEnter: =>
+        return if Tile.scrollLock
+        @setFocus()
+       
     onDblClick: => 
         if not @tag?
             post.emit 'loadDir', @file
