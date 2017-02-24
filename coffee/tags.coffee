@@ -29,7 +29,7 @@ class Tags
         
     @tagError: (err) =>
         if tile = @queue.shift()
-            log "[ERROR] can't load tag for tile", tile.absFilePath()
+            # log "[ERROR] can't load tag for tile", tile.absFilePath()
             @dequeue()
         
     @tagLoaded: (tag) =>

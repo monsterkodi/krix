@@ -10,6 +10,7 @@ path = require 'path'
 log  = require './tools/log'
 post = require './post'
 tags = require './tags'
+imgs = require './imgs'
 
 class Tile
     
@@ -23,31 +24,25 @@ class Tile
         @pad = document.createElement 'div'
         @pad.className = "krixTilePad"
         @div.appendChild @pad
-        
-        if @opt?.isFile
-            img = document.createElement 'div'
-            img.classList.add "krixTileImg"
-            img.style.display = 'inline-block'
-            img.style.overflow = "hidden"
 
-            sqr = document.createElement 'div'
-            sqr.classList.add "krixTileImg"
+        img = document.createElement 'div'
+        img.classList.add "krixTileImg"
+        img.style.display = 'inline-block'
+        img.style.overflow = "hidden"
+
+        sqr = document.createElement 'div'
+        img.appendChild sqr
+    
+        if @isFile()
+            img.style.backgroundColor = "rgba(0,0,100,0.5)"
             sqr.classList.add "krixTileSqrFile"
             sqr.innerHTML = path.basename @file
-            img.appendChild sqr
         else
             @pad.classList.add "krixTilePadDir"
-             
-            img = document.createElement 'div'
-            img.classList.add "krixTileImg"
-            img.style.display = 'inline-block'
-            img.style.overflow = "hidden"
-
-            sqr = document.createElement 'div'
+            img.classList.add "krixTileImgDir"
+            img.style.backgroundColor = "rgba(0,0,0,0.5)"
             sqr.classList.add "krixTileSqrDir"
-            # sqr.classList.add "krixTileImg"
             sqr.innerHTML = path.basename @file
-            img.appendChild sqr
              
         @pad.appendChild img
         elem.appendChild @div
@@ -55,51 +50,82 @@ class Tile
         if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
             tags.enqueue @ 
         else
-            @loadKrixImage()
+            imgs.enqueue @
 
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
-   
-    absFilePath: -> path.join @opt.musicDir, @file
-    isFile: -> @opt?.isFile
-    
-    loadKrixImage: ->
-        krixDir = @opt.krixDir or @absFilePath()
-        coverFile = path.join(krixDir, ".krix/cover.jpg")
-        fs.stat coverFile, (err, stat) =>
-            if err == null and stat.isFile()
-                @pad.firstChild.remove()
-                img = document.createElement 'img'
-                img.setAttribute 'src', "file://" + coverFile
-                img.className = "krixTileImg"
-                @pad.appendChild img
-        
-    setTag: (@tag) =>
-        # log "tagLoaded @tag.tags:#{@tag.tags}"    # 
-        if @tag.tags.picture?
-            @pad.firstChild.remove()
-            img = document.createElement 'img'
-            pic = @tag.tags.picture
-            data = new Buffer(pic.data).toString('base64')
-            img.setAttribute 'src', "data:#{pic.format};base64,#{data}"
-            img.setAttribute 'alt', @file
-            img.className = "krixTileImg"
-            @pad.appendChild img
-        else
-            sqr = @pad.firstChild.firstChild
-            sqr.innerHTML = @tag.tags.artist + "<br>" + @tag.tags.title
-        
+
     del: ->
         if @div?
             @div.removeEventListener "click", @onClick
             @div.removeEventListener "dblclick", @onDblClick
         @unFocus() if @hasFocus()
-    
-    hasFocus: -> @pad.classList.contains 'krixTilePadFocus'
-    isDir: -> not @tag?
-    
+        
+    #    0000000   0000000   000   000  00000000  00000000 
+    #   000       000   000  000   000  000       000   000
+    #   000       000   000   000 000   0000000   0000000  
+    #   000       000   000     000     000       000   000
+    #    0000000   0000000       0      00000000  000   000
+        
+    setCover: (coverFile) ->
+        @pad.firstChild.style.backgroundImage = "url('file://#{encodeURI(coverFile)}')"
+        @pad.firstChild.style.backgroundSize = "100% 100%"
+        @pad.firstChild.firstChild.classList.add 'krixTileSqrCover' if not @opt?.isUp
+
     setText: (title, sub) -> @pad.firstChild.firstChild.innerHTML = title + '<br>' + sub
+        
+    setTag: (@tag) =>
+        sqr = @pad.firstChild.firstChild
+        sqr.innerHTML = @tag.tags.artist + "<br>" + @tag.tags.title
+        if @tag.tags.picture?
+            pic = @tag.tags.picture
+            data = new Buffer(pic.data).toString('base64')
+            @pad.firstChild.style.backgroundImage = "url('data:#{pic.format};base64,#{data}')"
+            @pad.firstChild.style.backgroundSize = "100% 100%"
+            sqr.classList.add 'krixTileSqrCover'
+
+    #   00000000  000  000      00000000
+    #   000       000  000      000     
+    #   000000    000  000      0000000 
+    #   000       000  000      000     
+    #   000       000  0000000  00000000
+   
+    absFilePath: -> path.join @opt.musicDir, @file
+    isFile: -> @opt?.isFile
+    isDir: -> not @isFile()
+
+    coverDir:  -> @opt?.krixDir or @absFilePath()
+    krixDir:   -> path.join @coverDir(), ".krix" 
+    coverFile: -> path.join @krixDir(), "cover.jpg" 
+
+    delete: -> 
+        if @isFile()
+            fs.unlink @absFilePath(), (err) =>
+                if err
+                    log "[ERROR] deleting file #{@absFilePath()} failed!", err
+                else
+                    @focusNeighbor 'right'
+                    @del()
+                    @div.remove()
+        else
+            rimraf = require 'rimraf'
+            rimraf @absFilePath(), (err) =>
+                if err
+                    log "[ERROR] deleting directory #{@absFilePath()} failed!", err
+                else
+                    @focusNeighbor 'right'
+                    @del()
+                    @div.remove()
+
     
+    #   00000000   0000000    0000000  000   000   0000000
+    #   000       000   000  000       000   000  000     
+    #   000000    000   000  000       000   000  0000000 
+    #   000       000   000  000       000   000       000
+    #   000        0000000    0000000   0000000   0000000 
+            
+    hasFocus: -> @pad.classList.contains 'krixTilePadFocus'
+        
     unFocus: => 
         @pad?.classList.remove 'krixTilePadFocus'
         post.removeListener 'unfocus', @unFocus
@@ -112,6 +138,10 @@ class Tile
             @pad.scrollIntoViewIfNeeded()
             post.emit 'tileFocus', @
        
+    focusNeighbor: (nb) ->
+        tile = @neighbor nb
+        tile?.setFocus()  
+
     neighbor: (dir) ->
         div = switch dir
             when 'right' then @div.nextSibling
@@ -136,32 +166,10 @@ class Tile
                 div
         div?.tile or @
             
-    focusNeighbor: (nb) ->
-        tile = @neighbor nb
-        tile?.setFocus()  
         
     play: -> post.emit 'playFile', @file
     open: -> post.emit 'openFile', @file
     add:  -> post.emit 'addFile',  @file
-    delete: -> 
-        log 'delete', @absFilePath()
-        if @isFile()
-            fs.unlink @absFilePath(), (err) =>
-                if err
-                    log "[ERROR] deleting file #{@absFilePath()} failed!", err
-                else
-                    @focusNeighbor 'right'
-                    @del()
-                    @div.remove()
-        else
-            rimraf = require 'rimraf'
-            rimraf @absFilePath(), (err) =>
-                if err
-                    log "[ERROR] deleting directory #{@absFilePath()} failed!", err
-                else
-                    @focusNeighbor 'right'
-                    @del()
-                    @div.remove()
         
     onDblClick: => 
         if not @tag?

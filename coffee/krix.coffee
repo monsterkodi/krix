@@ -33,13 +33,18 @@ class Krix
         @tiles.addEventListener "dblclick", @onDblClick
         
         @style '.krixTile', "display: inline-block; padding: 0; margin: 0;"
-        @style '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px; "
+        @style '.krixTilePad', "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px;"
         @style '.krixTilePadFocus', "background-color: #44a;"
-        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #444;"
-        @style '.krixTileSqrDir', "padding:  5px; overflow: hidden; border-radius: 5px; background-color: #111;"
-        @style '.krixTileSqrFile', "padding:  5px; overflow: hidden; background-color: #333;"
+        @style '.krixTilePadFocus .krixTileSqrCover', "opacity: 1.0;"
+        @style '.krixTilePadDir', "border-radius: 8px;"
+        @style '.krixTilePadFocus.krixTilePadDir', "background-color: #333;"
+        @style '.krixTileSqrDir', "padding:  5px; overflow: hidden; border-radius: 0px; background-color: rgba(0,0,0,0.7); "
+        @style '.krixTileSqrCover', "opacity: 0;"
+        @style '.krixTilePad:hover .krixTileSqrCover', "opacity: 1.0;"
+        @style '.krixTileImgDir', "border-radius: 5px;"
+        @style '.krixTileSqrFile', "padding:5px; overflow: hidden; background-color: rgba(0,0,100,0.7);"
         @style '.krixTilePad:hover', "border-color: #44a;"
-        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #444;"
+        @style '.krixTilePad.krixTilePadDir:hover', "border-color: #333;"
   
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
@@ -77,7 +82,7 @@ class Krix
         @tiles.removeChild @tiles.lastChild while @tiles.lastChild
         @tilesDir = path.join @musicDir, dir
         if dir.length and dir != '.'
-            tile = new Tile path.dirname(dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir
+            tile = new Tile path.dirname(dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
             tile.setText path.dirname(dir), path.basename(dir)
             tile.setFocus()
             
