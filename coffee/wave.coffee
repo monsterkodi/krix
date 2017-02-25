@@ -5,6 +5,7 @@
 # 00     00  000   000      0      00000000
 
 log     = require './tools/log'
+drag    = require './tools/drag'
 childp  = require 'child_process'
 process = require 'process'
 path    = require 'path'
@@ -41,7 +42,17 @@ class Wave
         @elem.appendChild @blnd
         
         post.on 'status', @onStatus
-  
+
+        @drag = new drag 
+            target:  @elem
+            onStart: @onDragStart
+            onMove:  @onDragMove
+            cursor: 'pointer'
+
+    onDragMove: (drag, event) => @seekTo event.clientX
+    onDragStart: (drag,event) => @seekTo event.clientX
+    seekTo: (x) -> post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/@pps
+      
     onStatus: (status) => 
         left = parseInt @pps * status.elapsed / 2
         @line.style.left = "#{left+182}px"
