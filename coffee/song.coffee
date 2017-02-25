@@ -34,10 +34,10 @@ class Song
         post.emit 'current'
         
     onCurrentSong: (song) =>
-        if not @tile or song.file != @tile.absFilePath()
+        if not @tile or song.file != @tile.file
             @tile?.del()
             if song.file?
                 @tile = new Tile song.file, @elem, isFile: true
-                @wave.showFile @tile.absFilePath()
+                @wave.showFile @tile.absFilePath(), song
     
 module.exports = Song

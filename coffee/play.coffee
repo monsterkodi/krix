@@ -27,6 +27,7 @@ class Play
         post.on 'toggle',    @onToggle
         post.on 'random',    @onRandom
         post.on 'repeat',    @onRepeat
+        post.on 'refresh',   @refreshStatus
         
         @refreshStatus()
     
@@ -35,11 +36,10 @@ class Play
     onRandom: => @mpc 'random', [@status?.random == '0' and '1' or '0']
     onRepeat: => @mpc 'repeat', [@status?.repeat == '0' and '1' or '0']
     onToggle: => @mpcc.toggle()
-    onCurrent: => @mpc 'currentsong', (info) -> post.emit 'currentSong', info
-
-    refreshStatus: ->
+    onCurrent: => @mpc 'currentsong', (info) -> post.emit 'currentSong', info 
+    refreshStatus: =>
         @mpc 'status', (@status) => 
-            log 'status', @status
+            # log '---- status ---- ', @status
             post.emit 'status', @status
         
     onServerChange: (change) =>

@@ -9,6 +9,7 @@ childp  = require 'child_process'
 process = require 'process'
 path    = require 'path'
 fs      = require 'fs'
+post    = require './post'
 
 class Wave
     
@@ -19,18 +20,45 @@ class Wave
         @elem.style.left       = '182px'
         @elem.style.right      = '0'
         @elem.style.height     = '160px'
-        # @elem.style.background = "#000"
         @elem.style.overflow   = "hidden"
         @elem.classList.add 'wave'
         @view.appendChild @elem
+        
+        @line = document.createElement 'div'
+        @line.style.position   = 'absolute'
+        @line.style.top        = '0'
+        @line.style.width      = '2px'
+        @line.style.height     = '180px'
+        @line.style.backgroundColor = "rgba(255,255,255,0.07)"
+        @view.appendChild @line
+
+        @blnd = document.createElement 'div'
+        @blnd.style.position   = 'absolute'
+        @blnd.style.top        = '0'
+        @blnd.style.left       = '0'
+        @blnd.style.height     = '160px'
+        @blnd.style.backgroundColor = "rgba(19,19,19,0.6)"
+        @elem.appendChild @blnd
+        
+        post.on 'status', @onStatus
   
-    showFile: (file) ->      
+    onStatus: (status) => 
+        left = parseInt @pps * status.elapsed / 2
+        @line.style.left = "#{left+182}px"
+        @blnd.style.width = "#{left}px"
+        
+        clearTimeout @timer
+        if status.state == 'play'
+            @timer = setTimeout @refresh, parseInt 1000 / @pps
+
+    refresh: => post.emit 'refresh'
+        
+    showFile: (file, song) ->      
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
         width = @elem.clientWidth
-        pps = 5
-        log 'width', width, pps
-        cmmd = "audiowaveform --pixels-per-second #{pps} --no-axis-labels -h 360 -w #{width*2} --background-color 00000000 --waveform-color ffffff -i \"#{file}\" -o \"#{outfile}\""
-        # log 'cmmd', cmmd
+        @seconds = song.duration
+        @pps = Math.max 1, parseInt 2 * width / @seconds
+        cmmd = "audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{width*2} --background-color 00000000 --waveform-color 444444 -i \"#{file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
         childp.exec cmmd, (err) =>
             if err?
