@@ -39,7 +39,7 @@ class Play
 
     refreshStatus: ->
         @mpc 'status', (@status) => 
-            # log 'status', @status
+            log 'status', @status
             post.emit 'status', @status
         
     onServerChange: (change) =>
