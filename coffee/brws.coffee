@@ -146,7 +146,9 @@ class Brws
             when 'home'      then @getFirstTile().setFocus()
             when 'end'       then @getLastTile().setFocus()
             when 'space'     then @getFocusTile().add()
-            when 'backspace' then @getFocusTile().delete()
+            when 'backspace' 
+                if mod == 'command' 
+                    @getFocusTile().delete()
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @getFocusTile().focusNeighbor key
             when 'enter' 

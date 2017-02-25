@@ -26,6 +26,7 @@ class Tile
         @div.tile = @
         @div.id = @id
         @div.className = "tile"
+        
         @pad = document.createElement 'div'
         @pad.className = "tilePad"
         @div.appendChild @pad
@@ -119,34 +120,16 @@ class Tile
     coverFile: -> path.join @krixDir(), "cover.jpg" 
 
     delete: -> 
-        # log 'delete', @absFilePath()
         fs.rename @absFilePath(), path.join(resolve('~/.Trash'), path.basename(@absFilePath())), (err) => 
             if err
                 log "[ERROR] trashing file #{@absFilePath()} failed!", err
             else
-                @focusNeighbor 'right'
+                if @div.parentNode.classList.contains "song"
+                    post.emit 'nextSong' 
+                else
+                    @focusNeighbor 'right'
                 @del()
-                @div.remove()
                 
-        # if @isFile()
-            # fs.unlink @absFilePath(), (err) =>
-                # if err
-                    # log "[ERROR] deleting file #{@absFilePath()} failed!", err
-                # else
-                    # @focusNeighbor 'right'
-                    # @del()
-                    # @div.remove()
-        # else
-            # rimraf = require 'rimraf'
-            # rimraf @absFilePath(), (err) =>
-                # if err
-                    # log "[ERROR] deleting directory #{@absFilePath()} failed!", err
-                # else
-                    # @focusNeighbor 'right'
-                    # @del()
-                    # @div.remove()
-
-    
     #   00000000   0000000    0000000  000   000   0000000
     #   000       000   000  000       000   000  000     
     #   000000    000   000  000       000   000  0000000 

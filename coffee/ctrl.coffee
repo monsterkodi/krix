@@ -36,30 +36,25 @@ class Ctrl
         style '.button', """
             margin-top:     5px; 
             opacity:        1.0; 
-            color:          #fff;
+            color:          #444;
             background:     #111;
             padding:        10px;
             border-radius:  5px;
             margin-right:   5px;
             display:        inline-block;
         """
-        style '.button:hover',   "opacity: 0.7"
-        style '.button:active',  "opacity: 0.4"
+        style '.button:hover',   "color: #fff"
+        style '.button:active',  "background: #222"
         style '.buttonActive',   "color: #fa0"
         style '.buttonInactive', "color: #444"
         style "#random", "margin-left: 14px"
-        style "#home",   "margin-left: 14px; color: #444"
-        style "#up",     "color: #444"
-        style "#home:hover",   "color: #fff"
-        style "#up:hover",     "color: #fff"
+        style "#home",   "margin-left: 14px;"
         style "#song",   "vertical-align: bottom;"
         style "#length", "vertical-align: top; margin-top: 5px;"
         style '.label',          """
             display:        inline-block;
-            border-radius:  5px; 
             margin-left:    10px;
-            padding:        5px; 
-            background:     rgb(16,16,16); 
+            padding:        0; 
             color:          #444
         """
         style "#play", """
@@ -105,24 +100,26 @@ class Ctrl
         @buttons.classList.add "buttons"
         @elem.appendChild @buttons
         
-        @button id: 'prev',   icon: 'step-backward fa-2x', cb: -> post.emit 'prevSong'
-        @button id: 'play',   icon: 'play fa-3x',          cb: @onPlayButton
-        @button id: 'next',   icon: 'step-forward fa-2x',  cb: -> post.emit 'nextSong'
+        @button id: 'prev',     icon: 'step-backward fa-2x', cb: -> post.emit 'prevSong'
+        @button id: 'play',     icon: 'play fa-3x',          cb: @onPlayButton
+        @button id: 'next',     icon: 'step-forward fa-2x',  cb: -> post.emit 'nextSong'
         @buttons.appendChild document.createElement 'br'
-        @button id: 'random', icon: 'random fa-1x',        cb: -> post.emit 'random'
-        @button id: 'repeat', icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
-        @label  id: 'song' 
+        @button id: 'random',   icon: 'random fa-1x',        cb: -> post.emit 'random'
+        @button id: 'repeat',   icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
+        @button id: 'song',     icon: 'music fa-1x',         cb: -> post.emit 'song'
+        @label id: 'songid', $('song')
         @buttons.appendChild document.createElement 'br'
-        @button id: 'home',   icon: 'home fa-1x',          cb: -> post.emit 'home'
-        @button id: 'up',     icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
-        @label  id: 'length' 
+        @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
+        @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
+        @button id: 'playlist', icon: 'bars fa-1x',          cb: -> post.emit 'playlist'
+        @label id: 'playlistlength', $('playlist')
 
-    label: (opt) ->
+    label: (opt, parent) ->
         labl = document.createElement 'div'
         labl.id = opt.id
         labl.classList.add 'label'
         labl.classList.add 'highlight'
-        @buttons.appendChild labl
+        parent.appendChild labl
         
     button: (opt) ->
         bttn = document.createElement 'div'
@@ -145,14 +142,16 @@ class Ctrl
         $('repeat').classList.toggle 'buttonInactive', (status.repeat == '0')
         $('repeat').classList.toggle 'buttonActive',   (status.repeat == '1')
         
-        if parseInt($('song').innerHTML) != parseInt(status.song)+1
-            node = $('song')
+        if parseInt($('songid').innerHTML) != parseInt(status.song)+1
+            node = $('songid')
             clone = node.cloneNode true
-            clone.innerHTML = parseInt(status.song)+1
+            num = parseInt(status.song)+1
+            num = 0 if Number.isNaN num
+            clone.innerHTML = num
             node.parentNode.replaceChild clone, node
         
-        if parseInt($('length').innerHTML) != parseInt(status.playlistlength)
-            node = $('length')
+        if parseInt($('playlistlength').innerHTML) != parseInt(status.playlistlength)
+            node = $('playlistlength')
             clone = node.cloneNode true
             clone.innerHTML = status.playlistlength
             node.parentNode.replaceChild clone, node
