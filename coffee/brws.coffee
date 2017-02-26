@@ -15,8 +15,9 @@ _      = require 'lodash'
 log    = require './tools/log'
 Tile   = require './tile'
 Play   = require './play'
-Prefs  = require './prefs'
+prefs  = require './prefs'
 tags   = require './tags' 
+imgs   = require './imgs'
 walk   = require './walk'
 post   = require './post'
 
@@ -42,7 +43,7 @@ class Brws
         @tilesDir = @musicDir
         Tile.musicDir = @musicDir
         
-        @setTileNum Prefs.get "tileNum:#{@musicDir}", 8
+        @setTileNum prefs.get "tileNum:#{@musicDir}", 8
         
         @tiles.addEventListener "dblclick", @onDblClick
         @tiles.addEventListener "scroll",   @onScroll
@@ -103,7 +104,7 @@ class Brws
         @clear()
         @tilesDir = path.join @musicDir, @dir
         
-        num = Prefs.get "tileNum:#{@tilesDir}", 0
+        num = prefs.get "tileNum:#{@tilesDir}", 0
         if num != 0 and @tileNum != num
             @setTileNum num
         
@@ -131,6 +132,11 @@ class Brws
             tile.setFocus() if not @focusTile
             if musicPath == highlightFile
                 tile.setFocus()
+                
+        @walker.on 'done', =>
+            if prefs.get "expanded:#{@dir}", false
+                @expandAllTiles()
+                # setTimeout @expandAllTiles, 100
      
     showSong: (song) => @loadDir path.dirname(song.file), song.file
     
@@ -167,11 +173,16 @@ class Brws
         @tileSize = Math.floor size
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
+        
+        fontSize = Math.max 8, Math.min 20, @tileSize / 10
+        log @tileSize, fontSize
+        style '.tileSqr', "font-size: #{fontSize}px"
+                
         style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
-        Prefs.set "tileNum:#{@tilesDir}", @tileNum
+        prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize (@tilesWidth() / @tileNum)-22
             
     onDblClick: (event) =>
@@ -202,6 +213,11 @@ class Brws
     
     modKeyComboEventDown: (mod, key, combo, event) ->
         focusTile = @getFocusTile()
+        switch combo
+            when 'command+u' 
+                tags.pruneCache()
+                imgs.pruneCache()
+                @loadDir @dir
         switch key
             when '-'         then @setTileNum @tileNum + 1
             when '='         then @setTileNum @tileNum - 1

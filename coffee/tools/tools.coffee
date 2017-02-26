@@ -50,8 +50,19 @@ module.exports =
     # 000   000  000   000  000   000  000   000     000   
     # 000   000  000   000  000   000  000   000     000   
 
-    last:  (a) -> a[a.length-1] if a?.length
-    first: (a) -> a[0] if a?.length
+    last:  (a) -> 
+        if not _.isArray a
+            return a
+        if a?.length
+            return a[a.length-1]
+        null
+        
+    first: (a) ->
+        if not _.isArray a
+            return a
+        if a?.length
+            return a[0]
+        null
     
     startOf: (r) -> r[0]
     endOf:   (r) -> r[0] + Math.max 1, r[1]-r[0]

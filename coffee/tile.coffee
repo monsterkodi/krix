@@ -47,6 +47,8 @@ class Tile
         sqr.appendChild art
         sqr.appendChild tit
         img.appendChild sqr
+        
+        sqr.classList.add 'tileSqr'
     
         if @isFile()
             art.classList.add 'tileArtist'
@@ -70,10 +72,6 @@ class Tile
         else
             imgs.enqueue @
             
-        # if @isDir()
-            # if prefs.get "expanded:#{@file}", false
-                # setTimeout @doExpand, 100
-
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
         @div.addEventListener "mouseenter", @onEnter
@@ -111,14 +109,9 @@ class Tile
         if @tag.cover?
             coverURI = encodeURI @tag.cover 
             coverURI = coverURI.replace /\#/g, "%23"
+            coverURI = coverURI.replace /\&/g, "%26"
             coverURI = coverURI.replace /\'/g, "%27"
             @pad.firstChild.style.backgroundImage = "url('file://#{coverURI}')"
-            @pad.firstChild.style.backgroundSize = "100% 100%"
-            sqr.classList.add 'tileSqrCover'
-        else if @tag.picture? # still used?
-            pic = @tag.picture
-            data = new Buffer(pic.data).toString('base64')
-            @pad.firstChild.style.backgroundImage = "url('data:#{pic.format};base64,#{data}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
             sqr.classList.add 'tileSqrCover'
 
@@ -230,11 +223,12 @@ class Tile
             
         @walker.on 'done', =>
             if @children.length == 1
-               @del()
+                @focusNeighbor 'right'
+                @del()
     
     addChild: (child) ->
-        @children.push child
         @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
+        @children.push child
         
     doCollapse: ->
         @div.classList.remove 'tileExpanded'

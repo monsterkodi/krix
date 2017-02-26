@@ -17,10 +17,14 @@ class Imgs
     @cache = {}
     @queue = []
     
+    @pruneCache: -> 
+        for key in Object.keys @cache
+            delete @cache[key] if @cache[key] == false
+            
+    
     @clearQueue: -> @queue = []
     
     @enqueue: (tile) ->
-        # log tile.file, tile.coverFile()
         if @cache[tile.coverFile()]?
             if @cache[tile.coverFile()]
                 tile.setCover @cache[tile.coverFile()]
@@ -31,7 +35,7 @@ class Imgs
     @dequeue: ->
         if @queue.length
             tile = @queue[0]
-            coverDir = tile.absFilePath() #tile.coverDir()
+            coverDir = tile.absFilePath()
             coverFile = tile.coverFile()
             fs.stat coverFile, (err, stat) =>
                 if err == null and stat.isFile()
@@ -42,10 +46,16 @@ class Imgs
     
     @convertToJPG: (file, cb) ->
         extname = path.extname(file).toLowerCase()
-        if extname in ['.gif', '.tif', '.png', '.bmp']
+        if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
             coverFile = swapExt file, '.jpg'
             # log 'converting ', file, coverFile
             childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
+    
+    @potentialAlbumCover: (coverFile) ->
+        albumCover = path.join path.dirname(coverFile), "cover.jpg"
+        fs.stat albumCover, (err, stat) =>
+            if err
+                childp.exec "convert \"#{coverFile}\" \"#{albumCover}\"", (err) -> 
                         
     @checkDirForCover: (dir, coverFile) ->
         if tile = @queue.shift()
@@ -55,9 +65,9 @@ class Imgs
                     for file in files
                         absFile = path.join dir, file 
                         extname = path.extname(file).toLowerCase()
-                        if extname in ['.gif', '.tif', '.png', '.bmp']
+                        if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
                             mkpath tile.krixDir(), (err) ->
-                                log 'converting ', absFile, coverFile
+                                # log 'converting ', absFile, coverFile
                                 childp.exec "convert \"#{absFile}\" \"#{coverFile}\"", (err) ->
                                     if not err
                                         Imgs.cache[tile.coverFile()] = coverFile
@@ -66,7 +76,7 @@ class Imgs
                                         log '[ERROR] converting', absFile, coverFile, err
                             return
                         else if extname == '.jpg'
-                            log 'moving cover', absFile, coverFile
+                            # log 'moving cover', absFile, coverFile
                             mkpath tile.krixDir(), (err) ->
                                 fs.rename absFile, coverFile, (err) ->
                                     if not err

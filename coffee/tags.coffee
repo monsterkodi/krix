@@ -5,11 +5,13 @@
 #    000     000   000   0000000   0000000 
 {
 swapExt,
+first,
 last
 }           = require './tools/tools'
 log         = require './tools/log'
 imgs        = require './imgs'
 jsmediatags = require 'jsmediatags'
+childp      = require 'child_process'
 mkpath      = require 'mkpath'
 path        = require 'path'
 fs          = require 'fs'
@@ -19,6 +21,16 @@ class Tags
     @cache = {}
     @queue = []
     
+    @pruneCache: ->
+        for key in Object.keys Tags.cache
+            if not Tags.cache[key].cover?
+                delete Tags.cache[key] 
+                jsonFile = path.join path.dirname(key), ".krix", swapExt path.basename(key), '.json'
+                log 'removing', jsonFile
+                fs.unlink jsonFile, (err) ->
+                    if err
+                        log "[ERROR] can't remove", jsonFile
+            
     @clearQueue: -> @queue = []
     
     @enqueue: (tile) ->
@@ -56,7 +68,8 @@ class Tags
                     log "[ERROR] can't create .krix folder for", tile.file
                     Tags.dequeue()
                 else       
-                    if tag.tags.picture
+                    # log 'tags loaded', tile.file, tag.tags.APIC?
+                    if tag.tags.APIC?
                         Tags.saveCover tile, tag.tags
                     else
                         Tags.saveJson tile, tag.tags
@@ -79,20 +92,36 @@ class Tags
     
     @saveCover: (tile, tag) ->
 
-        format    = tag.picture.format.toLowerCase()
+        picture   = first tag.APIC 
+        format    = picture.data.format.toLowerCase()
         picExt    = '.' + last format.split '/'
         coverFile = swapExt path.join(tile.krixDir(), path.basename tile.file), picExt
         
-        fs.writeFile coverFile, Buffer.from(tag.picture.data), (err) =>
+        # log 'coverFile', coverFile, picExt, format
+        
+        fs.writeFile coverFile, Buffer.from(picture.data.data), (err) =>
             if err?
                 log "[ERROR] can't save cover image for", tile.file
+                delete tag.cover
                 Tags.saveJson tile, tag
             else
-                Tags.saveJson tile, tag, coverFile
+                if picExt in [".tiff", ".bpm"]
+                    jpgFile = swapExt coverFile, ".jpg"
+                    childp.exec "convert \"#{coverFile}\" \"#{jpgFile}\"", (err) =>
+                        if err?
+                            log "[ERROR] can't save cover image for", tile.file
+                            delete tag.cover
+                            Tags.saveJson tile, tag
+                        else
+                            tag.cover = jpgFile
+                            Tags.saveJson tile, tag, jpgFile
+                else            
+                    Tags.saveJson tile, tag, coverFile
+                
+                imgs.potentialAlbumCover coverFile
             
     @tagError: (err) ->
         if tile = Tags.queue.shift()
-            # log "[ERROR] can't load tag for tile", tile.absFilePath()
             Tags.dequeue()
         
 module.exports = Tags
