@@ -20,6 +20,7 @@ class Imgs
     @clearQueue: -> @queue = []
     
     @enqueue: (tile) ->
+        # log tile.file, tile.coverFile()
         if @cache[tile.coverFile()]?
             if @cache[tile.coverFile()]
                 tile.setCover @cache[tile.coverFile()]
@@ -30,7 +31,7 @@ class Imgs
     @dequeue: ->
         if @queue.length
             tile = @queue[0]
-            coverDir = tile.coverDir()
+            coverDir = tile.absFilePath() #tile.coverDir()
             coverFile = tile.coverFile()
             fs.stat coverFile, (err, stat) =>
                 if err == null and stat.isFile()

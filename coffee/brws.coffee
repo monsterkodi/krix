@@ -10,7 +10,6 @@ queue
 }      = require './tools/tools'
 fs     = require 'fs'
 path   = require 'path'
-walk   = require 'walkdir'
 childp = require 'child_process'
 _      = require 'lodash'
 log    = require './tools/log'
@@ -18,6 +17,7 @@ Tile   = require './tile'
 Play   = require './play'
 Prefs  = require './prefs'
 tags   = require './tags' 
+walk   = require './walk'
 post   = require './post'
 
 MIN_TILE_SIZE = 50
@@ -108,13 +108,12 @@ class Brws
         
         if @dir.length and @dir != '.'
             tile = new Tile @dir, @tiles, 
-                krixDir:  @tilesDir
                 openDir:  path.dirname @dir
                 isUp: true
             tile.setText path.dirname(@dir), path.basename(@dir)
             tile.setFocus()
-            
-        @walker = walk @tilesDir, max_depth: 1
+
+        @walker = new walk @tilesDir
         
         @walker.on 'file', (file) =>
             return if path.basename(file).startsWith '.'
@@ -159,6 +158,7 @@ class Brws
     getFocusTile: -> @focusTile or @getFirstTile()
     getFirstTile: -> @tiles.firstChild.tile
     getLastTile:  -> @tiles.lastChild.tile
+    getTiles: -> (t.tile for t in @tiles.childNodes)
     tilesWidth: -> @tiles.clientWidth
     tilesHeight: -> @tiles.clientHeight
 
@@ -185,6 +185,14 @@ class Brws
         clearTimeout @scrollTimer
         @scrollTimer = setTimeout unlock, 100
 
+    collapseAllTiles: -> 
+        tiles = @getTiles()
+        tile.collapse() for tile in tiles
+            
+    expandAllTiles: -> 
+        tiles = @getTiles()
+        tile.expand() for tile in tiles
+
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  
@@ -204,7 +212,16 @@ class Brws
                 if mod == 'command' 
                     focusTile.delete()
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
-                focusTile.focusNeighbor key
+                if combo == 'command+left'
+                    focusTile.collapse()
+                else if combo == 'command+right'
+                    focusTile.expand()
+                else if combo == 'command+down'
+                    @expandAllTiles()
+                else if combo == 'command+up'
+                    @collapseAllTiles()
+                else
+                    focusTile.focusNeighbor key
             when 'enter' 
                 if focusTile.isDir()
                     if combo == 'enter' then focusTile.open()

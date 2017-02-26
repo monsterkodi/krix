@@ -5,14 +5,17 @@
 #    000     000  000      000     
 #    000     000  0000000  00000000
 {
-resolve
-}    = require './tools/tools'
-fs   = require 'fs'
-path = require 'path'
-log  = require './tools/log'
-post = require './post'
-tags = require './tags'
-imgs = require './imgs'
+resolve,
+last
+}     = require './tools/tools'
+log   = require './tools/log'
+post  = require './post'
+tags  = require './tags'
+imgs  = require './imgs'
+walk  = require './walk'
+prefs = require './prefs'
+path  = require 'path'
+fs    = require 'fs'
 
 class Tile
     
@@ -20,6 +23,8 @@ class Tile
     @musicDir = null
     
     constructor: (@file, elem, @opt) ->
+        
+        @file = @file.substr(Tile.musicDir.length+1) if @file.startsWith Tile.musicDir
             
         @id = @file
         @div = document.createElement 'div'
@@ -63,6 +68,10 @@ class Tile
             tags.enqueue @ 
         else
             imgs.enqueue @
+            
+        # if @isDir()
+            # if prefs.get "expanded:#{@file}", false
+                # setTimeout @doExpand, 100
 
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
@@ -121,13 +130,11 @@ class Tile
     absFilePath: -> path.join Tile.musicDir, @file
     isFile: -> @opt?.isFile
     isDir: -> not @isFile()
-
-    coverDir:  -> @opt?.krixDir or @absFilePath()
     krixDir:   -> 
         if @isFile()
             path.join path.dirname(@absFilePath()), '.krix'
         else
-            path.join @coverDir(), ".krix" 
+            path.join @absFilePath(), ".krix" 
     coverFile: -> path.join @krixDir(), "cover.jpg" 
 
     delete: -> 
@@ -188,6 +195,47 @@ class Tile
                     div = div[sib]
                 div
         div?.tile or @
+
+    #   00000000  000   000  00000000    0000000   000   000  0000000  
+    #   000        000 000   000   000  000   000  0000  000  000   000
+    #   0000000     00000    00000000   000000000  000 0 000  000   000
+    #   000        000 000   000        000   000  000  0000  000   000
+    #   00000000  000   000  000        000   000  000   000  0000000  
+
+    isExpanded: -> @children?.length
+
+    expand: ->
+        return if @isFile() or @isExpanded() or @opt?.isUp
+        # prefs.set "expanded:#{@file}", true
+        @doExpand()
+            
+    collapse: ->
+        return if @isFile() or not @isExpanded() or @opt?.isUp
+        # prefs.del "expanded:#{@file}"
+        @doCollapse()
+
+    doExpand: =>
+        # log 'do expand', @file
+        @children = []
+        @walker?.stop()
+        @walker = new walk @absFilePath()
+        
+        @walker.on 'file', (file) =>
+            return if path.basename(file).startsWith '.'
+            @addChild new Tile file, @div.parentNode, isFile: true
+            
+        @walker.on 'directory', (dir) =>
+            dirname = path.basename(dir)
+            return if dirname.startsWith('.') or dirname == 'iTunes'
+            @addChild new Tile dir, @div.parentNode, openDir: dir
+    
+    addChild: (child) ->
+        @children.push child
+        @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
+        
+    doCollapse: ->
+        while child = @children?.pop()
+            child.del()
         
     play: -> post.emit 'playFile', @file
     open: -> 

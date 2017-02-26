@@ -169,7 +169,7 @@ class Ctrl
     # 000   000  00000000     000   
     
     modKeyComboEventDown: (mod, key, combo, event) ->
-        switch key
+        switch combo
             when 'n' then post.emit 'nextSong'
             when 'p' then post.emit 'prevSong'
         
