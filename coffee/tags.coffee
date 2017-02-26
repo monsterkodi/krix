@@ -30,77 +30,69 @@ class Tags
         if Tags.queue.length
             tile = Tags.queue[0]
             if Tags.cache[tile.absFilePath()]?
-                setImmediate -> Tags.tagLoaded Tags.cache[tile.absFilePath()]
+                setImmediate -> Tags.jsonLoaded Tags.cache[tile.absFilePath()]
             else
-                Tags.loadTags tile, (err, tags) ->
-                    if tags
-                        Tags.tagLoaded tags: tags
+                Tags.loadJson tile, (err, tag) ->
+                    if not err?
+                        Tags.jsonLoaded tag
                     else
                         jsmediatags.read tile.absFilePath(), onSuccess: Tags.tagLoaded, onError: Tags.tagError
-        
-    @tagError: (err) =>
-        if tile = @queue.shift()
-            # log "[ERROR] can't load tag for tile", tile.absFilePath()
-            @dequeue()
 
-    @loadTags: (tile, cb) ->
+    @loadJson: (tile, cb) ->
         jsonFile = swapExt path.join(tile.krixDir(), path.basename tile.file), '.json'
-        fs.readFile jsonFile, 'utf8', (err, data) ->
-            if err?
-                cb err
-            else
-                # log 'got json tags', jsonFile, JSON.parse data
-                cb null, JSON.parse data
-    
-    @saveTag: (tile, tag) ->
-        mkpath tile.krixDir(), (err) =>
-            if err?
-                log "[ERROR] cant create .krix folder for", tile.file
-                return
+        fs.readFile jsonFile, 'utf8', (err, data) =>
+            cb err, data? and JSON.parse data
+
+    @jsonLoaded: (tag) ->
+        if tile = Tags.queue.shift()
+            Tags.cache[tile.absFilePath()] = tag 
+            tile.setTag tag
+            Tags.dequeue()
+        
+    @tagLoaded: (tag) ->
+        if tile = Tags.queue.shift()
+            mkpath tile.krixDir(), (err) =>
+                if err?
+                    log "[ERROR] can't create .krix folder for", tile.file
+                    Tags.dequeue()
+                else       
+                    if tag.tags.picture
+                        Tags.saveCover tile, tag.tags
+                    else
+                        Tags.saveJson tile, tag.tags
+                  
+    @saveJson: (tile, tag, cover) ->
+                
             jsonFile = swapExt path.join(tile.krixDir(), path.basename tile.file), '.json'
             
             t = 
-                krix: true
-                title: tag.title
+                title:  tag.title
                 artist: tag.artist
                 
-            if tag.picture
-                t.cover = swapExt jsonFile, '.jpg'
-                @saveCover tile, tag
-                
-            fs.writeFile jsonFile, JSON.stringify(t, null, ' '), (err) ->
-                if err?
-                    log "[ERROR] cant save tag json for", tile.file
+            t.cover = cover if cover?
+        
+            fs.writeFile jsonFile, JSON.stringify(t, null, ' '), (err) =>
+                log "[ERROR] can't save tag json for", tile.file if err?
+            
+            tile.setTag t
+            Tags.dequeue()
     
     @saveCover: (tile, tag) ->
-        coverFile = swapExt path.join(tile.krixDir(), path.basename tile.file), '.jpg'
-        format = tag.picture.format.toLowerCase()
-        if format.endsWith('jpg') or format.endsWith('jpeg')
-            # log 'saveCover', coverFile
-            fs.writeFile coverFile, Buffer.from(tag.picture.data), (err) ->
-                if err?
-                    log '[ERROR] cant save cover jpg for', tile.file
-                # else 
-                    # log 'cover saved to', coverFile
-        else
-            picExt = last format.split '/'
-            imgSrc = swapExt path.join(tile.krixDir(), path.basename(tile.file)), '.' + picExt
-            # log 'convertCover', imgSrc
-            fs.writeFile imgSrc, Buffer.from(tag.picture.data), (err) ->
-                if err?
-                    log '[ERROR] cant save cover jpg for', tile.file
-                else
-                    # log 'cover to JPG', imgSrc
-                    imgs.convertToJPG imgSrc
-            
-    @tagLoaded: (tag) =>
-        if tile = @queue.shift()
-            if not tag.tags.krix 
-                @saveTag tile, tag.tags
+
+        format    = tag.picture.format.toLowerCase()
+        picExt    = '.' + last format.split '/'
+        coverFile = swapExt path.join(tile.krixDir(), path.basename tile.file), picExt
+        
+        fs.writeFile coverFile, Buffer.from(tag.picture.data), (err) =>
+            if err?
+                log "[ERROR] can't save cover image for", tile.file
+                Tags.saveJson tile, tag
             else
-                @cache[tile.absFilePath()] = tag 
-            tile.setTag tag
+                Tags.saveJson tile, tag, coverFile
+            
+    @tagError: (err) ->
+        if tile = Tags.queue.shift()
+            # log "[ERROR] can't load tag for tile", tile.absFilePath()
             Tags.dequeue()
-            # setTimeout Tags.dequeue, 1
         
 module.exports = Tags

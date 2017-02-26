@@ -97,13 +97,16 @@ class Tile
         
     setTag: (@tag) =>
         sqr = @pad.firstChild.firstChild
-        @setText @tag.tags.artist, @tag.tags.title
-        if @tag.tags.cover?
-            @pad.firstChild.style.backgroundImage = "url('file://#{@tag.tags.cover}')"
+        @setText @tag.artist, @tag.title
+        if @tag.cover?
+            coverURI = encodeURI @tag.cover 
+            coverURI = coverURI.replace /\#/g, "%23"
+            coverURI = coverURI.replace /\'/g, "%27"
+            @pad.firstChild.style.backgroundImage = "url('file://#{coverURI}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
             sqr.classList.add 'tileSqrCover'
-        else if @tag.tags.picture?
-            pic = @tag.tags.picture
+        else if @tag.picture? # still used?
+            pic = @tag.picture
             data = new Buffer(pic.data).toString('base64')
             @pad.firstChild.style.backgroundImage = "url('data:#{pic.format};base64,#{data}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
