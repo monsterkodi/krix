@@ -5,7 +5,8 @@
 #   0000000    000   000  00     00  0000000 
 {
 resolve,
-style
+style,
+queue
 }      = require './tools/tools'
 fs     = require 'fs'
 path   = require 'path'
@@ -14,6 +15,7 @@ childp = require 'child_process'
 _      = require 'lodash'
 log    = require './tools/log'
 Tile   = require './tile'
+Play   = require './play'
 tags   = require './tags' 
 post   = require './post'
 
@@ -57,6 +59,8 @@ class Brws
         
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
+        post.on 'playlist',  @showPlaylist
+        post.on 'song',      @showSong
         post.on 'loadDir',   @loadDir
         post.on 'home',      @goHome
         post.on 'up',        @goUp
@@ -71,12 +75,15 @@ class Brws
 
     goUp:   => @loadDir path.dirname @dir
     goHome: => @loadDir ''
-    
-    loadDir: (@dir) =>
+
+    clear: ->
         @walker?.stop()
         tags.clearQueue()
         post.emit 'unfocus'
         @tiles.lastChild.tile.del() while @tiles.lastChild
+        
+    loadDir: (@dir, highlightFile) =>
+        @clear()
         @tilesDir = path.join @musicDir, @dir
         if @dir.length and @dir != '.'
             tile = new Tile path.dirname(@dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
@@ -88,7 +95,9 @@ class Brws
         @walker.on 'file', (file) =>
             return if path.basename(file).startsWith '.'
             musicPath = file.substr @musicDir.length+1
-            new Tile musicPath, @tiles, isFile: true
+            tile = new Tile musicPath, @tiles, isFile: true
+            if musicPath == highlightFile
+                tile.setFocus()
             
         @walker.on 'directory', (dir) =>
             dirname = path.basename(dir)
@@ -96,6 +105,22 @@ class Brws
             musicPath = dir.substr @musicDir.length+1
             tile = new Tile musicPath, @tiles
             tile.setFocus() if not @focusTile
+     
+    showSong: (song) => @loadDir path.dirname(song.file), song.file
+    
+    #   00000000   000       0000000   000   000  000      000   0000000  000000000
+    #   000   000  000      000   000   000 000   000      000  000          000   
+    #   00000000   000      000000000    00000    000      000  0000000      000   
+    #   000        000      000   000     000     000      000       000     000   
+    #   000        0000000  000   000     000     0000000  000  0000000      000   
+        
+    showPlaylist: (song) =>
+        @clear()
+        Play.instance.mpc 'playlist', (playlist) =>
+            queue playlist, timeout: 10, cb: (item) =>
+                tile = new Tile item.file, @tiles, isFile: true
+                if item.file == song.file
+                    tile.setFocus()
         
     # 000000000  000  000      00000000   0000000
     #    000     000  000      000       000     

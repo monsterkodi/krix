@@ -98,7 +98,11 @@ class Tile
     setTag: (@tag) =>
         sqr = @pad.firstChild.firstChild
         @setText @tag.tags.artist, @tag.tags.title
-        if @tag.tags.picture?
+        if @tag.tags.cover?
+            @pad.firstChild.style.backgroundImage = "url('file://#{@tag.tags.cover}')"
+            @pad.firstChild.style.backgroundSize = "100% 100%"
+            sqr.classList.add 'tileSqrCover'
+        else if @tag.tags.picture?
             pic = @tag.tags.picture
             data = new Buffer(pic.data).toString('base64')
             @pad.firstChild.style.backgroundImage = "url('data:#{pic.format};base64,#{data}')"
@@ -116,7 +120,11 @@ class Tile
     isDir: -> not @isFile()
 
     coverDir:  -> @opt?.krixDir or @absFilePath()
-    krixDir:   -> path.join @coverDir(), ".krix" 
+    krixDir:   -> 
+        if @isFile()
+            path.join path.dirname(@absFilePath()), '.krix'
+        else
+            path.join @coverDir(), ".krix" 
     coverFile: -> path.join @krixDir(), "cover.jpg" 
 
     delete: -> 
@@ -177,7 +185,6 @@ class Tile
                     div = div[sib]
                 div
         div?.tile or @
-            
         
     play: -> post.emit 'playFile', @file
     open: -> post.emit 'openFile', @file

@@ -106,12 +106,12 @@ class Ctrl
         @buttons.appendChild document.createElement 'br'
         @button id: 'random',   icon: 'random fa-1x',        cb: -> post.emit 'random'
         @button id: 'repeat',   icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
-        @button id: 'song',     icon: 'music fa-1x',         cb: -> post.emit 'song'
+        @button id: 'song',     icon: 'music fa-1x',         cb: => post.emit 'song', @song.song
         @label id: 'songid', $('song')
         @buttons.appendChild document.createElement 'br'
         @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
         @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
-        @button id: 'playlist', icon: 'bars fa-1x',          cb: -> post.emit 'playlist'
+        @button id: 'playlist', icon: 'bars fa-1x',          cb: => post.emit 'playlist', @song.song
         @label id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->

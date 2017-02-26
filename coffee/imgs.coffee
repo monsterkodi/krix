@@ -3,7 +3,9 @@
 # 000  000000000  000  0000  0000000 
 # 000  000 0 000  000   000       000
 # 000  000   000   0000000   0000000 
-
+{
+swapExt
+}      = require './tools/tools'
 log    = require './tools/log'
 fs     = require 'fs'
 path   = require 'path'
@@ -36,6 +38,13 @@ class Imgs
                 else 
                     @checkDirForCover coverDir, coverFile
                 @dequeue()
+    
+    @convertToJPG: (file, cb) ->
+        extname = path.extname(file).toLowerCase()
+        if extname in ['.gif', '.tif', '.png', '.bmp']
+            coverFile = swapExt file, '.jpg'
+            # log 'converting ', file, coverFile
+            childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
                         
     @checkDirForCover: (dir, coverFile) ->
         if tile = @queue.shift()

@@ -12,7 +12,21 @@ path = require 'path'
 os   = require 'os'
 fs   = require 'fs'
 
+#  0000000   000   000  00000000  000   000  00000000
+# 000   000  000   000  000       000   000  000     
+# 000 00 00  000   000  0000000   000   000  0000000 
+# 000 0000   000   000  000       000   000  000     
+#  00000 00   0000000   00000000   0000000   00000000
+
+queue = (items, opt = timeout:1 ) ->
+    while item = items.shift()
+        opt.cb? item
+        fnc = () -> queue items, opt
+        setTimeout fnc, opt.timeout
+
 module.exports = 
+
+    queue: queue
 
     # 0000000    000   0000000  000000000
     # 000   000  000  000          000   
@@ -182,7 +196,7 @@ module.exports =
 
     sw: () -> document.body.clientWidth
     sh: () -> document.body.clientHeight
-    
+
 #  0000000  000000000  00000000   000  000   000   0000000 
 # 000          000     000   000  000  0000  000  000      
 # 0000000      000     0000000    000  000 0 000  000  0000
@@ -204,3 +218,6 @@ if not String.prototype.splice
 if not Array.prototype.reversed
     Array.prototype.reversed = ->
         _.clone(@).reverse()
+
+
+

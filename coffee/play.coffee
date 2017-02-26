@@ -13,8 +13,11 @@ post      = require './post'
 
 class Play
     
+    @instance = null
+    
     constructor: () ->
         
+        Play.instance = @
         @random = 0
         @mpcc = komponist.createConnection 6600, 'localhost', -> log 'connected to mpc server'
         @mpcc.on 'changed',  @onServerChange
@@ -31,7 +34,7 @@ class Play
         post.on 'refresh',   @refreshStatus
         
         @refreshStatus()
-    
+            
     del: -> @mpc 'close'
     
     onRandom: => @mpc 'random', [@status?.random == '0' and '1' or '0']
