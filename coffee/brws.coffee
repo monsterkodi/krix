@@ -16,6 +16,7 @@ _      = require 'lodash'
 log    = require './tools/log'
 Tile   = require './tile'
 Play   = require './play'
+Prefs  = require './prefs'
 tags   = require './tags' 
 post   = require './post'
 
@@ -38,9 +39,10 @@ class Brws
         @view.appendChild @tiles
         
         @musicDir = resolve "~/Music"
+        @tilesDir = @musicDir
         Tile.musicDir = @musicDir
         
-        @setTileNum @tilesWidth() / 120
+        @setTileNum Prefs.get "tileNum:#{@musicDir}", 8
         
         @tiles.addEventListener "dblclick", @onDblClick
         @tiles.addEventListener "scroll",   @onScroll
@@ -85,6 +87,11 @@ class Brws
     loadDir: (@dir, highlightFile) =>
         @clear()
         @tilesDir = path.join @musicDir, @dir
+        
+        num = Prefs.get "tileNum:#{@tilesDir}", 0
+        if num != 0 and @tileNum != num
+            @setTileNum num
+        
         if @dir.length and @dir != '.'
             tile = new Tile path.dirname(@dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
             tile.setText path.dirname(@dir), path.basename(@dir)
@@ -144,6 +151,7 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
+        Prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize (@tilesWidth() / @tileNum)-22
             
     onDblClick: (event) =>

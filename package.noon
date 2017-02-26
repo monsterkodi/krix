@@ -5,6 +5,7 @@ dependencies
               komponist     ^0.1.0
               lodash        ^4.17.4
               mkpath        ^1.0.0
-              noon          >=1.0.13
+              nconf         ^0.8.4
+              noon          ^1.0.13
               rimraf        ^2.6.0
               walkdir       0.0.11
