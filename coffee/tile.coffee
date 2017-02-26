@@ -190,7 +190,12 @@ class Tile
         div?.tile or @
         
     play: -> post.emit 'playFile', @file
-    open: -> post.emit 'openFile', @file
+    open: -> 
+        if @isDir()
+            post.emit 'loadDir', (@opt?.openDir or @file), @file
+        
+    showInFinder: -> post.emit 'showFile', @file
+            
     add:  -> post.emit 'addFile',  @file
        
     #   00     00   0000000   000   000   0000000  00000000
@@ -205,7 +210,7 @@ class Tile
        
     onDblClick: => 
         if @isDir()
-            post.emit 'loadDir', @file
+            @open()
         else
             @play()
             

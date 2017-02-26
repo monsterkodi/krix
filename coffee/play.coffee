@@ -48,8 +48,6 @@ class Play
             post.emit 'status', @status
         
     onServerChange: (change) =>
-        # log "Play.onServerChange change:", change
-        
         switch change
             when 'player' 
                 @onCurrent()
@@ -57,14 +55,9 @@ class Play
             when 'options'
                 @refreshStatus()
             when 'playlist'
-                log 'playlist changed'
                 @refreshStatus()
-                # @mpc 'playlist', (playlist) ->
-                    # for f in playlist
-                        # log f.file
     
     playFile: (file) =>
-        # log "Play.playFile file:#{file}"
         @mpc 'clear'
         @mpc 'add', [file]
         @mpc 'play'
@@ -74,7 +67,6 @@ class Play
     prevSong: => @mpc 'previous'
     
     mpc: (cmmd, args=[], cb=null) -> 
-        # log 'cmmd', cmmd, 'args', args
         if _.isFunction args
             cb = args
             args = []

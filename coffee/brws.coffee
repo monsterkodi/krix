@@ -64,6 +64,7 @@ class Brws
         post.on 'playlist',  @showPlaylist
         post.on 'song',      @showSong
         post.on 'loadDir',   @loadDir
+        post.on 'showFile',  @showFile
         post.on 'home',      @goHome
         post.on 'up',        @goUp
         
@@ -75,7 +76,7 @@ class Brws
     # 000      000   000  000   000  000   000
     # 0000000   0000000   000   000  0000000  
 
-    goUp:   => @loadDir path.dirname @dir
+    goUp:   => @loadDir path.dirname(@dir), @dir
     goHome: => @loadDir ''
 
     clear: ->
@@ -83,8 +84,21 @@ class Brws
         tags.clearQueue()
         post.emit 'unfocus'
         @tiles.lastChild.tile.del() while @tiles.lastChild
+
+    showFile: (file) =>
+        absPath = path.join @musicDir, file
+        stat = fs.statSync absPath 
+        args = [
+            '-e', 'tell application "Finder"', 
+            '-e', "reveal POSIX file \"#{absPath}\"",
+            '-e', 'activate',
+            '-e', 'end tell']
+        childp.spawn 'osascript', args
         
     loadDir: (@dir, highlightFile) =>
+        
+        # log 'loadDir', @dir, highlightFile
+                    
         @clear()
         @tilesDir = path.join @musicDir, @dir
         
@@ -93,7 +107,10 @@ class Brws
             @setTileNum num
         
         if @dir.length and @dir != '.'
-            tile = new Tile path.dirname(@dir), @tiles, musicDir: @musicDir, krixDir: @tilesDir, isUp: true
+            tile = new Tile @dir, @tiles, 
+                krixDir:  @tilesDir
+                openDir:  path.dirname @dir
+                isUp: true
             tile.setText path.dirname(@dir), path.basename(@dir)
             tile.setFocus()
             
@@ -112,6 +129,8 @@ class Brws
             musicPath = dir.substr @musicDir.length+1
             tile = new Tile musicPath, @tiles
             tile.setFocus() if not @focusTile
+            if musicPath == highlightFile
+                tile.setFocus()
      
     showSong: (song) => @loadDir path.dirname(song.file), song.file
     
@@ -173,23 +192,25 @@ class Brws
     # 000   000  00000000     000   
     
     modKeyComboEventDown: (mod, key, combo, event) ->
+        focusTile = @getFocusTile()
         switch key
             when '-'         then @setTileNum @tileNum + 1
             when '='         then @setTileNum @tileNum - 1
+            when 'esc'       then @goUp()
             when 'home'      then @getFirstTile().setFocus()
             when 'end'       then @getLastTile().setFocus()
-            when 'space'     then @getFocusTile().add()
+            when 'space'     then focusTile.add()
             when 'backspace' 
                 if mod == 'command' 
-                    @getFocusTile().delete()
+                    focusTile.delete()
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
-                @getFocusTile().focusNeighbor key
+                focusTile.focusNeighbor key
             when 'enter' 
-                if @getFocusTile().isDir()
-                    if combo == 'enter' then @getFocusTile().open()
-                    else @getFocusTile().play()
+                if focusTile.isDir()
+                    if combo == 'enter' then focusTile.open()
+                    else focusTile.play()
                 else
-                    if combo == 'enter' then @getFocusTile().play()
-                    else @getFocusTile().open()
+                    if combo == 'enter' then focusTile.play()
+                    else focusTile.showInFinder()
         
 module.exports = Brws

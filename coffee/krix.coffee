@@ -7,9 +7,6 @@
 {
 resolve
 }      = require './tools/tools'
-fs     = require 'fs'
-path   = require 'path'
-childp = require 'child_process'
 log    = require './tools/log'
 Prefs  = require './prefs'
 Brws   = require './brws'
@@ -26,9 +23,7 @@ class Krix
         @play = new Play
         @ctrl = new Ctrl @view
         @brws = new Brws @view
-        
-        post.on 'openFile',  @openFile
-                
+                        
         @brws.loadDir ""
     
     del: ->
@@ -36,20 +31,7 @@ class Krix
         @ctrl?.del()
         @brws?.del()
         @play?.del()
-        
-    openFile: (file) =>
-        absPath = path.join @brws.musicDir, file
-        stat = fs.statSync absPath 
-        if stat.isDirectory()
-            @brws.loadDir file
-        else
-            args = [
-                '-e', 'tell application "Finder"', 
-                '-e', "reveal POSIX file \"#{absPath}\"",
-                '-e', 'activate',
-                '-e', 'end tell']
-            childp.spawn 'osascript', args
-        
+                
     resized: (w,h) -> @aspect = w/h
                       
     # 000   000  00000000  000   000
