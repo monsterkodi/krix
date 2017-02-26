@@ -43,19 +43,20 @@ class Tile
 
         sqr = document.createElement 'div'
         art = document.createElement 'div'
-        art.classList.add 'tileArtist'
-        sqr.appendChild art
         tit = document.createElement 'div'
-        tit.classList.add 'tileTrack'
+        sqr.appendChild art
         sqr.appendChild tit
         img.appendChild sqr
     
         if @isFile()
+            art.classList.add 'tileArtist'
             art.innerHTML = path.basename @file
+            tit.classList.add 'tileTrack'
             img.style.backgroundColor = "rgba(0,0,100,0.5)"
             sqr.classList.add "tileSqrFile"
         else
             tit.innerHTML = path.basename @file
+            tit.classList.add 'tileName'
             img.style.backgroundColor = "rgba(0,0,0,0.5)"
             img.classList.add "tileImgDir"
             sqr.classList.add "tileSqrDir"
@@ -96,13 +97,13 @@ class Tile
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @opt?.isUp
 
     setText: (top, sub) -> 
-        art = @pad.firstChild.firstChild.firstChild
-        tit = art.nextSibling
+        artist = @pad.firstChild.firstChild.firstChild
+        title = artist.nextSibling
         if sub
-            art.innerHTML = top
-            tit.innerHTML = sub
+            artist.innerHTML = top
+            title.innerHTML = sub
         else
-            tit.innerHTML = top
+            title.innerHTML = top
         
     setTag: (@tag) =>
         sqr = @pad.firstChild.firstChild
@@ -206,16 +207,14 @@ class Tile
 
     expand: ->
         return if @isFile() or @isExpanded() or @opt?.isUp
-        # prefs.set "expanded:#{@file}", true
         @doExpand()
             
     collapse: ->
         return if @isFile() or not @isExpanded() or @opt?.isUp
-        # prefs.del "expanded:#{@file}"
         @doCollapse()
 
     doExpand: =>
-        # log 'do expand', @file
+        @div.classList.add 'tileExpanded'
         @children = []
         @walker?.stop()
         @walker = new walk @absFilePath()
@@ -228,12 +227,17 @@ class Tile
             dirname = path.basename(dir)
             return if dirname.startsWith('.') or dirname == 'iTunes'
             @addChild new Tile dir, @div.parentNode, openDir: dir
+            
+        @walker.on 'done', =>
+            if @children.length == 1
+               @del()
     
     addChild: (child) ->
         @children.push child
         @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
         
     doCollapse: ->
+        @div.classList.remove 'tileExpanded'
         while child = @children?.pop()
             child.del()
         

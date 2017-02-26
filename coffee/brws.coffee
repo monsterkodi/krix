@@ -48,6 +48,7 @@ class Brws
         @tiles.addEventListener "scroll",   @onScroll
         
         style '.tile',                       "display: inline-block; padding: 0; margin: 0;"
+        style '.tileExpanded .tileName',     "color: #fa0;"
         style '.tilePad',                    "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px;"
         style '.tilePadFocus',               "background-color: #44a;"
         style '.tilePadFocus .tileSqrCover', "opacity: 1.0;"
