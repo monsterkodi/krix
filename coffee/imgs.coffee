@@ -48,7 +48,6 @@ class Imgs
         extname = path.extname(file).toLowerCase()
         if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
             coverFile = swapExt file, '.jpg'
-            # log 'converting ', file, coverFile
             childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
     
     @potentialAlbumCover: (coverFile) ->
@@ -67,7 +66,6 @@ class Imgs
                         extname = path.extname(file).toLowerCase()
                         if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
                             mkpath tile.krixDir(), (err) ->
-                                # log 'converting ', absFile, coverFile
                                 childp.exec "convert \"#{absFile}\" \"#{coverFile}\"", (err) ->
                                     if not err
                                         Imgs.cache[tile.coverFile()] = coverFile
@@ -76,7 +74,6 @@ class Imgs
                                         log '[ERROR] converting', absFile, coverFile, err
                             return
                         else if extname == '.jpg'
-                            # log 'moving cover', absFile, coverFile
                             mkpath tile.krixDir(), (err) ->
                                 fs.rename absFile, coverFile, (err) ->
                                     if not err

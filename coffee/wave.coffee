@@ -73,7 +73,7 @@ class Wave
         @elem.style.backgroundImage = ""
         childp.exec cmmd, (err) =>
             if err?
-                log "[ERROR] can't create waveform for #{file}", err
+                log "[ERROR] can't create waveform for #{file}", err.cmd
             else
                 fs.readFile outfile, (err, data) =>
                     base = data.toString 'base64' 

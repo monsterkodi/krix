@@ -97,8 +97,6 @@ class Tags
         picExt    = '.' + last format.split '/'
         coverFile = swapExt path.join(tile.krixDir(), path.basename tile.file), picExt
         
-        # log 'coverFile', coverFile, picExt, format
-        
         fs.writeFile coverFile, Buffer.from(picture.data.data), (err) =>
             if err?
                 log "[ERROR] can't save cover image for", tile.file

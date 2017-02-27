@@ -138,7 +138,7 @@ class Brws
                 @expandAllTiles()
                 # setTimeout @expandAllTiles, 100
      
-    showSong: (song) => @loadDir path.dirname(song.file), song.file
+    showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
     
     #   00000000   000       0000000   000   000  000      000   0000000  000000000
     #   000   000  000      000   000   000 000   000      000  000          000   
@@ -148,10 +148,10 @@ class Brws
         
     showPlaylist: (song) =>
         @clear()
-        Play.instance.mpc 'playlist', (playlist) =>
-            queue playlist, timeout: 10, cb: (item) =>
-                tile = new Tile item.file, @tiles, isFile: true
-                if item.file == song.file
+        Play.instance.mpc 'playlistinfo', (playlist) =>
+            queue playlist, timeout: 1, cb: (file) =>
+                tile = new Tile file, @tiles, isFile: true
+                if file == song?.file
                     tile.setFocus()
         
     # 000000000  000  000      00000000   0000000
@@ -175,9 +175,7 @@ class Brws
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         
         fontSize = Math.max 8, Math.min 20, @tileSize / 10
-        log @tileSize, fontSize
         style '.tileSqr', "font-size: #{fontSize}px"
-                
         style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
