@@ -23,9 +23,7 @@ app           = electron.app
 BrowserWindow = electron.BrowserWindow
 Tray          = electron.Tray
 Menu          = electron.Menu
-clipboard     = electron.clipboard
 ipc           = electron.ipcMain
-dialog        = electron.dialog
 main          = undefined # < created in app.on 'ready'
 tray          = undefined # < created in Main.constructor
 
@@ -41,7 +39,6 @@ args  = require('karg') """
 
 #{pkg.productName}
 
-    filelist  . ? files to open           . **
     show      . ? open window on startup  . = true
     prefs     . ? show preferences        . = false
     noprefs   . ? don't load preferences  . = false
@@ -137,9 +134,6 @@ class Main
             
         @createWindow()
 
-        if args.DevTools
-            activeWin()?.webContents.openDevTools()
-
         MainMenu.init @
 
         setTimeout @showWindows, 10
@@ -226,18 +220,6 @@ class Main
     # 000   000  000            000     000     000   000  000   000  000     
     # 000   000  00000000  0000000      000      0000000   000   000  00000000
     
-    restoreWindows: ->
-        windows = prefs.get 'windows', {}
-        # sequenced = {}
-        # i = 0
-        # for k, w of windows
-            # if w.file
-                # i += 1
-                # sequenced[i] = w
-        # prefs.set 'windows', sequenced
-        # for k, w of sequenced
-            # @restoreWin w
-                
     restoreWin: (state) ->
         w = @createWindow state.file
         w.setBounds state.bounds if state.bounds?
@@ -283,7 +265,10 @@ class Main
             # win.showInactive()
             win.show()
             win.focus()
-                    
+            
+            if args.DevTools
+                win.webContents.openDevTools()
+                        
             saveState = => @saveWinBounds win
                     
             setTimeout saveState, 1000

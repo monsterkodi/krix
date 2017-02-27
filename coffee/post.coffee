@@ -5,13 +5,13 @@
 #   000        000   000       000     000   
 #   000         0000000   0000000      000   
 
-EventEmitter = require 'events'
+events = require 'events'
 
-class Post extends EventEmitter
+class Post extends events
     
     @singleton = null
     
-    constructor: () -> Event.singleton = @
+    constructor: () -> Post.singleton = @
     @instance:   () -> Post.singleton or new Post()
     stop:        () -> @removeAllListeners()
         

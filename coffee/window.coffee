@@ -7,9 +7,9 @@
 sw,sh,$
 }           = require './tools/tools'
 Split       = require './split'
-Area        = require './area/area'
-LogView     = require './logview/logview'
+LogView     = require './logview'
 Titlebar    = require './titlebar'
+Main        = require './main'
 keyinfo     = require './tools/keyinfo'
 log         = require './tools/log'
 prefs       = require './prefs'
@@ -51,12 +51,7 @@ delState = window.delState = (key) ->
 # 000  000        000     
 # 000  000         0000000
 
-# ipc.on 'loadFile', (event, file) => loadFile file
-ipc.on 'setWinID', (event, id) => 
-    winID = window.winID = id
-    window.split?.setWinID id 
-    
-titlebar = window.titlebar = new Titlebar
+ipc.on 'setWinID', (event, id) => winID = window.winID = id
 
 #  0000000  00000000   000      000  000000000
 # 000       000   000  000      000     000   
@@ -64,13 +59,14 @@ titlebar = window.titlebar = new Titlebar
 #      000  000        000      000     000   
 # 0000000   000        0000000  000     000   
 
-split = window.split = new Split()
+titlebar = window.titlebar = new Titlebar
+main     = window.main     = new Main $('.main')
+logview  = window.logview  = new LogView '.logview'
+split    = window.split    = new Split()
+
 split.on 'split', =>
     main.resized()
     logview.resized()
-
-main        = window.main        = new Main '.main'
-logview     = window.logview     = new LogView '.logview'
 
 # 00000000   00000000   0000000  000  0000000  00000000
 # 000   000  000       000       000     000   000     

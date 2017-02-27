@@ -1,3 +1,5 @@
+![krix](img/banner.png)
+
 ### todo
 
 - app
