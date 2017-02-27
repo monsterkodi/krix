@@ -80,7 +80,7 @@ class Play
                 log "[ERROR] mpc command list failed:", err
 
     onServerChange: (change) =>
-        if change =='player' then then @onCurrent()
+        if change =='player' then @onCurrent()
         @onRefresh()
     
     mpc: (cmmd, args=[], cb=null) -> 
