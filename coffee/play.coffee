@@ -46,6 +46,7 @@ class Play
         log 'connected to mpd'
         @mpcc = @client
         @onRefresh()
+        @onCurrent()
         
     onClientError: (err) =>
         if err.code == 'ECONNREFUSED'
@@ -79,11 +80,7 @@ class Play
                 log "[ERROR] mpc command list failed:", err
 
     onServerChange: (change) =>
-        switch change
-            when 'player' 
-                @onCurrent()
-            # when 'options'
-            # when 'playlist'
+        if change =='player' then then @onCurrent()
         @onRefresh()
     
     mpc: (cmmd, args=[], cb=null) -> 

@@ -32,7 +32,6 @@ class Song
         
         post.on 'currentSong', @onCurrentSong
         post.on 'seek', =>  @tile?.setFocus()
-        post.emit 'current'
         
     onCurrentSong: (@song) =>
         if not @tile or @song.file != @tile.file
