@@ -31,6 +31,7 @@ class Song
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
         
         post.on 'currentSong', @onCurrentSong
+        post.on 'seek', =>  @tile?.setFocus()
         post.emit 'current'
         
     onCurrentSong: (@song) =>

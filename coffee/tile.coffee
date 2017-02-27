@@ -5,6 +5,7 @@
 #    000     000  000      000     
 #    000     000  0000000  00000000
 {
+encodePath,
 resolve,
 last
 }     = require './tools/tools'
@@ -90,7 +91,7 @@ class Tile
     #    0000000   0000000       0      00000000  000   000
         
     setCover: (coverFile) ->
-        @pad.firstChild.style.backgroundImage = "url('file://#{encodeURI(coverFile)}')"
+        @pad.firstChild.style.backgroundImage = "url('file://#{encodePath(coverFile)}')"
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @opt?.isUp
 
@@ -107,11 +108,7 @@ class Tile
         sqr = @pad.firstChild.firstChild
         @setText @tag.artist, @tag.title
         if @tag.cover?
-            coverURI = encodeURI @tag.cover 
-            coverURI = coverURI.replace /\#/g, "%23"
-            coverURI = coverURI.replace /\&/g, "%26"
-            coverURI = coverURI.replace /\'/g, "%27"
-            @pad.firstChild.style.backgroundImage = "url('file://#{coverURI}')"
+            @pad.firstChild.style.backgroundImage = "url('file://#{encodePath(@tag.cover)}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
             sqr.classList.add 'tileSqrCover'
 

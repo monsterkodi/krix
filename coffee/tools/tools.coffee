@@ -105,6 +105,12 @@ module.exports =
     fileName:  (p) -> path.basename p, path.extname p
     extName:   (p) -> path.extname(p).slice 1
 
+    encodePath: (p) ->
+        p = encodeURI p
+        p = p.replace /\#/g, "%23"
+        p = p.replace /\&/g, "%26"
+        p = p.replace /\'/g, "%27"
+
     fileList: (paths, opt={ignoreHidden: true, logError: true}) ->
         files = []
         paths = [paths] if typeof paths == 'string'
