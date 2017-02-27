@@ -3,3 +3,4 @@ css
 package.json
 node_modules
 krix-darwin-x64
+*.html
