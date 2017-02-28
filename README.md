@@ -2,7 +2,7 @@
 
 ### todo
 
-- app
+- apply folder cover to files
 - refresh wave on resize
 
 

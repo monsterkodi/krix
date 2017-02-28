@@ -196,16 +196,10 @@ class Main
             visibleWins()[0].showInactive()
             visibleWins()[0].focus()
     
-    closeWindow: (w) => w?.close()
     closeWindows: =>
-        for w in wins()
-            @closeWindow w
+        w.close() for w in wins()
         hideDock()
     
-    closeWindowsAndQuit: => 
-        @closeWindows()
-        @quit()
-      
     #  0000000  000000000   0000000    0000000  000   000
     # 000          000     000   000  000       000  000 
     # 0000000      000     000000000  000       0000000  
@@ -262,7 +256,6 @@ class Main
                         
         winLoaded = =>
 
-            # win.showInactive()
             win.show()
             win.focus()
             
@@ -297,9 +290,9 @@ class Main
             @toggleWindows()
             
     quit: => 
-        # prefs.save (ok) =>
-            # app.exit 0
-            # process.exit 0
+        @closeWindows()
+        app.exit 0
+        process.exit 0
         
     #  0000000   0000000     0000000   000   000  000000000
     # 000   000  000   000  000   000  000   000     000   

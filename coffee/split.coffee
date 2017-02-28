@@ -113,16 +113,17 @@ class Split extends event
         if @logVisible != v
             @logVisible = v
             if v and @logviewHeight() <= 0
-                @splitAt @elemHeight() - Math.max(100, prefs.get('split', 200))-@handleHeight
+                @splitAt clamp 100, @elemHeight() - 100, prefs.get 'split', @elemHeight()-100 
             else if @logviewHeight() > 0 and not v
                 @splitAt @elemHeight()
             display = v and 'inherit' or 'none'
             @logview.style.display   = display
             @handle.style.display = display            
+            window.main.resized()
             window.logview.resized()
             prefs.set 'logvisible', v
             
-    clearLog: -> window.logview.setText ""
+    clearLog: -> window.logview.clear()
     showOrClearLog: -> 
         if @logVisible
             @clearLog()

@@ -42,10 +42,6 @@ class MainMenu
                 label:       'Quit'
                 accelerator: 'Command+Q'
                 click:       main.quit
-            ,
-                label:       'Close All Windows And Quit'
-                accelerator: 'Command+Alt+Q'
-                click:       main.closeWindowsAndQuit
             ]
         ,
             # 000   000  000  000   000  0000000     0000000   000   000
@@ -66,8 +62,8 @@ class MainMenu
             ,
                 type: 'separator'
             ,                            
-                label:       'Close All Windows'
-                accelerator: 'Alt+Cmd+W'
+                label:       'Close Window'
+                accelerator: 'Cmd+W'
                 click:       main.closeWindows
             ,
                 label:       'Close Other Windows'

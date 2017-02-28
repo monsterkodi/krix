@@ -16,10 +16,6 @@ class Main extends Stage
         @krix = new Krix @view
         @view.focus()
     
-    # start: -> 
-        # @krix = new Krix @view
-        # @view.focus()
-        
     stop: -> @krix?.del()
         
     resized: (w,h) -> @krix?.resized w, h
