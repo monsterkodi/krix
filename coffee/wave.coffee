@@ -69,7 +69,7 @@ class Wave
         width = @elem.clientWidth
         @seconds = song.duration
         @pps = Math.max 1, parseInt 2 * width / @seconds
-        cmmd = "audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{width*2} --background-color 00000000 --waveform-color 444444 -i \"#{file}\" -o \"#{outfile}\""
+        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{width*2} --background-color 00000000 --waveform-color 444444 -i \"#{file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
         childp.exec cmmd, (err) =>
             if err?
