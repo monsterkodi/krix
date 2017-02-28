@@ -21,7 +21,7 @@ class Wave
         @view.appendChild @elem
         
         @line = document.createElement 'div'
-        @line.classList.add 'waveLines'
+        @line.classList.add 'waveLine'
         @view.appendChild @line
 
         @blnd = document.createElement 'div'
@@ -63,10 +63,11 @@ class Wave
     showFile: (@file, @song) ->      
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
         @width = @elem.clientWidth
-        @seconds = @song.duration
+        @seconds = @song?.duration or 0
         @pps = Math.max 1, parseInt 2 * @width / @seconds
         cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{@width*2} --background-color 00000000 --waveform-color 444444 -i \"#{@file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
+        @refresh()
         childp.exec cmmd, (err) =>
             if err?
                 log "[ERROR] can't create waveform for #{@file}", err.cmd

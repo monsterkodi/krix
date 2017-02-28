@@ -15,11 +15,13 @@ class Krix
     
     constructor: (@view) ->
 
-        @play = new Play
         @ctrl = new Ctrl @view
         @brws = new Brws @view
-                        
+        @play = new Play
         @brws.loadDir ""
+        
+        post.emit 'current'
+        post.emit 'refresh'
     
     del: ->
         post.stop()

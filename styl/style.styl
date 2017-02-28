@@ -260,14 +260,31 @@ body
     left                200px
     bottom              10px
     right               0
-    background-color    #111
+    background-color    #000
     
 .songInfo
     position            absolute
     right               0
     top                 0
     bottom              0
-    background          #f00
+    background          rgba(0,0,0,0)
+    
+.songElapsed
+.songDuration
+    padding             2px
+    border-radius       2px
+    position            absolute
+    font-size           14px
+    font-weight         bold
+    color               #333
+    background          rgba(0,0,0,0.7)
+    right               10px
+
+.songElapsed
+    top                 10px
+
+.songDuration
+    bottom              10px
 
 .wave
     position            absolute
@@ -277,12 +294,12 @@ body
     height              160px
     overflow            hidden
 
-.waveLines 
+.waveLine 
     position            absolute
     top                 0
     width               2px
     height              180px
-    background-color    rgba(255,255,255,0.07)
+    background-color    rgba(255,255,255,0.14)
 
 .waveBlend
     position            absolute
@@ -342,6 +359,7 @@ body
 #prev
     width          30px
     text-align     center
+    
 @keyframes highlight
     0%,100%   
         color: rgb(16,16,16)
