@@ -12,10 +12,11 @@ Krix  = require './krix'
 class Main extends Stage
     
     constructor: (@view) -> 
+                
         super @view
         @krix = new Krix @view
         @view.focus()
-    
+            
     stop: -> @krix?.del()
         
     resized: (w,h) -> @krix?.resized w, h

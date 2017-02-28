@@ -25,22 +25,23 @@ class MainMenu
             label: pkg.name   
             submenu: [     
                 label:       "About #{pkg.productName}"
+                accelerator: 'Cmd+.'
                 click:        main.showAbout
             ,
                 type: 'separator'
             ,
                 label:       "Hide #{pkg.productName}"
-                accelerator: 'Command+H'
+                accelerator: 'Cmd+H'
                 click:       main.hideWindows
             ,
                 label:       'Hide Others'
-                accelerator: 'Command+Alt+H'
+                accelerator: 'Cmd+Alt+H'
                 role:        'hideothers'
             ,
                 type: 'separator'
             ,
                 label:       'Quit'
-                accelerator: 'Command+Q'
+                accelerator: 'Cmd+Q'
                 click:       main.quit
             ]
         ,

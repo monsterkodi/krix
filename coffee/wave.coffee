@@ -15,6 +15,7 @@ post    = require './post'
 class Wave
     
     constructor: (@view) ->
+        
         @elem = document.createElement 'div'
         @elem.style.position   = 'absolute'
         @elem.style.top        = '10px'
@@ -43,6 +44,10 @@ class Wave
         
         post.on 'status', @onStatus
 
+        @width = null
+        @file  = null
+        @song  = null
+
         @drag = new drag 
             target:  @elem
             onStart: @onDragStart
@@ -63,13 +68,17 @@ class Wave
             @timer = setTimeout @refresh, parseInt 1000 / @pps
 
     refresh: => post.emit 'refresh'
+    resized: =>
+        if @elem.clientWidth != @width
+            reloadWave = => @showFile @file, @song
+            setTimeout reloadWave, 500
         
-    showFile: (file, song) ->      
+    showFile: (@file, @song) ->      
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
-        width = @elem.clientWidth
-        @seconds = song.duration
-        @pps = Math.max 1, parseInt 2 * width / @seconds
-        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{width*2} --background-color 00000000 --waveform-color 444444 -i \"#{file}\" -o \"#{outfile}\""
+        @width = @elem.clientWidth
+        @seconds = @song.duration
+        @pps = Math.max 1, parseInt 2 * @width / @seconds
+        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{@width*2} --background-color 00000000 --waveform-color 444444 -i \"#{@file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
         childp.exec cmmd, (err) =>
             if err?

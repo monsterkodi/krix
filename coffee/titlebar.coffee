@@ -3,27 +3,24 @@
 #    000     000     000     000      0000000   0000000    000000000  0000000  
 #    000     000     000     000      000       000   000  000   000  000   000
 #    000     000     000     0000000  00000000  0000000    000   000  000   000
-{
-unresolve,
-clamp,
-$}       = require './tools/tools'
-log      = require './tools/log'
-path     = require 'path'
-electron = require 'electron'
-ipc      = electron.ipcRenderer
+
+{$} = require './tools/tools'
+log = require './tools/log'
 
 class Titlebar
     
     constructor: () ->
         @elem = $('.titlebar')
-        @elem.ondblclick = (event) => ipc.send 'maximizeWindow', window.winID
+        @elem.ondblclick = (event) => 
+            win = window.browserWin
+            if win?.isMaximized()
+                win?.unmaximize() 
+            else
+                win?.maximize()
 
     update: (info) ->
-        if info.file?
-            title   = path.basename info.file
-            tooltip = unresolve info.file
-        else
-            title = ''
+        
+        title = info.title or ''
         ic  = info.focus and " focus" or ""
         id  = "<span class='clickarea'><span class=\"winid #{ic}\">#{info.winID}</span>"
         dc  = info.dirty and " dirty" or "clean"

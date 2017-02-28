@@ -33,8 +33,6 @@ tray          = undefined # < created in Main.constructor
 # 000   000  000   000  000   000       000
 # 000   000  000   000   0000000   0000000 
 
-# childp.execSync "syslog -s -l error \"argv: #{process.argv.join ' '}\""
-
 args  = require('karg') """
 
 #{pkg.productName}
@@ -45,7 +43,6 @@ args  = require('karg') """
     verbose   . ? log more                . = false
     DevTools  . ? open developer tools    . = false
     debug     .                             = false
-    test      .                             = false
     
 version  #{pkg.version}
 
@@ -68,12 +65,12 @@ if args.verbose
 # 000        000   000  000       000            000
 # 000        000   000  00000000  000       0000000 
 
-prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon", shortcut: 'F3'
+prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon"
 
 if args.prefs
     log colors.yellow.bold 'prefs'
-    if fileExists prefs.path
-        log noon.stringify noon.load(prefs.path), colors:true
+    if fileExists prefs.file
+        log noon.stringify noon.load(prefs.file), colors:true
 
 # 000   000  000  000   000   0000000
 # 000 0 000  000  0000  000  000     
@@ -89,12 +86,6 @@ winWithID   = (winID) ->
     for w in wins()
         return w if w.id == wid
 
-# 0000000     0000000    0000000  000   000
-# 000   000  000   000  000       000  000 
-# 000   000  000   000  000       0000000  
-# 000   000  000   000  000       000  000 
-# 0000000     0000000    0000000  000   000
-
 hideDock = ->
     return if prefs.get 'trayOnly', false
     app.dock.hide() if app.dock
@@ -105,11 +96,10 @@ hideDock = ->
 # 000  000        000     
 # 000  000         0000000
 
-ipc.on 'toggleDevTools',         (event)         => event.sender.toggleDevTools()
-ipc.on 'maximizeWindow',         (event, winID)  => main.toggleMaximize winWithID winID
-ipc.on 'activateWindow',         (event, winID)  => main.activateWindowWithID winID
-ipc.on 'saveBounds',             (event, winID)  => main.saveWinBounds winWithID winID
-ipc.on 'reloadWindow',           (event, winID)  => main.reloadWin winWithID winID
+ipc.on 'toggleDevTools', (event)        => event.sender.toggleDevTools()
+ipc.on 'maximizeWindow', (event, winID) => main.toggleMaximize winWithID winID
+ipc.on 'activateWindow', (event, winID) => main.activateWindowWithID winID
+ipc.on 'reloadWindow',   (event, winID) => main.reloadWin winWithID winID
                         
 # 00     00   0000000   000  000   000
 # 000   000  000   000  000  0000  000
@@ -130,14 +120,12 @@ class Main
                                 
         app.setName pkg.productName
                                 
-        electron.globalShortcut.register prefs.get('shortcut'), @toggleWindows
+        electron.globalShortcut.register prefs.get('shortcut', 'F3'), @toggleWindows
             
         @createWindow()
 
         MainMenu.init @
 
-        setTimeout @showWindows, 10
-        
     # 000   000  000  000   000  0000000     0000000   000   000   0000000
     # 000 0 000  000  0000  000  000   000  000   000  000 0 000  000     
     # 000000000  000  000 0 000  000   000  000   000  000000000  0000000 
@@ -162,12 +150,10 @@ class Main
         if win.isMaximized()
             win.unmaximize() 
         else
-            win.maximize()
-
-    saveWinBounds: (win) ->
-        prefs.set "windows:#{win.id}:bounds",win.getBounds()
+            win.maximize()        
 
     toggleWindows: =>
+        log "toggleWindows"
         if wins().length
             if visibleWins().length
                 if activeWin()
@@ -185,11 +171,13 @@ class Main
             hideDock()
             
     showWindows: =>
+        log 'showWindows'
         for w in wins()
             w.show()
             app.dock.show()
             
     raiseWindows: =>
+        log 'raiseWindows'
         if visibleWins().length
             for w in visibleWins()
                 w.showInactive()
@@ -200,27 +188,8 @@ class Main
         w.close() for w in wins()
         hideDock()
     
-    #  0000000  000000000   0000000    0000000  000   000
-    # 000          000     000   000  000       000  000 
-    # 0000000      000     000000000  000       0000000  
-    #      000     000     000   000  000       000  000 
-    # 0000000      000     000   000   0000000  000   000
-     
     screenSize: -> electron.screen.getPrimaryDisplay().workAreaSize
-    
-    # 00000000   00000000   0000000  000000000   0000000   00000000   00000000
-    # 000   000  000       000          000     000   000  000   000  000     
-    # 0000000    0000000   0000000      000     000   000  0000000    0000000 
-    # 000   000  000            000     000     000   000  000   000  000     
-    # 000   000  00000000  0000000      000      0000000   000   000  00000000
-    
-    restoreWin: (state) ->
-        w = @createWindow state.file
-        w.setBounds state.bounds if state.bounds?
-        w.webContents.openDevTools() if state.devTools
-        w.showInactive()
-        w.focus()
-                
+                    
     #  0000000  00000000   00000000   0000000   000000000  00000000
     # 000       000   000  000       000   000     000     000     
     # 000       0000000    0000000   000000000     000     0000000 
@@ -229,19 +198,24 @@ class Main
        
     createWindow: () ->
         
-        {width, height} = @screenSize()
-        ww = height + 122
-        
+        bounds = prefs.get 'bounds', null
+        if not bounds
+            {w, h} = @screenSize()
+            bounds.width = h + 122
+            bounds.height = h
+            bounds.x = parseInt (w-bounds.width)/2
+            bounds.y = 0
+            
         win = new BrowserWindow
-            x:               parseInt (width-ww)/2
-            y:               0
-            width:           ww
-            height:          height
-            minWidth:        140
-            minHeight:       130
+            x:               bounds.x
+            y:               bounds.y
+            width:           bounds.width
+            height:          bounds.height
+            minWidth:        205
+            minHeight:       225
             useContentSize:  true
             fullscreenable:  true
-            show:            true
+            show:            false
             hasShadow:       false
             backgroundColor: '#000'
             titleBarStyle:   'hidden'
@@ -251,26 +225,21 @@ class Main
         win.on 'close',  @onCloseWin
         win.on 'move',   @onMoveWin
         win.on 'resize', @onResizeWin
-                
-        winReady = => win.webContents.send 'setWinID', win.id
-                        
-        winLoaded = =>
-
+                               
+        winReady = => 
+            win.webContents.send 'setWinID', win.id
+            
+        winReadyToShow = =>
             win.show()
             win.focus()
             
-            if args.DevTools
-                win.webContents.openDevTools()
+            if args.DevTools then win.webContents.openDevTools()
                         
-            saveState = => @saveWinBounds win
-                    
-            setTimeout saveState, 1000
-        
-        win.webContents.on 'dom-ready',       winReady
-        win.webContents.on 'did-finish-load', winLoaded
+        win.webContents.once 'dom-ready', winReady
+        win.on 'ready-to-show', winReadyToShow
         win 
     
-    onMoveWin: (event) => @saveWinBounds event.sender
+    onMoveWin: (event) => event.sender.webContents.send 'saveBounds'
     
     # 00000000   00000000   0000000  000  0000000  00000000
     # 000   000  000       000       000     000   000     
@@ -281,7 +250,6 @@ class Main
     onResizeWin: (event) => 
     
     onCloseWin: (event) =>
-        prefs.del "windows:#{event.sender.id}"
         if visibleWins().length == 1
             hideDock()
         
@@ -301,34 +269,23 @@ class Main
     # 000   000  0000000     0000000    0000000      000   
     
     showAbout: =>    
-        cwd = __dirname
         w = new BrowserWindow
-            dir:             cwd
-            preloadWindow:   true
-            resizable:       true
-            frame:           true
             show:            true
             center:          true
-            backgroundColor: '#333'            
+            resizable:       false
+            frame:           false
+            backgroundColor: '#000'            
             width:           400
-            height:          420
-        w.loadURL "file://#{cwd}/../about.html"
+            height:          400
+        w.loadURL "file://#{__dirname}/../about.html"
 
-    log: -> log (str(s) for s in [].slice.call arguments, 0).join " " if args.verbose
-    dbg: -> log (str(s) for s in [].slice.call arguments, 0).join " " if args.debug
-            
 #  0000000   00000000   00000000         0000000   000   000
 # 000   000  000   000  000   000       000   000  0000  000
 # 000000000  00000000   00000000        000   000  000 0 000
 # 000   000  000        000        000  000   000  000  0000
 # 000   000  000        000        000   0000000   000   000
 
-app.on 'activate', (event, hasVisibleWindows) => #log "app.on activate #{hasVisibleWindows}"
-app.on 'browser-window-focus', (event, win)   => #log "app.on browser-window-focus #{win.id}"
-
 app.on 'ready', => main = new Main
-    
-app.on 'window-all-closed', ->
     
 app.setName pkg.productName
 

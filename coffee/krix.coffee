@@ -4,11 +4,8 @@
 #   0000000    0000000    000    00000  
 #   000  000   000   000  000   000 000 
 #   000   000  000   000  000  000   000
-{
-resolve
-}      = require './tools/tools'
+
 log    = require './tools/log'
-Prefs  = require './prefs'
 Brws   = require './brws'
 Ctrl   = require './ctrl'
 Play   = require './play'
@@ -17,8 +14,6 @@ post   = require './post'
 class Krix
     
     constructor: (@view) ->
-
-        Prefs.init resolve '~/Library/Application Support/krix/krix.noon'
 
         @play = new Play
         @ctrl = new Ctrl @view
@@ -32,7 +27,10 @@ class Krix
         @brws?.del()
         @play?.del()
                 
-    resized: (w,h) -> @aspect = w/h
+    resized: (w,h) -> 
+        @aspect = w/h
+        @ctrl.resized()
+        @brws.resized()
                       
     # 000   000  00000000  000   000
     # 000  000   000        000 000 

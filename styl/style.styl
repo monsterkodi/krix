@@ -160,17 +160,70 @@ body
 .log
     bottom              0
 
-// 00     00   0000000   000  000   000
-// 000   000  000   000  000  0000  000
-// 000000000  000000000  000  000 0 000
-// 000 0 000  000   000  000  000  0000
-// 000   000  000   000  000  000   000
-
 .main
     position            relative
     overflow            hidden
     background          #181818
     pointer-events      auto
+
+.tiles
+    position            absolute
+    top                 200px
+    left                0
+    right               0
+    bottom              0
+    background          #000
+    overflow-y          scroll
+
+.tile                       
+    display             inline-block
+    padding             0
+    margin              0
+    
+.tileExpanded .tileName     
+    color               #fa0
+    
+.tilePad                    
+    display             inline-block
+    padding             10px
+    padding-bottom      6px
+    border              1px solid transparent
+    border-radius       3px
+    
+.tilePadFocus               
+    background-color    #44a
+    
+.tilePadFocus .tileSqrCover 
+    opacity             1.0
+    
+.tilePadDir                 
+    border-radius       8px
+    
+.tilePadFocus.tilePadDir    
+    background-color    #333
+    
+.tileSqrDir                 
+    padding             5px
+    overflow            hidden
+    border-radius       0px
+    background-color    rgba(0,0,0,0.7)
+    
+.tileSqrCover               
+    opacity             0
+    
+.tileArtist                 
+    color               #88f
+    
+.tileImgDir                 
+    border-radius       5px
+    
+.tileSqrFile                
+    padding             5px
+    overflow            hidden
+    background-color    rgba(0,0,100,0.7)
+
+.logview
+    font-size           10px
 
 .logview
 .main

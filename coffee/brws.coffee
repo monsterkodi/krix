@@ -29,13 +29,6 @@ class Brws
     constructor: (@view) ->
         
         @tiles = document.createElement 'div'
-        @tiles.style.position = 'absolute'
-        @tiles.style.top = '200px'
-        @tiles.style.left = '0'
-        @tiles.style.right = '0'
-        @tiles.style.bottom = '0'
-        @tiles.style.background = "#000"
-        @tiles.style.overflow = "scroll"
         @tiles.classList.add 'tiles'
         @view.appendChild @tiles
         
@@ -47,20 +40,7 @@ class Brws
         
         @tiles.addEventListener "dblclick", @onDblClick
         @tiles.addEventListener "scroll",   @onScroll
-        
-        style '.tile',                       "display: inline-block; padding: 0; margin: 0;"
-        style '.tileExpanded .tileName',     "color: #fa0;"
-        style '.tilePad',                    "display: inline-block; padding: 10px; padding-bottom: 6px; border: 1px solid transparent; border-radius: 3px;"
-        style '.tilePadFocus',               "background-color: #44a;"
-        style '.tilePadFocus .tileSqrCover', "opacity: 1.0;"
-        style '.tilePadDir',                 "border-radius: 8px;"
-        style '.tilePadFocus.tilePadDir',    "background-color: #333;"
-        style '.tileSqrDir',                 "padding:  5px; overflow: hidden; border-radius: 0px; background-color: rgba(0,0,0,0.7);"
-        style '.tileSqrCover',               "opacity: 0;"
-        style '.tileArtist',                 "color: #88f;"
-        style '.tileImgDir',                 "border-radius: 5px;"
-        style '.tileSqrFile',                "padding:5px; overflow: hidden; background-color: rgba(0,0,100,0.7);"
-        
+                
         post.on 'tileFocus', @onTileFocus
         post.on 'unfocus',   @onUnfocus
         post.on 'playlist',  @showPlaylist
@@ -180,8 +160,11 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
+        log 'setTileNum', num, @tileNum, @tilesWidth()
         prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize (@tilesWidth() / @tileNum)-22
+    
+    resized: => @setTileNum @tileNum
             
     onDblClick: (event) =>
         if event.target.classList.contains 'tiles'

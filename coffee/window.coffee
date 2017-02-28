@@ -22,28 +22,12 @@ pkg         = require '../package.json'
 ipc           = electron.ipcRenderer
 remote        = electron.remote
 BrowserWindow = remote.BrowserWindow
-winID         = null
-main          = null
-logview       = null
-
-#  0000000  000000000   0000000   000000000  00000000
-# 000          000     000   000     000     000     
-# 0000000      000     000000000     000     0000000 
-#      000     000     000   000     000     000     
-# 0000000      000     000   000     000     00000000
-   
-setState = window.setState = (key, value) ->
-    return if not winID
-    if winID
-        prefs.set "windows:#{winID}:#{key}", value
-    
-getState = window.getState = (key, value) ->
-    return value if not winID
-    prefs.get "windows:#{winID}:#{key}", value
-    
-delState = window.delState = (key) ->
-    return if not winID
-    prefs.del "windows:#{winID}:#{key}"
+saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browserWin.getBounds()
+loadPrefs     = ->
+    app = electron.remote.app
+    prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon"
+    # if bounds = prefs.get 'bounds', null
+        # window.browserWin.setBounds bounds
 
 # 000  00000000    0000000
 # 000  000   000  000     
@@ -51,22 +35,21 @@ delState = window.delState = (key) ->
 # 000  000        000     
 # 000  000         0000000
 
-ipc.on 'setWinID', (event, id) => winID = window.winID = id
-
-#  0000000  00000000   000      000  000000000
-# 000       000   000  000      000     000   
-# 0000000   00000000   000      000     000   
-#      000  000        000      000     000   
-# 0000000   000        0000000  000     000   
-
-titlebar = window.titlebar = new Titlebar
-main     = window.main     = new Main $('.main')
-logview  = window.logview  = new LogView '.logview'
-split    = window.split    = new Split()
-
-split.on 'split', =>
-    main.resized()
-    logview.resized()
+ipc.on 'setWinID', (event, id) => 
+    # log 'setWinID', id
+    window.winID = id
+    window.browserWin = BrowserWindow.fromId id
+    loadPrefs()
+    window.titlebar = new Titlebar
+    window.main     = new Main $('.main')
+    window.logview  = new LogView '.logview'
+    window.split    = new Split()
+    split.on 'split', ->
+        window.main.resized()
+        window.logview.resized()
+    window.split.resized()
+        
+ipc.on 'saveBounds', saveBounds
 
 # 00000000   00000000   0000000  000  0000000  00000000
 # 000   000  000       000       000     000   000     
@@ -77,13 +60,11 @@ split.on 'split', =>
 screenSize = => electron.screen.getPrimaryDisplay().workAreaSize
 
 window.onresize = ->
-    split.resized()
-    ipc.send 'saveBounds', winID if winID?
+    saveBounds()
+    log 'window.onresize'
+    window.split.resized()
 
-window.onload = => 
-    split.resized()
-    
-# window.onunload = 
+window.onunload = -> prefs.save()
 
 # 0000000   0000000  00000000   00000000  00000000  000   000   0000000  000   000   0000000   000000000
 #000       000       000   000  000       000       0000  000  000       000   000  000   000     000   
@@ -120,6 +101,6 @@ document.onkeydown = (event) ->
     switch combo
         when 'f4'                 then return screenShot()
         when 'command+alt+i'      then return ipc.send 'toggleDevTools', winID
-        when 'command+alt+k'      then return split.toggleLog()
-        when 'command+alt+ctrl+k' then return split.showOrClearLog()
+        when 'command+alt+k'      then return window.split.toggleLog()
+        when 'command+alt+ctrl+k' then return window.split.showOrClearLog()
         

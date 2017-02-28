@@ -162,6 +162,8 @@ class Ctrl
             else status.state
         $('play').innerHTML = "<div class=\"fa fa-#{icon} fa-3x\"></div>"
 
+    resized: => @song.resized()
+
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  

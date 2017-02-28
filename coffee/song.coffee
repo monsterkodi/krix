@@ -32,6 +32,8 @@ class Song
         
         post.on 'currentSong', @onCurrentSong
         post.on 'seek', =>  @tile?.setFocus()
+
+    resized: => @wave?.resized()
         
     onCurrentSong: (@song) =>
         if not @tile or @song.file != @tile.file
