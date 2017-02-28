@@ -37,9 +37,11 @@ class Song
         
     onCurrentSong: (@song) =>
         if not @tile or @song.file != @tile.file
+            setFocus = @tile?.hasFocus()
             @tile?.del()
             if @song.file?
                 @tile = new Tile @song.file, @elem, isFile: true
                 @wave.showFile @tile.absFilePath(), @song
+                @tile.setFocus() if setFocus
     
 module.exports = Song

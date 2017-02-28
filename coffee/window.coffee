@@ -22,6 +22,8 @@ pkg         = require '../package.json'
 ipc           = electron.ipcRenderer
 remote        = electron.remote
 BrowserWindow = remote.BrowserWindow
+window.winID  = 1
+
 saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browserWin.getBounds()
 loadPrefs     = ->
     app = electron.remote.app
@@ -61,7 +63,6 @@ screenSize = => electron.screen.getPrimaryDisplay().workAreaSize
 
 window.onresize = ->
     saveBounds()
-    log 'window.onresize'
     window.split.resized()
 
 window.onunload = -> prefs.save()

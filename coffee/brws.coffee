@@ -161,7 +161,7 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
-        log 'setTileNum', num, @tileNum, @tilesWidth()
+        # log 'setTileNum', num, @tileNum, @tilesWidth()
         prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize (@tilesWidth() / @tileNum)-22
     

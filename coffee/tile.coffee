@@ -137,7 +137,7 @@ class Tile
                     post.emit 'nextSong' 
                 else
                     @focusNeighbor 'right'
-                @del()
+                    @del()
                 
     #   00000000   0000000    0000000  000   000   0000000
     #   000       000   000  000       000   000  000     
@@ -167,24 +167,26 @@ class Tile
         div = switch dir
             when 'right' then @div.nextSibling
             when 'left'  then @div.previousSibling
-            when 'up', 'down' 
-                sib = dir == 'up' and 'previousSibling' or 'nextSibling'
-                cols = Math.floor @div.parentNode.clientWidth / @div.clientWidth
-                div = @div
-                while cols > 0 and div[sib]
-                    cols -= 1
-                    div = div[sib]
-                div
+            when 'up', 'down'
+                if @div.parentNode?
+                    sib = dir == 'up' and 'previousSibling' or 'nextSibling'
+                    cols = Math.floor @div.parentNode.clientWidth / @div.clientWidth
+                    div = @div
+                    while cols > 0 and div[sib]
+                        cols -= 1
+                        div = div[sib]
+                    div
             when 'page up', 'page down' 
-                sib = dir == 'page up' and 'previousSibling' or 'nextSibling'
-                cols = Math.floor @div.parentNode.clientWidth / @div.clientWidth
-                rows = Math.floor @div.parentNode.clientHeight / @div.clientHeight
-                num = rows * cols
-                div = @div
-                while num > 0 and div[sib]
-                    num -= 1
-                    div = div[sib]
-                div
+                if @div.parentNode?
+                    sib = dir == 'page up' and 'previousSibling' or 'nextSibling'
+                    cols = Math.floor @div.parentNode.clientWidth / @div.clientWidth
+                    rows = Math.floor @div.parentNode.clientHeight / @div.clientHeight
+                    num = rows * cols
+                    div = @div
+                    while num > 0 and div[sib]
+                        num -= 1
+                        div = div[sib]
+                    div
         div?.tile or @
 
     #   00000000  000   000  00000000    0000000   000   000  0000000  

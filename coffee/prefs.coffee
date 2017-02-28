@@ -54,7 +54,7 @@ class Prefs
     # 0000000   000   000      0      00000000
 
     @save: (cb) ->
-        log 'Prefs.save', Prefs.file
+        # log 'Prefs.save', Prefs.file
         return if not Prefs.file
         clearTimeout Prefs.timer if Prefs.timer
         Prefs.timer = null

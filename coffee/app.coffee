@@ -137,14 +137,7 @@ class Main
     activeWin:   activeWin
     visibleWins: visibleWins
         
-    reloadWin: (win) ->
-        if win?
-            dev = win.webContents.isDevToolsOpened()
-            if dev
-                win.webContents.closeDevTools()
-                setTimeout win.webContents.reloadIgnoringCache, 100
-            else
-                win.webContents.reloadIgnoringCache()
+    reloadWin: (win) -> win?.webContents.reloadIgnoringCache()
 
     toggleMaximize: (win) ->
         if win.isMaximized()
@@ -170,7 +163,6 @@ class Main
             hideDock()
             
     showWindows: =>
-        log 'showWindows'
         for w in wins()
             w.show()
             app.dock.show()
@@ -234,7 +226,7 @@ class Main
             
             if args.DevTools then win.webContents.openDevTools()
                         
-        win.webContents.once 'dom-ready', winReady
+        win.webContents.on 'dom-ready', winReady
         win.on 'ready-to-show', winReadyToShow
         win 
     

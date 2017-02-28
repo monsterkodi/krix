@@ -25,60 +25,6 @@ class Ctrl
         @elem.style.overflow   = "hidden"
         @elem.classList.add 'ctrl'
         @view.appendChild @elem
-
-        style '.buttons', """
-            position:       absolute;
-            bottom:         10px;
-            left:           10px;
-            width:          200px;
-            paddingTop:     10px;
-        """    
-        style '.button', """
-            margin-top:     5px; 
-            opacity:        1.0; 
-            color:          #444;
-            background:     #111;
-            padding:        10px;
-            border-radius:  5px;
-            margin-right:   5px;
-            display:        inline-block;
-        """
-        style '.button:hover',   "color: #fff"
-        style '.button:active',  "background: #222"
-        style '.buttonActive',   "color: #fa0"
-        style '.buttonInactive', "color: #444"
-        style "#random", "margin-left: 14px"
-        style "#home",   "margin-left: 14px;"
-        style "#song",   "vertical-align: bottom;"
-        style "#length", "vertical-align: top; margin-top: 5px;"
-        style '.label',          """
-            display:        inline-block;
-            margin-left:    10px;
-            padding:        0; 
-            color:          #444
-        """
-        style "#play", """
-            width: 42px;
-            margin-bottom: 15px;
-        """
-        style "#next", """
-            width: 30px;
-            text-align: center;
-        """
-        style "#prev", """
-            width: 30px;
-            text-align: center;
-        """
-        
-        style "@keyframes highlight", """
-            0%,100%   {color: rgb(16,16,16);}
-            50%  {color: rgb(255,255,255);}
-        """
-        style ".highlight", """
-            animation: highlight 1.5s;
-            animation-timing-function: ease-in;
-            animation-iteration-count: 1;
-        """
         
         @song = new Song @elem
         
@@ -174,5 +120,9 @@ class Ctrl
         switch combo
             when 'n' then post.emit 'nextSong'
             when 'p' then post.emit 'prevSong'
+            when 'left', 'right'
+                if @song?.tile?.hasFocus()
+                    post.emit 'seek', key == 'left' and '-20' or '+20'
+                    
         
 module.exports = Ctrl

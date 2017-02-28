@@ -234,4 +234,65 @@ body
     color               #ddd 
     
     font-family         font
+        
+//   0000000    000   000  000000000  000000000   0000000   000   000   0000000
+//   000   000  000   000     000        000     000   000  0000  000  000     
+//   0000000    000   000     000        000     000   000  000 0 000  0000000 
+//   000   000  000   000     000        000     000   000  000  0000       000
+//   0000000     0000000      000        000      0000000   000   000  0000000 
+        
+.buttons
+    position       absolute
+    bottom         10px
+    left           10px
+    width          200px
+    paddingTop     10px
+.button
+    margin-top     5px
+    opacity        1.0
+    color          #444
+    background     #111
+    padding        10px
+    border-radius  5px
+    margin-right   5px
+    display        inline-block
+.button:hover       
+    color          #fff
+.button:active      
+    background     #222
+.buttonActive
+    color          #fa0
+.buttonInactive
+    color          #444
+#random
+#home
+    margin-left     14px
+#song
+    vertical-align  bottom
+#length
+    vertical-align  top
+    margin-top      5px
+.label
+    display        inline-block
+    margin-left    10px
+    padding        0
+    color          #444
+#play
+    width          42px
+    margin-bottom  15px
+#next
+    width          30px
+    text-align     center
+#prev
+    width          30px
+    text-align     center
+@keyframes highlight
+    0%,100%   
+        color: rgb(16,16,16)
+    50%  
+        color: rgb(255,255,255)
+.highlight
+    animation                   highlight 1.5s
+    animation-timing-function   ease-in
+    animation-iteration-count   1
     
