@@ -17,29 +17,15 @@ class Wave
     constructor: (@view) ->
         
         @elem = document.createElement 'div'
-        @elem.style.position   = 'absolute'
-        @elem.style.top        = '10px'
-        @elem.style.left       = '182px'
-        @elem.style.right      = '0'
-        @elem.style.height     = '160px'
-        @elem.style.overflow   = "hidden"
         @elem.classList.add 'wave'
         @view.appendChild @elem
         
         @line = document.createElement 'div'
-        @line.style.position   = 'absolute'
-        @line.style.top        = '0'
-        @line.style.width      = '2px'
-        @line.style.height     = '180px'
-        @line.style.backgroundColor = "rgba(255,255,255,0.07)"
+        @line.classList.add 'waveLines'
         @view.appendChild @line
 
         @blnd = document.createElement 'div'
-        @blnd.style.position   = 'absolute'
-        @blnd.style.top        = '0'
-        @blnd.style.left       = '0'
-        @blnd.style.height     = '160px'
-        @blnd.style.backgroundColor = "rgba(19,19,19,0.6)"
+        @blnd.classList.add 'waveBlend'
         @elem.appendChild @blnd
         
         post.on 'status', @onStatus

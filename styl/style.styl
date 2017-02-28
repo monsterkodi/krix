@@ -14,7 +14,8 @@ titlebarHeight        = 22px
 titlebarFontSize      = 14px
 splithandleHeight     = 6px
 thinBorder            = 1px solid frameColor
-font                  = "Menlo", "Cousine", "Liberation Mono", "Andale Mono", monospace
+font                  = "Avenir Next", "Verdanda", sans-serif
+fontMono              = "Menlo", "Cousine", "Liberation Mono", "Andale Mono", monospace
 
 fill-abs()
     position            absolute
@@ -166,6 +167,13 @@ body
     background          #181818
     pointer-events      auto
 
+
+// 000000000  000  000      00000000
+//    000     000  000      000     
+//    000     000  000      0000000 
+//    000     000  000      000     
+//    000     000  0000000  00000000
+
 .tiles
     position            absolute
     top                 200px
@@ -174,11 +182,16 @@ body
     bottom              0
     background          #000
     overflow-y          scroll
+    padding-top         10px
 
 .tile                       
     display             inline-block
     padding             0
     margin              0
+    
+.tiles .tile
+    margin-right        -11px
+    margin-top          -11px
     
 .tileExpanded .tileName     
     color               #fa0
@@ -234,6 +247,49 @@ body
     color               #ddd 
     
     font-family         font
+
+//    0000000   0000000   000   000   0000000 
+//   000       000   000  0000  000  000      
+//   0000000   000   000  000 0 000  000  0000
+//        000  000   000  000  0000  000   000
+//   0000000    0000000   000   000   0000000 
+
+.song
+    position            absolute
+    top                 10px
+    left                200px
+    bottom              10px
+    right               0
+    background-color    #111
+    
+.songInfo
+    position            absolute
+    right               0
+    top                 0
+    bottom              0
+    background          #f00
+
+.wave
+    position            absolute
+    top                 10px
+    left                182px
+    right               0
+    height              160px
+    overflow            hidden
+
+.waveLines 
+    position            absolute
+    top                 0
+    width               2px
+    height              180px
+    background-color    rgba(255,255,255,0.07)
+
+.waveBlend
+    position            absolute
+    top                 0
+    left                0
+    height              160px
+    background-color    rgba(19,19,19,0.6)
         
 //   0000000    000   000  000000000  000000000   0000000   000   000   0000000
 //   000   000  000   000     000        000     000   000  0000  000  000     

@@ -16,16 +16,14 @@ class Song
     constructor: (@view) ->
         
         @elem = document.createElement 'div'
-        @elem.style.position        = 'absolute'
-        @elem.style.top             = '10px'
-        @elem.style.left            = '200px'
-        @elem.style.bottom          = '10px'
-        @elem.style.right           = '0'
-        @elem.style.backgroundColor = "#111"
         @elem.classList.add 'song'
         @view.appendChild @elem
         
         @wave = new Wave @elem
+    
+        @info = document.createElement 'div'
+        @info.classList.add 'songInfo'
+        @elem.appendChild @info
         
         tileSize = 160
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
@@ -37,9 +35,11 @@ class Song
         
     onCurrentSong: (@song) =>
         if not @tile or @song.file != @tile.file
+            @info.innerHTML = ""
             setFocus = @tile?.hasFocus()
             @tile?.del()
             if @song.file?
+                @info.innerHTML = @song.duration
                 @tile = new Tile @song.file, @elem, isFile: true
                 @wave.showFile @tile.absFilePath(), @song
                 @tile.setFocus() if setFocus
