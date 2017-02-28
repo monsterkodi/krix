@@ -120,7 +120,7 @@ class Main
                                 
         app.setName pkg.productName
                                 
-        electron.globalShortcut.register prefs.get('shortcut', 'F3'), @toggleWindows
+        electron.globalShortcut.register prefs.get('shortcut', 'F4'), @toggleWindows
             
         @createWindow()
 
@@ -153,7 +153,6 @@ class Main
             win.maximize()        
 
     toggleWindows: =>
-        log "toggleWindows"
         if wins().length
             if visibleWins().length
                 if activeWin()
@@ -177,7 +176,6 @@ class Main
             app.dock.show()
             
     raiseWindows: =>
-        log 'raiseWindows'
         if visibleWins().length
             for w in visibleWins()
                 w.showInactive()
@@ -201,6 +199,7 @@ class Main
         bounds = prefs.get 'bounds', null
         if not bounds
             {w, h} = @screenSize()
+            bounds = {}
             bounds.width = h + 122
             bounds.height = h
             bounds.x = parseInt (w-bounds.width)/2

@@ -3,7 +3,6 @@
 ### todo
 
 - apply folder cover to files
-- refresh wave on resize
 
 
 ```sh

@@ -71,7 +71,8 @@ class Wave
     resized: =>
         if @elem.clientWidth != @width
             reloadWave = => @showFile @file, @song
-            setTimeout reloadWave, 500
+            clearTimeout @resizeTimer
+            @resizeTimer = setTimeout reloadWave, 500
         
     showFile: (@file, @song) ->      
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
@@ -82,7 +83,7 @@ class Wave
         @elem.style.backgroundImage = ""
         childp.exec cmmd, (err) =>
             if err?
-                log "[ERROR] can't create waveform for #{file}", err.cmd
+                log "[ERROR] can't create waveform for #{@file}", err.cmd
             else
                 fs.readFile outfile, (err, data) =>
                     base = data.toString 'base64' 

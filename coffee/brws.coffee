@@ -83,6 +83,7 @@ class Brws
                     
         @clear()
         @tilesDir = path.join @musicDir, @dir
+        @focusTile = null
         
         num = prefs.get "tileNum:#{@tilesDir}", 0
         if num != 0 and @tileNum != num
@@ -155,7 +156,7 @@ class Brws
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         
         fontSize = Math.max 8, Math.min 20, @tileSize / 10
-        style '.tileSqr', "font-size: #{fontSize}px"
+        style '.tiles .tileSqr', "font-size: #{fontSize}px"
         style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
