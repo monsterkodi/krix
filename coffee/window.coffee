@@ -100,7 +100,7 @@ document.onkeydown = (event) ->
     {mod, key, combo} = keyinfo.forEvent event
 
     switch combo
-        when 'f4'                 then return screenShot()
+        when 'f6'                 then return screenShot()
         when 'command+alt+i'      then return ipc.send 'toggleDevTools', winID
         when 'command+alt+k'      then return window.split.toggleLog()
         when 'command+alt+ctrl+k' then return window.split.showOrClearLog()
