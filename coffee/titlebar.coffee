@@ -4,8 +4,9 @@
 #    000     000     000     000      000       000   000  000   000  000   000
 #    000     000     000     0000000  00000000  0000000    000   000  000   000
 
-{$} = require './tools/tools'
-log = require './tools/log'
+{$}  = require './tools/tools'
+log  = require './tools/log'
+post = require './post'
 
 class Titlebar
     
@@ -17,21 +18,14 @@ class Titlebar
                 win?.unmaximize() 
             else
                 win?.maximize()
+                
+        post.on 'titleSong', @update
 
-    update: (info) ->
-        
-        title = info.title or ''
-        ic  = info.focus and " focus" or ""
-        id  = "<span class='clickarea'><span class=\"winid #{ic}\">#{info.winID}</span>"
-        dc  = info.dirty and " dirty" or "clean"
-        dot = info.sticky and "○" or "●"
-        db  = "<span class=\"dot #{dc}#{ic}\">#{dot}</span>"
-        da  = info.dirty and dot or ""
-        txt = id + db 
-        if title.length
-            txt += "<span class=\"title #{dc}#{ic}\" data-tip=\"#{tooltip}\">#{title} #{da}</span>"
-        txt += "</span>"
-        @elem.innerHTML = txt
+    update: (tag) =>
+        # tag = window.main.krix.ctrl.song.tile?.tag # :)
+        # tag = global.main.krix.ctrl.song.tile?.tag # :)
+        log 'tag', tag
+        @elem.innerHTML = "<span class=\"title\" >#{tag?.artist} - #{tag?.title}</span>"
         $('.clickarea', @elem)?.addEventListener 'click', @showList
        
 module.exports = Titlebar

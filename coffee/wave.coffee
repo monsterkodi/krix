@@ -42,10 +42,12 @@ class Wave
 
     onDragMove: (drag, event) => @seekTo event.clientX
     onDragStart: (drag,event) => @seekTo event.clientX
-    seekTo: (x) -> post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/@pps
+    seekTo: (x) -> 
+        log 'event.clientX', x
+        post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/(@pps*@scale)
       
     onStatus: (status) => 
-        left = parseInt @pps * status.elapsed / 2
+        left = parseInt @scale * @pps * status.elapsed / 2
         @line.style.left = "#{left+182}px"
         @blnd.style.width = "#{left}px"
         
@@ -64,8 +66,11 @@ class Wave
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
         @width = @elem.clientWidth
         @seconds = @song?.duration or 0
-        @pps = Math.max 1, parseInt 2 * @width / @seconds
-        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{@width*2} --background-color 00000000 --waveform-color 444444 -i \"#{@file}\" -o \"#{outfile}\""
+        @scale = 2 * @width / @seconds
+        log '@scale', @scale
+        @pps = Math.max 1, parseInt @scale
+        @scale = 1 if @scale > 1
+        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color 444444 -i \"#{@file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
         @refresh()
         childp.exec cmmd, (err) =>

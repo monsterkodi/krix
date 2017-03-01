@@ -107,6 +107,8 @@ class Tile
     setTag: (@tag) =>
         sqr = @pad.firstChild.firstChild
         @setText @tag.artist, @tag.title
+        if @isCurrentSong()
+            post.emit 'titleSong', @tag
         if @tag.cover?
             @pad.firstChild.style.backgroundImage = "url('file://#{encodePath(@tag.cover)}')"
             @pad.firstChild.style.backgroundSize = "100% 100%"
@@ -120,6 +122,7 @@ class Tile
    
     absFilePath: -> path.join Tile.musicDir, @file
     isFile: -> @opt?.isFile
+    isCurrentSong: -> @div.parentNode.classList.contains "song"
     isDir: -> not @isFile()
     krixDir:   -> 
         if @isFile()
@@ -133,7 +136,7 @@ class Tile
             if err
                 log "[ERROR] trashing file #{@absFilePath()} failed!", err
             else
-                if @div.parentNode.classList.contains "song"
+                if @isCurrentSong()
                     post.emit 'nextSong' 
                 else
                     @focusNeighbor 'right'
