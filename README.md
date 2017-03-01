@@ -1,4 +1,4 @@
-![krix](img/bannr.png)
+![krix](img/banner.png)
 
 ![screenshot](img/krix_1.png)
 
