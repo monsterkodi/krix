@@ -26,7 +26,6 @@ class Tags
             if not Tags.cache[key].cover?
                 delete Tags.cache[key] 
                 jsonFile = path.join path.dirname(key), ".krix", swapExt path.basename(key), '.json'
-                log 'removing', jsonFile
                 fs.unlink jsonFile, (err) ->
                     if err
                         log "[ERROR] can't remove", jsonFile

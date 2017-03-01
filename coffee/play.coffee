@@ -58,7 +58,7 @@ class Play
                 @server.on 'data',  (data) -> log "mpd server data", data
                 setTimeout @connect, 500
             else
-                log "can't connect to spawned mpd server either", err
+                log "[ERROR] can't connect to spawned mpd server either", err
         else
             log '[ERROR] mpd client error:', err
         

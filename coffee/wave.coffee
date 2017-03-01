@@ -61,7 +61,6 @@ class Wave
         @seconds = @song?.duration or 0
         @scale = 2 * @width / @seconds
         @pps = Math.max 1, parseInt @scale
-        # log '@pps', @pps, '@scale', @scale, 'adj', @width/(@seconds*@pps/2)
         if @pps > 1
             @scale = @width/(@seconds*@pps/2)
     

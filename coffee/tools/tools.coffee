@@ -133,7 +133,7 @@ module.exports =
                     files.push p
             catch err
                 if opt.logError
-                    log 'tools.fileList.error:', err
+                    log '[ERROR] tools.fileList.error:', err
         files
         
     fileExists: (file) ->

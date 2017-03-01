@@ -28,8 +28,6 @@ saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browser
 loadPrefs     = ->
     app = electron.remote.app
     prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon"
-    # if bounds = prefs.get 'bounds', null
-        # window.browserWin.setBounds bounds
 
 # 000  00000000    0000000
 # 000  000   000  000     
@@ -38,7 +36,6 @@ loadPrefs     = ->
 # 000  000         0000000
 
 ipc.on 'setWinID', (event, id) => 
-    # log 'setWinID', id
     window.winID = id
     window.browserWin = BrowserWindow.fromId id
     loadPrefs()
@@ -78,8 +75,7 @@ screenShot = ->
     win.capturePage (img) ->
         file = 'screenShot.png'
         remote.require('fs').writeFile file, img.toPng(), (err) -> 
-            log 'saving screenshot failed', err if err?
-            log "screenshot saved to #{file}"
+            log '[ERROR] saving screenshot failed', err if err?
 
 # 00000000   0000000    0000000  000   000   0000000
 # 000       000   000  000       000   000  000     
