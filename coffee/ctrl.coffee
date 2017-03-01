@@ -53,12 +53,12 @@ class Ctrl
         @button id: 'random',   icon: 'random fa-1x',        cb: -> post.emit 'random'
         @button id: 'repeat',   icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
         @button id: 'song',     icon: 'music fa-1x',         cb: => post.emit 'song', @song.song
-        @label id: 'songid', $('song')
+        @label  id: 'songid', $('song')
         @buttons.appendChild document.createElement 'br'
         @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
         @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
         @button id: 'playlist', icon: 'bars fa-1x',          cb: => post.emit 'playlist', @song.song
-        @label id: 'playlistlength', $('playlist')
+        @label  id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->
         labl = document.createElement 'div'
@@ -119,7 +119,8 @@ class Ctrl
     modKeyComboEventDown: (mod, key, combo, event) ->
         switch combo
             when 'n' then post.emit 'nextSong'
-            when 'p' then post.emit 'prevSong'
+            when 'b' then post.emit 'prevSong'
+            when 'p' then post.emit 'toggle'
             when 'left', 'right'
                 if @song?.tile?.hasFocus()
                     post.emit 'seek', key == 'left' and '-20' or '+20'
