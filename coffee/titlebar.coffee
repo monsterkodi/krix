@@ -22,10 +22,6 @@ class Titlebar
         post.on 'titleSong', @update
 
     update: (tag) =>
-        # tag = window.main.krix.ctrl.song.tile?.tag # :)
-        # tag = global.main.krix.ctrl.song.tile?.tag # :)
-        log 'tag', tag
-        @elem.innerHTML = "<span class=\"title\" >#{tag?.artist} - #{tag?.title}</span>"
-        $('.clickarea', @elem)?.addEventListener 'click', @showList
+        @elem.innerHTML = "<span class=\"title\" >#{tag?.artist} ● #{tag?.title}</span>"
        
 module.exports = Titlebar

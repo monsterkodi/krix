@@ -34,7 +34,7 @@ class Song
         @infoDuration.classList.add 'songDuration'
         @info.appendChild @infoDuration
         
-        tileSize = 160
+        tileSize = 156
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
         
         post.on 'currentSong', @onCurrentSong

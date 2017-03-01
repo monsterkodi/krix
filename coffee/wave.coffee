@@ -43,7 +43,6 @@ class Wave
     onDragMove: (drag, event) => @seekTo event.clientX
     onDragStart: (drag,event) => @seekTo event.clientX
     seekTo: (x) -> 
-        log 'event.clientX', x
         post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/(@pps*@scale)
       
     onStatus: (status) => 
@@ -53,24 +52,31 @@ class Wave
         
         clearTimeout @timer
         if status.state == 'play'
-            @timer = setTimeout @refresh, parseInt 1000 / @pps
+            @timer = setTimeout @refresh, Math.min 200, parseInt 1000 * @scale
 
     refresh: => post.emit 'refresh'
+    
+    calc: ->
+        @width = @elem.clientWidth
+        @seconds = @song?.duration or 0
+        @scale = 2 * @width / @seconds
+        @pps = Math.max 1, parseInt @scale
+        # log '@pps', @pps, '@scale', @scale, 'adj', @width/(@seconds*@pps/2)
+        if @pps > 1
+            @scale = @width/(@seconds*@pps/2)
+    
     resized: =>
-        if @elem.clientWidth != @width
+        pps = @pps
+        @calc()
+        if pps != @pps
             reloadWave = => @showFile @file, @song
             clearTimeout @resizeTimer
             @resizeTimer = setTimeout reloadWave, 500
         
     showFile: (@file, @song) ->      
         outfile = path.join process.env.TMPDIR, 'krixWave.png'
-        @width = @elem.clientWidth
-        @seconds = @song?.duration or 0
-        @scale = 2 * @width / @seconds
-        log '@scale', @scale
-        @pps = Math.max 1, parseInt @scale
-        @scale = 1 if @scale > 1
-        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color 444444 -i \"#{@file}\" -o \"#{outfile}\""
+        @calc()
+        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{@file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
         @refresh()
         childp.exec cmmd, (err) =>
