@@ -16,13 +16,6 @@ class Ctrl
     constructor: (@view) ->
         
         @elem = document.createElement 'div'
-        @elem.style.position   = 'absolute'
-        @elem.style.top        = '0'
-        @elem.style.left       = '0'
-        @elem.style.right      = '0'
-        @elem.style.height     = '200px'
-        @elem.style.background = "#222"
-        @elem.style.overflow   = "hidden"
         @elem.classList.add 'ctrl'
         @view.appendChild @elem
         

@@ -39,7 +39,6 @@ class Tile
 
         img = document.createElement 'div'
         img.classList.add "tileImg"
-        img.style.display = 'inline-block'
         img.style.overflow = "hidden"
 
         sqr = document.createElement 'div'

@@ -3,7 +3,7 @@
 ### todo
 
 - apply folder cover to files
-
+- cache wave img
 
 ```sh
 

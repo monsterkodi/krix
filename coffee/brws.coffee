@@ -155,7 +155,7 @@ class Brws
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         
-        fontSize = Math.max 8, Math.min 20, @tileSize / 10
+        fontSize = Math.max 8, Math.min 18, @tileSize / 10
         style '.tiles .tileSqr', "font-size: #{fontSize}px"
         style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
 

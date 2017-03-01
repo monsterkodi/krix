@@ -5,13 +5,11 @@
 //      000     000        000     000    
 // 0000000      000        000     0000000
 
-scrollhandleWidth     = 6px
+tileSize              = 156
+frameWidth            = 6px
 frameColor            = #222
-frameWidth            = scrollhandleWidth
 frameBorder           = frameWidth solid frameColor
 titlebarHeight        = 22px
-titlebarFontSize      = 14px
-splithandleHeight     = 6px
 font                  = "Avenir Next", "Verdanda", sans-serif
 fontMono              = "Menlo", "Cousine", "Liberation Mono", "Andale Mono", monospace
 
@@ -55,7 +53,8 @@ body
     box-sizing          border-box
     background          #333
     color               #aaa
-    font-size           titlebarFontSize
+    font-size           13px
+    padding-top         2px
     padding-left        70px
     padding-right       70px
     white-space         nowrap
@@ -79,7 +78,7 @@ body
     
 .handle
     background          #222
-    height              splithandleHeight
+    height              frameWidth
     overflow            hidden
     position            relative
     
@@ -93,6 +92,20 @@ body
     background          #181818
     pointer-events      auto
 
+//    0000000  000000000  00000000   000    
+//   000          000     000   000  000    
+//   000          000     0000000    000    
+//   000          000     000   000  000    
+//    0000000     000     000   000  0000000
+
+.ctrl
+    position            absolute
+    top                 0
+    left                0
+    right               0
+    height              184px
+    background          #222
+    overflow            hidden
 
 // 000000000  000  000      00000000
 //    000     000  000      000     
@@ -102,13 +115,13 @@ body
 
 .tiles
     position            absolute
-    top                 200px
+    top                 184px
     left                0
     right               0
     bottom              0
     background          #000
     overflow-y          scroll
-    padding-top         10px
+    padding-left        frameWidth
 
 .tile                       
     display             inline-block
@@ -116,17 +129,14 @@ body
     margin              0
     
 .tiles .tile
-    margin-right        -11px
-    margin-top          -11px
+    margin-top               frameWidth
     
 .tileExpanded .tileName     
     color               #fa0
     
 .tilePad                    
     display             inline-block
-    padding             10px
-    padding-bottom      6px
-    border              1px solid transparent
+    padding             frameWidth
     border-radius       3px
     
 .tilePadFocus               
@@ -142,7 +152,7 @@ body
     background-color    #333
     
 .tileSqrDir                 
-    padding             5px
+    padding             frameWidth
     overflow            hidden
     border-radius       0px
     background-color    rgba(0,0,0,0.7)
@@ -154,10 +164,10 @@ body
     color               #88f
     
 .tileImgDir                 
-    border-radius       5px
+    border-radius       frameWidth
     
 .tileSqrFile                
-    padding             5px
+    padding             frameWidth
     overflow            hidden
     background-color    rgba(0,0,100,0.7)
 
@@ -184,11 +194,12 @@ body
 
 .song
     position            absolute
-    top                 10px
-    left                200px
-    bottom              10px
+    top                 frameWidth
+    left                189px
+    height              172px
     right               0
     background-color    #000
+    border-radius       3px
     
 .songInfo
     position            absolute
@@ -199,8 +210,8 @@ body
     
 .songElapsed
 .songDuration
-    padding-left        5px
-    padding-right       5px
+    padding-left        frameWidth
+    padding-right       frameWidth
     position            absolute
     font-size           14px
     font-weight         bold
@@ -210,19 +221,19 @@ body
 
 .songElapsed
     top                 0px
-    padding-top         5px
-    border-bottom-left-radius  5px
+    padding-top         frameWidth
+    border-bottom-left-radius  frameWidth
 
 .songDuration
-    border-top-left-radius     5px
+    border-top-left-radius     frameWidth
     bottom              0px
-    padding-bottom      5px
+    padding-bottom      frameWidth
 
 .wave
     position            absolute
-    top                 10px
+    top                 frameWidth
     left                182px
-    right               0
+    right               frameWidth
     height              160px
     overflow            hidden
     opacity             0.25
@@ -230,8 +241,8 @@ body
 .waveLine 
     position            absolute
     top                 0
+    bottom              0
     width               2px
-    height              180px
     background-color    rgba(255,255,255,0.14)
 
 .waveBlend
@@ -249,18 +260,22 @@ body
         
 .buttons
     position            absolute
-    bottom              10px
-    left                10px
-    width               200px
-    paddingTop          10px
+    top                 frameWidth
+    left                0
+    
 .button     
-    margin-top          5px
+    margin-top          frameWidth
+    vertical-align      bottom
     opacity             1.0
     color               #444
     background          #111
     padding             10px
-    border-radius       5px
-    margin-right        5px
+    padding-top         11px
+    padding-bottom      9px
+    border-radius       frameWidth
+    margin-right        frameWidth
+    min-width           20px
+    text-align          center
     display             inline-block
 .button:hover            
     color               #fff
@@ -270,28 +285,26 @@ body
     color               #fa0
 .buttonInactive     
     color               #444
-#random
-#home
-    margin-left         14px
-#song    
-    vertical-align      bottom
-#length    
-    vertical-align      top
-    margin-top          5px
+
 .label
     display             inline-block
     margin-left         10px
     padding             0
     color               #444
+    font-size           14px
+    font-weight         bold
 #play     
-    width               42px
-    margin-bottom       15px
+    width               50px
+    height              50px
+    
 #next     
+#prev
     width               30px
-    text-align          center
-#prev     
-    width               30px
-    text-align          center
+    
+#song
+#playlist
+    width               70px
+    
 
 //    0000000   000   000  000  00     00   0000000   000000000  000   0000000   000   000
 //   000   000  0000  000  000  000   000  000   000     000     000  000   000  0000  000
@@ -316,9 +329,9 @@ body
 // 0000000    0000000  000   000   0000000   0000000  0000000  0000000    000   000  000   000
 
 ::-webkit-scrollbar
-    width                   scrollhandleWidth
+    width                   frameWidth
 ::-webkit-scrollbar
-    height                  scrollhandleWidth  
+    height                  frameWidth  
     background-color        transparent
 
 ::-webkit-scrollbar-corner
