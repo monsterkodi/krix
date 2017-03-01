@@ -7,7 +7,6 @@
 ### todo
 
 - remember expand 
-- cache wave img
 - apply folder cover to files
 
 ```sh

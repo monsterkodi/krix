@@ -5,11 +5,12 @@
 #   000 0 000  000   000  000  000  0000
 #   000   000  000   000  000  000   000
 
-log  = require './tools/log'
-Brws = require './brws'
-Ctrl = require './ctrl'
-Play = require './play'
-post = require './post'
+keyinfo = require './tools/keyinfo'
+log     = require './tools/log'
+Brws    = require './brws'
+Ctrl    = require './ctrl'
+Play    = require './play'
+post    = require './post'
 
 class Main
     

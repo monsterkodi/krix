@@ -13,7 +13,8 @@ log = ->
 logScroll = -> 
     s = (str(s) for s in [].slice.call arguments, 0).join " "
     console.log s
-    childp.execSync "syslog -s -l Notice \"krix #{s.replace /\"/g, '\"'}\""
+    # msg = s.replace /([\`"'])/g, '\\$1'
+    # childp.execSync "syslog -s -l Notice \"krix #{msg}\""
     window.logview?.appendText s
 
 if window?

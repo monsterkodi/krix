@@ -68,23 +68,45 @@ class Wave
         pps = @pps
         @calc()
         if pps != @pps
-            reloadWave = => @showFile @file, @song
             clearTimeout @resizeTimer
+            reloadWave = => @showFile @file, @song
             @resizeTimer = setTimeout reloadWave, 500
         
     showFile: (@file, @song) ->      
-        outfile = path.join process.env.TMPDIR, 'krixWave.png'
-        @calc()
-        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{@file}\" -o \"#{outfile}\""
         @elem.style.backgroundImage = ""
-        @refresh()
+        @calc()
+        # @refresh() ???
+        if @pps == 1
+            waveFile = path.join path.dirname(@file), '.krix', path.basename(@file) + ".png"
+            fs.stat waveFile, (err, stat) =>
+                if !err? and stat.isFile()
+                    @elem.style.backgroundImage = "url('file://#{waveFile}')"
+                    @elem.style.backgroundSize = "100% 100%"
+                else
+                    @createWave waveFile, @showWave
+        else
+            waveFile = path.join process.env.TMPDIR, 'krixWave.png'
+            @createWave waveFile, @showWaveData
+            
+    createWave: (waveFile, cb) ->
+        inp = @file.replace /([\`"'])/g, '\\$1'
+        out = waveFile.replace /([\`"'])/g, '\\$1'
+        cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
         childp.exec cmmd, (err) =>
             if err?
                 log "[ERROR] can't create waveform for #{@file}", err.cmd
             else
-                fs.readFile outfile, (err, data) =>
-                    base = data.toString 'base64' 
-                    @elem.style.backgroundImage = "url('data:image/png;base64,#{base}')"
-                    @elem.style.backgroundSize = "100% 100%"
+                cb waveFile
+
+    showWave: (waveFile) =>
+        @elem.style.backgroundImage = "url('file://#{waveFile}')"
+        @elem.style.backgroundSize = "100% 100%"
+
+    showWaveData: (waveFile) =>
+        fs.readFile waveFile, (err, data) =>
+            if !err? and data?
+                base = data.toString 'base64' 
+                @elem.style.backgroundImage = "url('data:image/png;base64,#{base}')"
+                @elem.style.backgroundSize = "100% 100%"
         
 module.exports = Wave
