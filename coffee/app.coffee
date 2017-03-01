@@ -202,8 +202,8 @@ class Main
             y:               bounds.y
             width:           bounds.width
             height:          bounds.height
-            minWidth:        590
-            minHeight:       225
+            minWidth:        556
+            minHeight:       206
             useContentSize:  true
             fullscreenable:  true
             show:            false
