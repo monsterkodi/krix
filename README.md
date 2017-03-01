@@ -1,6 +1,6 @@
-![krix](img/banner.png)
+![krix](img/bannr.png)
 
-![screenshot](img/krix_1.png)
+![screenshot](img/krix1.png)
 
 ### wip
 
