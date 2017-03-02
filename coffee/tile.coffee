@@ -90,7 +90,7 @@ class Tile
     #    0000000   0000000       0      00000000  000   000
         
     setCover: (coverFile) ->
-        @pad.firstChild.style.backgroundImage = "url('file://#{encodePath(coverFile)}')"
+        @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @opt?.isUp
 
@@ -104,14 +104,11 @@ class Tile
             title.innerHTML = top
         
     setTag: (@tag) =>
-        sqr = @pad.firstChild.firstChild
         @setText @tag.artist, @tag.title
         if @isCurrentSong()
             post.emit 'titleSong', @tag
         if @tag.cover?
-            @pad.firstChild.style.backgroundImage = "url('file://#{encodePath(@tag.cover)}')"
-            @pad.firstChild.style.backgroundSize = "100% 100%"
-            sqr.classList.add 'tileSqrCover'
+            @setCover @tag.cover
 
     #   00000000  000  000      00000000
     #   000       000  000      000     
@@ -121,6 +118,7 @@ class Tile
    
     absFilePath: -> path.join Tile.musicDir, @file
     isFile: -> @opt?.isFile
+    isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
     isCurrentSong: -> @div.parentNode.classList.contains "song"
     isDir: -> not @isFile()
     krixDir:   -> 
@@ -154,11 +152,11 @@ class Tile
         post.removeListener 'unfocus', @unFocus
     
     setFocus: =>
-        if not @hasFocus()
+        if not @hasFocus() 
             post.emit 'unfocus'
             @pad.classList.add 'tilePadFocus'
             post.on 'unfocus', @unFocus
-            @pad.scrollIntoViewIfNeeded()
+            @pad.scrollIntoViewIfNeeded() if not @isParentClipping())
             post.emit 'tileFocus', @
        
     focusNeighbor: (nb) ->

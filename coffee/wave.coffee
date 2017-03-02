@@ -3,7 +3,9 @@
 # 000000000  000000000   000 000   0000000 
 # 000   000  000   000     000     000     
 # 00     00  000   000      0      00000000
-
+{
+encodePath
+}       = require './tools/tools'
 log     = require './tools/log'
 drag    = require './tools/drag'
 childp  = require 'child_process'
@@ -80,8 +82,7 @@ class Wave
             waveFile = path.join path.dirname(@file), '.krix', path.basename(@file) + ".png"
             fs.stat waveFile, (err, stat) =>
                 if !err? and stat.isFile()
-                    @elem.style.backgroundImage = "url('file://#{waveFile}')"
-                    @elem.style.backgroundSize = "100% 100%"
+                    @showWave waveFile
                 else
                     @createWave waveFile, @showWave
         else
@@ -89,17 +90,17 @@ class Wave
             @createWave waveFile, @showWaveData
             
     createWave: (waveFile, cb) ->
-        inp = @file.replace /([\`"'])/g, '\\$1'
-        out = waveFile.replace /([\`"'])/g, '\\$1'
+        inp = @file.replace /([\`"])/g, '\\$1'
+        out = waveFile.replace /([\`"])/g, '\\$1'
         cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
         childp.exec cmmd, (err) =>
             if err?
-                log "[ERROR] can't create waveform for #{@file}", err.cmd
+                log "[ERROR] can't create waveform for #{@file}", err
             else
                 cb waveFile
 
     showWave: (waveFile) =>
-        @elem.style.backgroundImage = "url('file://#{waveFile}')"
+        @elem.style.backgroundImage = "url(\"file://#{encodePath(waveFile)}\")"
         @elem.style.backgroundSize = "100% 100%"
 
     showWaveData: (waveFile) =>

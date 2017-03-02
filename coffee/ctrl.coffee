@@ -111,8 +111,8 @@ class Ctrl
     
     modKeyComboEventDown: (mod, key, combo, event) ->
         switch combo
-            when 'n' then post.emit 'nextSong'
-            when 'b' then post.emit 'prevSong'
+            when 'n', 'command+right' then post.emit 'nextSong'
+            when 'b', 'command+left'  then post.emit 'prevSong'
             when 'p' then post.emit 'toggle'
             when 'left', 'right'
                 if @song?.tile?.hasFocus()
