@@ -15,7 +15,7 @@ logScroll = ->
     console.log s
     # msg = s.replace /([\`"'])/g, '\\$1'
     # childp.execSync "syslog -s -l Notice \"krix #{msg}\""
-    window.logview?.appendText s
+    window.logview?.appendText?(s)
 
 if window?
     module.exports = logScroll

@@ -4,11 +4,9 @@
 # 000      000   000  000   000     000     000  000       000   000
 # 0000000   0000000    0000000       0      000  00000000  00     00
 
-{ $ } = require './tools/tools'
-
 class LogView 
 
-    constructor: (viewElem) -> @view = $(viewElem)
+    constructor: (@view) ->
 
     clear: -> @view.innerHTML = ""                
     

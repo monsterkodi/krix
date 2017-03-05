@@ -40,12 +40,9 @@ ipc.on 'setWinID', (event, id) =>
     window.browserWin = BrowserWindow.fromId id
     loadPrefs()
     window.titlebar = new Titlebar
-    window.main     = new Main $('.main')
-    window.logview  = new LogView '.logview'
+    window.main     = new Main $('main')
+    window.logview  = new LogView $('logview')
     window.split    = new Split()
-    split.on 'split', ->
-        window.main.resized()
-        window.logview.resized()
     window.split.resized()
         
 ipc.on 'saveBounds', saveBounds

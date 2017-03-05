@@ -6,6 +6,7 @@
 // 0000000      000        000     0000000
 
 tileSize              = 156
+ctrlHeight            = 184px
 frameWidth            = 6px
 frameColor            = #222
 frameBorder           = frameWidth solid frameColor
@@ -68,29 +69,28 @@ body
 //      000  000        000      000     000   
 // 0000000   000        0000000  000     000   
         
-.split
-    overflow            hidden
-    position            relative
+#split
     border-left         frameBorder
     border-right        frameBorder
-    border-bottom       frameBorder
     box-sizing          border-box
+    position            absolute
+    top                 titlebarHeight
+    left                0px
+    right               0px
+    bottom              0px
     
-.handle
-    background          #222
-    height              frameWidth
-    overflow            hidden
-    position            relative
+.gutter
+    background  #222
     
-.log
-    bottom              0
-    overflow            auto
+.gutter-vertical
+    cursor    row-resize
 
 .main
     position            relative
     overflow            hidden
     background          #181818
     pointer-events      auto
+    min-height          ctrlHeight
 
 //    0000000  000000000  00000000   000    
 //   000          000     000   000  000    
@@ -99,11 +99,7 @@ body
 //    0000000     000     000   000  0000000
 
 .ctrl
-    position            absolute
-    top                 0
-    left                0
-    right               0
-    height              184px
+    height              ctrlHeight
     background          #222
     overflow            hidden
 
@@ -114,16 +110,16 @@ body
 //    000     000  0000000  00000000
 
 .tiles
-    position            absolute
-    top                 184px
-    left                0
-    right               0
-    bottom              0
     background          #000
     overflow-y          scroll
     padding-top         frameWidth
     padding-left        frameWidth
     padding-bottom      frameWidth
+    position            absolute
+    top                 184px
+    bottom              0
+    left                0
+    right               0
 
 .tile                       
     display             inline-block
@@ -174,6 +170,8 @@ body
     font-size           12px
     overflow            scroll
     font-family         fontMono
+    border-bottom       frameWidth solid #222
+    box-sizing          border-box
 
 .main
     overflow            hidden

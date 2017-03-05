@@ -83,8 +83,8 @@ class Brws
         @tilesDir = path.join @musicDir, @dir
         @focusTile = null
         
-        num = prefs.get "tileNum:#{@tilesDir}", 0
-        if num != 0 and @tileNum != num
+        num = prefs.get "tileNum:#{@tilesDir}", -1
+        if num != -1 and @tileNum != num
             @setTileNum num
         
         if @dir.length and @dir != '.'
@@ -158,7 +158,8 @@ class Brws
         style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
-        @tileNum = Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), Math.max(1, Math.floor(num))
+        @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
+        log "setTileNum #{@tileNum} #{@tilesWidth()} #{num}"
         tileSize = parseInt (@tilesWidth()-8)/@tileNum-12
         prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize tileSize

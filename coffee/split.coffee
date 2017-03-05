@@ -3,17 +3,13 @@
 # 0000000   00000000   000      000     000   
 #      000  000        000      000     000   
 # 0000000   000        0000000  000     000   
-{
-clamp,
-sh,sw,
-last,
-$}    = require './tools/tools'
+
+{ $ } = require './tools/tools'
 log   = require './tools/log'
-pos   = require './tools/pos'
-drag  = require './tools/drag'
 prefs = require './prefs'
-_     = require 'lodash'
 event = require 'events'
+spljs = require 'split.js'
+
 
 class Split extends event
     
@@ -25,68 +21,28 @@ class Split extends event
     
     constructor: () ->
 
-        @handleHeight = 6
-        @logVisible   = undefined
+        @logVisible = undefined
         
-        @elem        = $('.split'      )
-        @titlebar    = $('.titlebar'   )
-        @handle      = $('.handle.log' )
-        @main        = $('.main'       )
-        @logview     = $('.logview'    )
+        @split = spljs ['#main', '#logview'], 
+            sizes:      [75, 25]
+            minSize:    [184, 0]
+            cursor:     'row-resize'
+            direction:  'vertical'
+            gutterSize: 6
+            snapOffset: 30
+            onDragEnd:  @resized
 
-        @splitPos    = 20000
-        @panes       = [@main, @logview]
-                            
-        @dragLog = new drag
-            target: @handle
-            cursor: 'ns-resize'
-            onStop: (drag) => @hideLog() if @splitPos > @elemHeight() - 50
-            onMove: (drag) => @splitAt clamp 200, @elemHeight(), drag.pos.y - @elemTop() - @handleHeight/2
-
-    #  0000000  00000000   000      000  000000000
-    # 000       000   000  000      000     000   
-    # 0000000   00000000   000      000     000   
-    #      000  000        000      000     000   
-    # 0000000   000        0000000  000     000   
-    
-    splitAt: (@splitPos) -> 
-        @panes[0].style.height = "#{@splitPos}px"
-        @panes[1].style.height = "#{@elemHeight() - @splitPos}px"
-
-        @setLogVisible (@elemHeight() - @splitPos) > 0
+        @setLogVisible prefs.get 'logvisible', false
             
-        @elem.scrollTop = 0
-        prefs.set 'split', @splitPos
-        @emit     'split', @splitPos        
-        
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000
     # 0000000    0000000   0000000   000    000    0000000   000   000
     # 000   000  000            000  000   000     000       000   000
     # 000   000  00000000  0000000   000  0000000  00000000  0000000  
-    
+
     resized: =>
-        height = sh()-@titlebar.getBoundingClientRect().height
-        width  = sw()
-        @elem.style.height = "#{height}px"
-        @elem.style.width  = "#{width}px"
-        @showLog() if prefs.get 'logvisible', false
-        @splitPos = @elemHeight() if not @logVisible
-        @splitAt clamp 200, @elemHeight(), @splitPos
-    
-    # 00000000    0000000    0000000          0000000  000  0000000  00000000
-    # 000   000  000   000  000         0    000       000     000   000     
-    # 00000000   000   000  0000000   00000  0000000   000    000    0000000 
-    # 000        000   000       000    0         000  000   000     000     
-    # 000         0000000   0000000          0000000   000  0000000  00000000
-    
-    elemTop:    -> @elem.getBoundingClientRect().top
-    elemHeight: -> @elem.getBoundingClientRect().height - @handleHeight
-    
-    paneHeight: (i) -> @panes[i].getBoundingClientRect().height
-        
-    mainHeight:     -> @paneHeight 0
-    logviewHeight:  -> @paneHeight 1
+        window.main.resized()
+        window.logview.resized()
     
     # 000       0000000    0000000 
     # 000      000   000  000      
@@ -100,20 +56,14 @@ class Split extends event
     setLogVisible: (v) ->
         if @logVisible != v
             @logVisible = v
-            display = v and 'inherit' or 'none'
-             
-            if v and @logviewHeight() <= 0
-                @splitAt clamp 200, @elemHeight() - 200, prefs.get 'split', @elemHeight()-200 
-            else if @logviewHeight() > 0 and not v
-                @splitAt @elemHeight()
 
-            @logview.style.display = display
-            @handle.style.display = display   
-                
-            window.main.resized()
-            window.logview.resized()
+            if @logVisible
+                @split.setSizes [70, 30]
+            else
+                @split.collapse 1
             
             prefs.set 'logvisible', v
+            @resized()
             
     clearLog: -> window.logview.clear()
     showOrClearLog: -> 

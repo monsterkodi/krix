@@ -27,6 +27,7 @@ dependencies
                 nconf           ^0.8.4
                 noon            ^1.0.13
                 opener          ^1.4.3
+                split.js        ^1.2.0
 devDependencies
                 appdmg          ^0.4.5
                 electron        ^1.4.15
