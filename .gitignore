@@ -4,3 +4,5 @@ package.json
 node_modules
 krix-darwin-x64
 *.html
+dmg.json
+krix.dmg

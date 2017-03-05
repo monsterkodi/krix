@@ -1,0 +1,14 @@
+title  krix
+icon   img/krix.icns
+background  img/dmg.png
+contents
+    .
+        x   416
+        y   94
+        type  link 
+        path  /Applications
+    .
+        x   94
+        y   94
+        type  file 
+        path  krix-darwin-x64/krix.app

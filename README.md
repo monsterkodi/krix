@@ -6,7 +6,6 @@
 
 ### todo
 
-- remember expand 
 - apply folder cover to files
 
 ```sh
