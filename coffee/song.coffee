@@ -46,7 +46,7 @@ class Song
     duration: (s) -> durt().format(parseInt s).replace(/^0+/, '').replace(/^:0?/, '')
         
     onStatus: (status) =>
-        if @song
+        if @song?.duration? and status?.elapsed?
             @infoElapsed.innerHTML = "#{@duration status.elapsed}"
             @infoDuration.innerHTML = "#{@duration @song.duration}"
         else

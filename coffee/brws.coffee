@@ -180,10 +180,12 @@ class Brws
     collapseAllTiles: -> 
         tiles = @getTiles()
         tile.collapse() for tile in tiles
+        prefs.del "expanded:#{@dir}"
             
     expandAllTiles: -> 
         tiles = @getTiles()
         tile.expand() for tile in tiles
+        prefs.set "expanded:#{@dir}", true
 
     # 000   000  00000000  000   000
     # 000  000   000        000 000 

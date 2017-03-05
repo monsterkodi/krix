@@ -63,14 +63,18 @@ class Play
             log '[ERROR] mpd client error:', err
         
     del: -> @mpc 'close'
-    
-    onRandom:     => @mpc 'random', [@status?.random == '0'    and '1' or '0']
-    onRepeat:     => @mpc 'repeat', [@status?.repeat == '0'    and '1' or '0']
-    onToggle:     => @mpc 'pause',  [@status?.state  == 'play' and '1' or '0']
-    onCurrent:    => @mpc 'currentsong', (info) -> post.emit 'currentSong', info 
-    onRefresh:    => @mpc 'status', (@status) => post.emit 'status', @status
-    onSeek: (pos) => @mpc 'seekcur', [pos]
-    
+
+    onToggle:        => 
+        if @status?.state == 'stop'
+            @mpc 'play'
+        else
+            @mpc 'pause',  [@status?.state  == 'play' and '1' or '0']
+                     
+    onRandom:        => @mpc 'random', [@status?.random == '0'    and '1' or '0']
+    onRepeat:        => @mpc 'repeat', [@status?.repeat == '0'    and '1' or '0']
+    onCurrent:       => @mpc 'currentsong', (info) -> post.emit 'currentSong', info 
+    onRefresh:       => @mpc 'status', (@status) => post.emit 'status', @status
+    onSeek: (pos)    => @mpc 'seekcur', [pos]    
     nextSong:        => @mpc 'next'
     prevSong:        => @mpc 'previous'        
     addFile:  (file) => @mpc "add", [file]

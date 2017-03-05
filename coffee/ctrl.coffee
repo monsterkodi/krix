@@ -18,12 +18,9 @@ class Ctrl
         @elem = document.createElement 'div'
         @elem.classList.add 'ctrl'
         @view.appendChild @elem
-        
         @song = new Song @elem
-        
-        post.on 'status', @onStatus
-        
         @initButtons()
+        post.on 'status', @onStatus
         
     del: -> @elem.remove()
 
@@ -95,11 +92,7 @@ class Ctrl
             clone.innerHTML = status.playlistlength
             node.parentNode.replaceChild clone, node
 
-        icon = switch status.state
-            when 'play' then 'pause'
-            when 'pause' then 'play'
-            else status.state
-        $('play').innerHTML = "<div class=\"fa fa-#{icon} fa-3x\"></div>"
+        $('play').innerHTML = "<div class=\"fa fa-#{status.state} fa-3x\"></div>"
 
     resized: => @song.resized()
 
@@ -110,13 +103,16 @@ class Ctrl
     # 000   000  00000000     000   
     
     modKeyComboEventDown: (mod, key, combo, event) ->
-        switch combo
-            when 'n', 'command+right' then post.emit 'nextSong'
-            when 'b', 'command+left'  then post.emit 'prevSong'
-            when 'p' then post.emit 'toggle'
-            when 'left', 'right'
-                if @song?.tile?.hasFocus()
-                    post.emit 'seek', key == 'left' and '-20' or '+20'
-                    
         
+        switch combo
+            when 'n' then post.emit 'nextSong'
+            when 'b' then post.emit 'prevSong'
+            when 'p' then post.emit 'toggle'
+                    
+        if @song?.tile?.hasFocus()
+            switch combo                    
+                when 'left', 'right' then post.emit 'seek', key == 'left' and '-20' or '+20'
+                when 'command+right' then post.emit 'nextSong'
+                when 'command+left'  then post.emit 'prevSong'
+                
 module.exports = Ctrl

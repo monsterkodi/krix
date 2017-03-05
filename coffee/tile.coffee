@@ -156,7 +156,7 @@ class Tile
             post.emit 'unfocus'
             @pad.classList.add 'tilePadFocus'
             post.on 'unfocus', @unFocus
-            @pad.scrollIntoViewIfNeeded() if not @isParentClipping())
+            @pad.scrollIntoViewIfNeeded() if not @isParentClipping()
             post.emit 'tileFocus', @
        
     focusNeighbor: (nb) ->
@@ -222,7 +222,7 @@ class Tile
             
         @walker.on 'done', =>
             if @children.length == 1
-                @focusNeighbor 'right'
+                @focusNeighbor 'right' if @hasFocus()
                 @del()
     
     addChild: (child) ->
