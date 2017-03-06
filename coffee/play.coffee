@@ -24,16 +24,18 @@ class Play
         
         @connect()
             
-        post.on 'playFile', @playFile
-        post.on 'addFile',  @addFile
-        post.on 'nextSong', @nextSong
-        post.on 'prevSong', @prevSong
-        post.on 'current',  @onCurrent
-        post.on 'toggle',   @onToggle
-        post.on 'random',   @onRandom
-        post.on 'repeat',   @onRepeat
-        post.on 'seek',     @onSeek
-        post.on 'refresh',  @onRefresh
+        post.on 'playFile',     @playFile
+        post.on 'delPlaylist',  @delPlaylist
+        post.on 'playPlaylist', @playPlaylist
+        post.on 'addFile',      @addFile
+        post.on 'nextSong',     @nextSong
+        post.on 'prevSong',     @prevSong
+        post.on 'current',      @onCurrent
+        post.on 'toggle',       @onToggle
+        post.on 'random',       @onRandom
+        post.on 'repeat',       @onRepeat
+        post.on 'seek',         @onSeek
+        post.on 'refresh',      @onRefresh
         
     connect: =>
         
@@ -80,13 +82,28 @@ class Play
     addFile:  (file) => @mpc "add", [file]
     playFile: (file) =>
         @mpcc?.sendCommands ['clear', mpd.cmd('add', [file]), 'play'], (err, msg) ->
-            if err?
-                log "[ERROR] mpc command list failed:", err
+            log "[ERROR] playFile failed:", err if err?
 
+    delPlaylist: (playlist, cb) => @mpc 'rm', [playlist], cb
+                
+    playPlaylist: (playlist) => 
+        @mpcc?.sendCommands ['clear', mpd.cmd('load', [playlist]), 'play'], (err, msg) ->
+            log "[ERROR] playPlaylist failed:", err if err?
+
+    @newPlaylist: (name, cb) -> Play.instance.newPlaylist name, cb
+    newPlaylist: (name, cb) ->
+        @mpcc?.sendCommand mpd.cmd('save', [name]), (err, msg) =>
+            if err?
+                log 'saving playlist failed', err
+                @newPlaylist name+'_', cb
+            else
+                cb? name
+            
     onServerChange: (change) =>
         if change =='player' then @onCurrent()
         @onRefresh()
-    
+        
+    @mpc: (cmmd, args=[], cb=null) -> Play.instance.mpc cmmd, args, cb
     mpc: (cmmd, args=[], cb=null) -> 
         if _.isFunction args
             cb = args
@@ -95,12 +112,18 @@ class Play
             if err?
                 log "[ERROR] mpc command failed: #{cmmd} #{args}", err
             else
-                if cmmd == 'playlistinfo'
+                if cmmd in ['playlistinfo', 'listplaylist']
                     files = []
                     for l in msg.split '\n'
                         if l.startsWith 'file: '
                             files.push l.substr 6
                     cb? files
+                else if cmmd == 'listplaylists'
+                    lists = []
+                    for l in msg.split '\n'
+                        if l.startsWith 'playlist: '
+                            lists.push l.substr 10
+                    cb? lists
                 else
                     cb? mpd.parseKeyValueMessage msg
         

@@ -116,6 +116,15 @@ class Brws
         @walker.on 'done', =>
             if prefs.get "expanded:#{@dir}", false
                 @expandAllTiles()
+                
+            if @tilesDir == @musicDir
+                @loadPlaylists()
+
+    loadPlaylists: ->                
+        Play.mpc 'listplaylists', (playlists) =>
+            for list in playlists
+                tile = new Tile list, @tiles, playlist: list
+                tile.setText list
      
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
     
@@ -125,13 +134,21 @@ class Brws
     #   000        000      000   000     000     000      000       000     000   
     #   000        0000000  000   000     000     0000000  000  0000000      000   
         
-    showPlaylist: (song) =>
-        Play.instance.mpc 'playlistinfo', (playlist) =>
-            @clear()
-            queue playlist, timeout: 1, cb: (file) =>
-                tile = new Tile file, @tiles, isFile: true
-                if file == song?.file
-                    tile.setFocus()
+    showPlaylist: (playlist, song) =>
+        if playlist == ''
+            Play.instance.mpc 'playlistinfo', (playlist) =>
+                @clear()
+                queue playlist, timeout: 1, cb: (file) =>
+                    tile = new Tile file, @tiles, isFile: true
+                    if file == song?.file
+                        tile.setFocus()
+        else
+            Play.instance.mpc 'listplaylist', [playlist], (playlist) =>
+                @clear()
+                queue playlist, timeout: 1, cb: (file) =>
+                    tile = new Tile file, @tiles, isFile: true
+                    if file == song?.file
+                        tile.setFocus()
         
     # 000000000  000  000      00000000   0000000
     #    000     000  000      000       000     
@@ -206,6 +223,10 @@ class Brws
                                 del imgs.cache[coverFile]
                                 tile.setCover coverFile
 
+    createPlaylist: (name='new playlist') ->
+        Play.newPlaylist name, (playlist) ->
+            log 'created new playlist', playlist
+
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  
@@ -216,6 +237,7 @@ class Brws
         focusTile = @getFocusTile()
         switch combo
             when 'command+v' then @pasteCover()
+            when 'command+n' then @createPlaylist()
             when 'command+u' 
                 tags.pruneCache()
                 imgs.pruneCache()

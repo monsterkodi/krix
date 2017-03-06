@@ -15,7 +15,7 @@ class Walk extends EventEmitter
         fs.readdir @dir, @listFiles
     
     listFiles: (err, files) =>
-        while file = files.shift()
+        while file = files?.shift?()
             absPath = path.join @dir, file
             func = (w,p,c) -> (err,stat) -> 
                 w.emitFile p, stat

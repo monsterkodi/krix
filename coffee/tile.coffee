@@ -76,7 +76,7 @@ class Tile
         @div.addEventListener "dblclick", @onDblClick
         @div.addEventListener "mouseenter", @onEnter
 
-    del: ->
+    del: =>
         if @div?
             @div.removeEventListener "click", @onClick
             @div.removeEventListener "dblclick", @onDblClick
@@ -121,7 +121,8 @@ class Tile
     isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
     isCurrentSong: -> @div.parentNode.classList.contains "song"
     isDir: -> not @isFile()
-    krixDir:   -> 
+    isPlaylist: -> @opt?.playlist?
+    krixDir: -> 
         if @isFile()
             path.join path.dirname(@absFilePath()), '.krix'
         else
@@ -129,6 +130,9 @@ class Tile
     coverFile: -> path.join @krixDir(), "cover.jpg" 
 
     delete: -> 
+        if @isPlaylist()
+            post.emit 'delPlaylist', @file, @del
+            return
         fs.rename @absFilePath(), path.join(resolve('~/.Trash'), path.basename(@absFilePath())), (err) => 
             if err
                 log "[ERROR] trashing file #{@absFilePath()} failed!", err
@@ -236,8 +240,14 @@ class Tile
         while child = @children?.pop()
             child.del()
         
-    play: -> post.emit 'playFile', @file
+    play: -> 
+        if @isPlaylist()
+            post.emit 'playPlaylist', @file
+        else
+            post.emit 'playFile', @file
     open: -> 
+        if @isPlaylist()
+            post.emit 'playlist', @file
         if @isDir()
             post.emit 'loadDir', (@opt?.openDir or @file), @file
         

@@ -47,7 +47,7 @@ class Ctrl
         @buttons.appendChild document.createElement 'br'
         @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
         @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
-        @button id: 'playlist', icon: 'bars fa-1x',          cb: => post.emit 'playlist', @song.song
+        @button id: 'playlist', icon: 'bars fa-1x',          cb: => post.emit 'playlist', '', @song.song
         @label  id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->
