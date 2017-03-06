@@ -25,7 +25,7 @@ class Main
         post.emit 'refresh'
         
         @view.focus()
-        @view.onkeydown = @onKeyDown
+        @view.addEventListener 'keydown', @onKeyDown, false
     
     onKeyDown: (event) =>
         {mod, key, combo} = keyinfo.forEvent event

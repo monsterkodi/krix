@@ -7,8 +7,8 @@
 {
 encodePath,
 resolve,
-last
-}     = require './tools/tools'
+last,
+$}    = require './tools/tools'
 log   = require './tools/log'
 post  = require './post'
 tags  = require './tags'
@@ -64,6 +64,7 @@ class Tile
         else if @isPlaylist()
             tit.innerHTML = @file
             tit.classList.add 'tileName'
+            tit.addEventListener 'click', @onTitleClick
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
@@ -87,11 +88,11 @@ class Tile
         @unFocus() if @hasFocus()
         @div?.remove()
         
-    #    0000000   0000000   000   000  00000000  00000000 
-    #   000       000   000  000   000  000       000   000
-    #   000       000   000   000 000   0000000   0000000  
-    #   000       000   000     000     000       000   000
-    #    0000000   0000000       0      00000000  000   000
+    #  0000000   0000000   000   000  00000000  00000000 
+    # 000       000   000  000   000  000       000   000
+    # 000       000   000   000 000   0000000   0000000  
+    # 000       000   000     000     000       000   000
+    #  0000000   0000000       0      00000000  000   000
         
     setCover: (coverFile) ->
         @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
@@ -114,18 +115,19 @@ class Tile
         if @tag.cover?
             @setCover @tag.cover
 
-    #   00000000  000  000      00000000
-    #   000       000  000      000     
-    #   000000    000  000      0000000 
-    #   000       000  000      000     
-    #   000       000  0000000  00000000
+    # 00000000  000  000      00000000
+    # 000       000  000      000     
+    # 000000    000  000      0000000 
+    # 000       000  000      000     
+    # 000       000  0000000  00000000
    
-    absFilePath: -> path.join Tile.musicDir, @file
     isFile: -> @opt?.isFile
+    isPlaylist: -> @opt?.playlist?
+    isDir: -> not @isFile() and not @isPlaylist()
+    
+    absFilePath: -> path.join Tile.musicDir, @file
     isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
     isCurrentSong: -> @div.parentNode.classList.contains "song"
-    isDir: -> not @isFile() and not @isPlaylist()
-    isPlaylist: -> @opt?.playlist?
     krixDir: -> 
         if @isFile()
             path.join path.dirname(@absFilePath()), '.krix'
@@ -155,11 +157,11 @@ class Tile
         if @isFile() then @play()
         else @open()
                 
-    #   00000000   0000000    0000000  000   000   0000000
-    #   000       000   000  000       000   000  000     
-    #   000000    000   000  000       000   000  0000000 
-    #   000       000   000  000       000   000       000
-    #   000        0000000    0000000   0000000   0000000 
+    # 00000000   0000000    0000000  000   000   0000000
+    # 000       000   000  000       000   000  000     
+    # 000000    000   000  000       000   000  0000000 
+    # 000       000   000  000       000   000       000
+    # 000        0000000    0000000   0000000   0000000 
             
     hasFocus: -> @pad.classList.contains 'tilePadFocus'
         
@@ -205,11 +207,11 @@ class Tile
                     div
         div?.tile or @
 
-    #   00000000  000   000  00000000    0000000   000   000  0000000  
-    #   000        000 000   000   000  000   000  0000  000  000   000
-    #   0000000     00000    00000000   000000000  000 0 000  000   000
-    #   000        000 000   000        000   000  000  0000  000   000
-    #   00000000  000   000  000        000   000  000   000  0000000  
+    # 00000000  000   000  00000000    0000000   000   000  0000000  
+    # 000        000 000   000   000  000   000  0000  000  000   000
+    # 0000000     00000    00000000   000000000  000 0 000  000   000
+    # 000        000 000   000        000   000  000  0000  000   000
+    # 00000000  000   000  000        000   000  000   000  0000000  
 
     isExpanded: -> @children?.length
 
@@ -253,39 +255,58 @@ class Tile
             child.del()
         
     play: -> 
-        if @isPlaylist()
-            post.emit 'playPlaylist', @file
-        else
-            post.emit 'playFile', @file
-    open: -> 
-        if @isPlaylist()
-            post.emit 'playlist', @file
-        if @isDir()
-            post.emit 'loadDir', (@opt?.openDir or @file), @file
+        if @isPlaylist() then post.emit 'playPlaylist', @file
+        else                  post.emit 'playFile',    @file
+    open: ->
+        if @isPlaylist() then post.emit 'playlist', @file
+        if @isDir()      then post.emit 'loadDir', (@opt?.openDir or @file), @file
         
     showInFinder: -> post.emit 'showFile', @file
             
     add:  -> post.emit 'addFile',  @file
        
-    #   00     00   0000000   000   000   0000000  00000000
-    #   000   000  000   000  000   000  000       000     
-    #   000000000  000   000  000   000  0000000   0000000 
-    #   000 0 000  000   000  000   000       000  000     
-    #   000   000   0000000    0000000   0000000   00000000
+    # 00     00   0000000   000   000   0000000  00000000
+    # 000   000  000   000  000   000  000       000     
+    # 000000000  000   000  000   000  0000000   0000000 
+    # 000 0 000  000   000  000   000       000  000     
+    # 000   000   0000000    0000000   0000000   00000000
        
     onHover: =>
         return if Tile.scrollLock
         @setFocus()
        
     onDblClick: => 
-        if @isDir() or @isPlaylist()
-            @open()
-        else
-            @play()
+        if @isFile() then @play()
+        else @open()
             
     onClick: => 
         @setFocus()
         if event.shiftKey
             @add()
+    
+    # 000000000  000  000000000  000      00000000  
+    #    000     000     000     000      000       
+    #    000     000     000     000      0000000   
+    #    000     000     000     000      000       
+    #    000     000     000     0000000  00000000  
+            
+    onTitleClick: =>
+        return if @input?
+        title = $('.tileName', @div)
+        title.innerHTML = ""
+        @input = document.createElement 'input'
+        @input.classList.add 'tileInput'
+        title.appendChild @input
+        @input.addEventListener 'change', @onTitleChange
+        @input.addEventListener 'keydown', (event) -> event.stopImmediatePropagation()
+        @input.focus()
+
+    onTitleChange: (event) =>
+        event.stopPropagation()
+        post.emit 'renamePlaylist', @file, event.target.value
+        title = $('.tileName', @div)
+        title.innerHTML = event.target.value
+        delete @input
+        $('main').focus()
                 
 module.exports = Tile

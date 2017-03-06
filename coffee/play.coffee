@@ -24,18 +24,19 @@ class Play
         
         @connect()
             
-        post.on 'playFile',     @playFile
-        post.on 'delPlaylist',  @delPlaylist
-        post.on 'playPlaylist', @playPlaylist
-        post.on 'addFile',      @addFile
-        post.on 'nextSong',     @nextSong
-        post.on 'prevSong',     @prevSong
-        post.on 'current',      @onCurrent
-        post.on 'toggle',       @onToggle
-        post.on 'random',       @onRandom
-        post.on 'repeat',       @onRepeat
-        post.on 'seek',         @onSeek
-        post.on 'refresh',      @onRefresh
+        post.on 'playFile',       @playFile
+        post.on 'delPlaylist',    @delPlaylist
+        post.on 'playPlaylist',   @playPlaylist
+        post.on 'renamePlaylist', @renamePlaylist
+        post.on 'addFile',        @addFile
+        post.on 'nextSong',       @nextSong
+        post.on 'prevSong',       @prevSong
+        post.on 'current',        @onCurrent
+        post.on 'toggle',         @onToggle
+        post.on 'random',         @onRandom
+        post.on 'repeat',         @onRepeat
+        post.on 'seek',           @onSeek
+        post.on 'refresh',        @onRefresh
         
     connect: =>
         @client = mpd.connect port: 6600, host: 'localhost'
@@ -84,6 +85,8 @@ class Play
         @mpcc?.sendCommands ['clear', mpd.cmd('add', [file]), 'play'], (err, msg) ->
             log "[ERROR] playFile failed:", err if err?
 
+    renamePlaylist: (oldName, newName) => @mpc 'rename', [oldName, newName]
+    
     delPlaylist: (playlist, cb) => @mpc 'rm', [playlist], cb
                 
     playPlaylist: (playlist) => 

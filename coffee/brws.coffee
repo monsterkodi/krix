@@ -61,8 +61,8 @@ class Brws
     # 0000000   0000000   000   000  0000000  
 
     goUp: => 
-        if @isPlaylist()
-            @loadDir '', @file
+        if @playlist
+            @loadDir '', @playlist
         else
             @loadDir path.dirname(@dir), @dir
         
@@ -83,9 +83,38 @@ class Brws
             '-e', 'activate',
             '-e', 'end tell']
         childp.spawn 'osascript', args
+
+    # 00000000   000       0000000   000   000  000      000   0000000  000000000
+    # 000   000  000      000   000   000 000   000      000  000          000   
+    # 00000000   000      000000000    00000    000      000  0000000      000   
+    # 000        000      000   000     000     000      000       000     000   
+    # 000        0000000  000   000     000     0000000  000  0000000      000   
         
+    showPlaylist: (@playlist, song) =>
+        delete @dir
+        if @playlist == ''
+            Play.instance.mpc 'playlistinfo', (playlist) =>
+                @clear()
+                queue playlist, timeout: 1, cb: (file) =>
+                    tile = new Tile file, @tiles, isFile: true
+                    if file == song?.file
+                        tile.setFocus()
+        else
+            Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
+                @clear()
+                queue playlist, timeout: 1, cb: (file) =>
+                    tile = new Tile file, @tiles, isFile: true
+                    if file == song?.file
+                        tile.setFocus()
+        
+    # 000       0000000    0000000   0000000    0000000    000  00000000   
+    # 000      000   000  000   000  000   000  000   000  000  000   000  
+    # 000      000   000  000000000  000   000  000   000  000  0000000    
+    # 000      000   000  000   000  000   000  000   000  000  000   000  
+    # 0000000   0000000   000   000  0000000    0000000    000  000   000  
+    
     loadDir: (@dir, highlightFile) =>
-        
+        delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
         @focusTile = null
@@ -138,29 +167,7 @@ class Brws
                 tile.setText list
      
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
-    
-    #   00000000   000       0000000   000   000  000      000   0000000  000000000
-    #   000   000  000      000   000   000 000   000      000  000          000   
-    #   00000000   000      000000000    00000    000      000  0000000      000   
-    #   000        000      000   000     000     000      000       000     000   
-    #   000        0000000  000   000     000     0000000  000  0000000      000   
-        
-    showPlaylist: (playlist, song) =>
-        if playlist == ''
-            Play.instance.mpc 'playlistinfo', (playlist) =>
-                @clear()
-                queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true
-                    if file == song?.file
-                        tile.setFocus()
-        else
-            Play.instance.mpc 'listplaylist', [playlist], (playlist) =>
-                @clear()
-                queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true
-                    if file == song?.file
-                        tile.setFocus()
-        
+            
     # 000000000  000  000      00000000   0000000
     #    000     000  000      000       000     
     #    000     000  000      0000000   0000000 
