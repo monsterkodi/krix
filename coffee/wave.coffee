@@ -4,7 +4,8 @@
 # 000   000  000   000     000     000     
 # 00     00  000   000      0      00000000
 {
-encodePath
+encodePath,
+escapePath
 }       = require './tools/tools'
 log     = require './tools/log'
 drag    = require './tools/drag'
@@ -77,7 +78,6 @@ class Wave
     showFile: (@file, @song) ->      
         @elem.style.backgroundImage = ""
         @calc()
-        # @refresh() ???
         if @pps == 1
             waveFile = path.join path.dirname(@file), '.krix', path.basename(@file) + ".png"
             fs.stat waveFile, (err, stat) =>
@@ -90,15 +90,33 @@ class Wave
             @createWave waveFile, @showWaveData
             
     createWave: (waveFile, cb) ->
-        inp = @file.replace /([\`"])/g, '\\$1'
-        out = waveFile.replace /([\`"])/g, '\\$1'
+        inp = escapePath @file
+        out = escapePath waveFile
         cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
         childp.exec cmmd, (err) =>
             if err?
-                log "[ERROR] can't create waveform for #{@file}", err
+                # log "[ERROR] can't create waveform for #{@file}", err
+                @convertWav waveFile, cb
             else
                 cb waveFile
 
+    convertWav: (waveFile, cb) ->
+        inp  = escapePath @file
+        out  = path.join process.env.TMPDIR, 'krixWave.wav'
+        cmmd = "/usr/local/bin/ffmpeg -y -i \"#{inp}\" \"#{out}\""
+        childp.exec cmmd, (err) =>
+            if err?
+                log "[ERROR] can't convert #{inp} to #{out}", err
+            else
+                inp = out
+                out = escapePath waveFile
+                cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
+                childp.exec cmmd, (err) =>
+                    if err?
+                        log "[ERROR] can't create waveform for #{inp}", err
+                    else
+                        cb waveFile
+        
     showWave: (waveFile) =>
         @elem.style.backgroundImage = "url(\"file://#{encodePath(waveFile)}\")"
         @elem.style.backgroundSize = "100% 100%"

@@ -12,7 +12,6 @@ fs           = require 'fs'
 class Walk extends EventEmitter
     
     constructor: (@dir) ->
-        # log 'walk', @dir
         fs.readdir @dir, @listFiles
     
     listFiles: (err, files) =>

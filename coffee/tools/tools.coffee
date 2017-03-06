@@ -104,6 +104,8 @@ module.exports =
     unresolve: (p) -> p.replace os.homedir(), "~"    
     fileName:  (p) -> path.basename p, path.extname p
     extName:   (p) -> path.extname(p).slice 1
+    
+    escapePath: (p) -> p.replace /([\`"])/g, '\\$1'
 
     encodePath: (p) ->
         p = encodeURI p

@@ -115,7 +115,6 @@ class Brws
         @walker.on 'done', =>
             if prefs.get "expanded:#{@dir}", false
                 @expandAllTiles()
-                # setTimeout @expandAllTiles, 100
      
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
     
@@ -126,8 +125,8 @@ class Brws
     #   000        0000000  000   000     000     0000000  000  0000000      000   
         
     showPlaylist: (song) =>
-        @clear()
         Play.instance.mpc 'playlistinfo', (playlist) =>
+            @clear()
             queue playlist, timeout: 1, cb: (file) =>
                 tile = new Tile file, @tiles, isFile: true
                 if file == song?.file
@@ -159,7 +158,7 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
-        log "setTileNum #{@tileNum} #{@tilesWidth()} #{num}"
+        # log "setTileNum #{@tileNum} #{@tilesWidth()} #{num}"
         tileSize = parseInt (@tilesWidth()-8)/@tileNum-12
         prefs.set "tileNum:#{@tilesDir}", @tileNum
         @setTileSize tileSize
