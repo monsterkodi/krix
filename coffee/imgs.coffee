@@ -20,7 +20,6 @@ class Imgs
     @pruneCache: -> 
         for key in Object.keys @cache
             delete @cache[key] if @cache[key] == false
-            
     
     @clearQueue: -> @queue = []
     

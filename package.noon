@@ -1,6 +1,6 @@
 name            krix
 productName     krix
-version         0.1.0
+version         0.2.0
 description     minimal music player / mpd client
 license         Unlicense
 main            js/app.js

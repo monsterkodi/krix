@@ -212,10 +212,12 @@ class Tile
         @walker = new walk @absFilePath()
         
         @walker.on 'file', (file) =>
+            return if not @div.parentNode?
             return if path.basename(file).startsWith '.'
             @addChild new Tile file, @div.parentNode, isFile: true
             
         @walker.on 'directory', (dir) =>
+            return if not @div.parentNode?
             dirname = path.basename(dir)
             return if dirname.startsWith('.') or dirname == 'iTunes'
             @addChild new Tile dir, @div.parentNode, openDir: dir

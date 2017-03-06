@@ -51,7 +51,7 @@ class Ctrl
         @label  id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->
-        labl = document.createElement 'div'
+        labl = document.createElement 'span'
         labl.id = opt.id
         labl.classList.add 'label'
         labl.classList.add 'highlight'
@@ -63,7 +63,7 @@ class Ctrl
         bttn.classList.add 'button'
         
         if opt.icon
-            bttn.innerHTML = "<div class=\"fa fa-#{opt.icon}\"></div>"
+            bttn.innerHTML = "<span class=\"fa fa-#{opt.icon}\"></span>"
         else
             bttn.innerHTML = opt.text or opt.id
             

@@ -10,6 +10,7 @@ queue
 }      = require './tools/tools'
 fs     = require 'fs'
 path   = require 'path'
+mkpath = require 'mkpath'
 childp = require 'child_process'
 _      = require 'lodash'
 log    = require './tools/log'
@@ -187,6 +188,24 @@ class Brws
         tile.expand() for tile in tiles
         prefs.set "expanded:#{@dir}", true
 
+    pasteCover: ->
+        tile = @getFocusTile()
+        if tile?.isDir()
+            electron = require 'electron'
+            clipboard = electron.clipboard
+            image = clipboard.readImage()
+            data = image.toJPEG 95
+            if data.length
+                mkpath tile.krixDir(), (err) =>
+                    if err?
+                        log "[ERROR] can't create .krix folder for", tile.file
+                    else
+                        coverFile = path.join(tile.krixDir(), 'cover.jpg')
+                        fs.writeFile coverFile, data, (err) =>
+                            if !err?
+                                del imgs.cache[coverFile]
+                                tile.setCover coverFile
+
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  
@@ -196,6 +215,7 @@ class Brws
     modKeyComboEventDown: (mod, key, combo, event) ->
         focusTile = @getFocusTile()
         switch combo
+            when 'command+v' then @pasteCover()
             when 'command+u' 
                 tags.pruneCache()
                 imgs.pruneCache()
