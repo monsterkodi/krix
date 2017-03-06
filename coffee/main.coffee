@@ -19,7 +19,7 @@ class Main
         @ctrl = new Ctrl @view
         @brws = new Brws @view
         @play = new Play
-        @brws.loadDir ""
+        @brws.loadDir ''
         
         post.emit 'current'
         post.emit 'refresh'

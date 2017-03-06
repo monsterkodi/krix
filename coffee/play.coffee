@@ -38,7 +38,6 @@ class Play
         post.on 'refresh',      @onRefresh
         
     connect: =>
-        
         @client = mpd.connect port: 6600, host: 'localhost'
         @client.on 'error',  @onClientError
         @client.on 'system', @onServerChange
@@ -49,6 +48,7 @@ class Play
         @mpcc = @client
         @onRefresh()
         @onCurrent()
+        post.emit 'connected'
         
     onClientError: (err) =>
         if err.code == 'ECONNREFUSED'

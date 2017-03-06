@@ -54,15 +54,19 @@ class Tile
             art.classList.add 'tileArtist'
             art.innerHTML = path.basename @file
             tit.classList.add 'tileTrack'
-            img.style.backgroundColor = "rgba(0,0,100,0.5)"
             sqr.classList.add "tileSqrFile"
-        else
+        else if @isDir()
             tit.innerHTML = path.basename @file
             tit.classList.add 'tileName'
-            img.style.backgroundColor = "rgba(0,0,0,0.5)"
             img.classList.add "tileImgDir"
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
+        else if @isPlaylist()
+            tit.innerHTML = @file
+            tit.classList.add 'tileName'
+            img.classList.add "tileImgPlaylist"
+            sqr.classList.add "tileSqrPlaylist"
+            @pad.classList.add "tilePadPlaylist"
              
         @pad.appendChild img
         elem.appendChild @div
@@ -74,7 +78,7 @@ class Tile
             
         @div.addEventListener "click", @onClick
         @div.addEventListener "dblclick", @onDblClick
-        @div.addEventListener "mouseenter", @onEnter
+        @div.addEventListener "mouseenter", @onHover
 
     del: =>
         if @div?
@@ -120,7 +124,7 @@ class Tile
     isFile: -> @opt?.isFile
     isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
     isCurrentSong: -> @div.parentNode.classList.contains "song"
-    isDir: -> not @isFile()
+    isDir: -> not @isFile() and not @isPlaylist()
     isPlaylist: -> @opt?.playlist?
     krixDir: -> 
         if @isFile()
@@ -142,6 +146,14 @@ class Tile
                 else
                     @focusNeighbor 'right'
                     @del()
+
+    commandEnter: -> 
+        if @isFile() then @showInFinder()
+        else @play()
+    
+    enter: ->
+        if @isFile() then @play()
+        else @open()
                 
     #   00000000   0000000    0000000  000   000   0000000
     #   000       000   000  000       000   000  000     
@@ -202,11 +214,11 @@ class Tile
     isExpanded: -> @children?.length
 
     expand: ->
-        return if @isFile() or @isExpanded() or @opt?.isUp
+        return if not @isDir() or @isExpanded() or @opt?.isUp
         @doExpand()
             
     collapse: ->
-        return if @isFile() or not @isExpanded() or @opt?.isUp
+        return if not @isDir() or not @isExpanded() or @opt?.isUp
         @doCollapse()
 
     doExpand: =>
@@ -261,12 +273,12 @@ class Tile
     #   000 0 000  000   000  000   000       000  000     
     #   000   000   0000000    0000000   0000000   00000000
        
-    onEnter: =>
+    onHover: =>
         return if Tile.scrollLock
         @setFocus()
        
     onDblClick: => 
-        if @isDir()
+        if @isDir() or @isPlaylist()
             @open()
         else
             @play()

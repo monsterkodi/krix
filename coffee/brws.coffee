@@ -50,6 +50,7 @@ class Brws
         post.on 'showFile',  @showFile
         post.on 'home',      @goHome
         post.on 'up',        @goUp
+        post.on 'connected', @connected
         
     del: -> @tiles.remove()
         
@@ -59,7 +60,12 @@ class Brws
     # 000      000   000  000   000  000   000
     # 0000000   0000000   000   000  0000000  
 
-    goUp:   => @loadDir path.dirname(@dir), @dir
+    goUp: => 
+        if @isPlaylist()
+            @loadDir '', @file
+        else
+            @loadDir path.dirname(@dir), @dir
+        
     goHome: => @loadDir ''
 
     clear: ->
@@ -120,7 +126,12 @@ class Brws
             if @tilesDir == @musicDir
                 @loadPlaylists()
 
-    loadPlaylists: ->                
+    connected: =>
+        log 'loadPlaylists'
+        post.removeListener 'connected', @loadPlaylists
+        @loadPlaylists()
+        
+    loadPlaylists: ->
         Play.mpc 'listplaylists', (playlists) =>
             for list in playlists
                 tile = new Tile list, @tiles, playlist: list
@@ -242,6 +253,8 @@ class Brws
                 tags.pruneCache()
                 imgs.pruneCache()
                 @loadDir @dir
+            when 'command+enter' then focusTile.commandEnter()
+            when 'enter'         then focusTile.enter()
         switch key
             when '-'         then @setTileNum @tileNum + 1
             when '='         then @setTileNum @tileNum - 1
@@ -263,12 +276,5 @@ class Brws
                     @collapseAllTiles()
                 else
                     focusTile.focusNeighbor key
-            when 'enter' 
-                if focusTile.isDir()
-                    if combo == 'enter' then focusTile.open()
-                    else focusTile.play()
-                else
-                    if combo == 'enter' then focusTile.play()
-                    else focusTile.showInFinder()
         
 module.exports = Brws

@@ -70,7 +70,7 @@ class Wave
     resized: =>
         pps = @pps
         @calc()
-        if pps != @pps
+        if @file and pps != @pps
             clearTimeout @resizeTimer
             reloadWave = => @showFile @file, @song
             @resizeTimer = setTimeout reloadWave, 500
