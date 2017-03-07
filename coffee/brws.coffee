@@ -90,27 +90,33 @@ class Brws
     # 000        000      000   000     000     000      000       000     000   
     # 000        0000000  000   000     000     0000000  000  0000000      000   
         
-    showPlaylist: (@playlist, song) =>
+    showPlaylist: (@playlist, @highlight) =>
         
-        delete @dir
-        
+        delete @dir        
         @clear()
+        @focusTile = null
+        
+        num = prefs.get "tileNum:#{@playlist}", -1
+        if num != -1 and @tileNum != num
+            @setTileNum num
+        
         tile = new Tile @playlist, @tiles, 
             playlist: @playlist
             openDir:  '.'
             isUp:     true
+        tile.setFocus()
         
         if @playlist == ''
             Play.instance.mpc 'playlistinfo', (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
                     tile = new Tile file, @tiles, isFile: true
-                    if file == song?.file
+                    if file == @highlight
                         tile.setFocus()
         else
             Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
                     tile = new Tile file, @tiles, isFile: true
-                    if file == song?.file
+                    if file == @highlight
                         tile.setFocus()
 
     connected: () =>
@@ -121,6 +127,8 @@ class Brws
         Play.mpc 'listplaylists', (playlists) =>
             for list in playlists
                 tile = new Tile list, @tiles, playlist: list
+                if @highlight == list
+                    tile.setFocus()
 
     createPlaylist: (name='new playlist') ->
         return if @dir != ''
@@ -134,8 +142,8 @@ class Brws
     # 000      000   000  000   000  000   000  000   000  000  000   000  
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
     
-    loadDir: (@dir, highlightFile) =>
-        log "Brws.loadDir @dir:#{@dir} highlightFile:#{highlightFile}"
+    loadDir: (@dir, @highlight) =>
+        # log "Brws.loadDir @dir:#{@dir} highlightFile:#{highlightFile}"
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
@@ -158,7 +166,7 @@ class Brws
             return if path.basename(file).startsWith '.'
             musicPath = file.substr @musicDir.length+1
             tile = new Tile musicPath, @tiles, isFile: true
-            if musicPath == highlightFile
+            if musicPath == @highlight
                 tile.setFocus()
             
         @walker.on 'directory', (dir) =>
@@ -167,7 +175,7 @@ class Brws
             musicPath = dir.substr @musicDir.length+1
             tile = new Tile musicPath, @tiles
             tile.setFocus() if not @focusTile
-            if musicPath == highlightFile
+            if musicPath == @highlight
                 tile.setFocus()
                 
         @walker.on 'done', =>
@@ -208,7 +216,7 @@ class Brws
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
         # log "setTileNum #{@tileNum} #{@tilesWidth()} #{num}"
         tileSize = parseInt (@tilesWidth()-8)/@tileNum-12
-        prefs.set "tileNum:#{@tilesDir}", @tileNum
+        prefs.set "tileNum:#{@playlist ? @tilesDir}", @tileNum
         @setTileSize tileSize
     
     resized: => @setTileNum @tileNum
