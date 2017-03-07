@@ -60,7 +60,7 @@ window.onresize = ->
     window.split.resized()
 
 window.onunload = -> prefs.save()
-window.addEventListener 'focusin', (event) -> log "focus in #{document.activeElement?.className}"
+# window.addEventListener 'focusin', (event) -> log "focus in #{document.activeElement?.className}"
 
 # 0000000   0000000  00000000   00000000  00000000  000   000   0000000  000   000   0000000   000000000
 #000       000       000   000  000       000       0000  000  000       000   000  000   000     000   

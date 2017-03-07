@@ -63,6 +63,11 @@ class Brws
     goUp: =>
         if @playlist
             @loadDir '', @playlist
+        else if @dir in ['', '.']
+            if @focusTile?
+                post.emit 'focusSong'
+            else
+                @getFirstTile()?.setFocus()
         else
             @loadDir path.dirname(@dir), @dir
         
@@ -75,11 +80,12 @@ class Brws
         @tiles.lastChild.tile.del() while @tiles.lastChild
 
     showFile: (file) =>
-        absPath = path.join @musicDir, file
-        stat = fs.statSync absPath 
+        if not path.isAbsolute file
+            file = path.join @musicDir, file
+        stat = fs.statSync file 
         args = [
             '-e', 'tell application "Finder"', 
-            '-e', "reveal POSIX file \"#{absPath}\"",
+            '-e', "reveal POSIX file \"#{file}\"",
             '-e', 'activate',
             '-e', 'end tell']
         childp.spawn 'osascript', args
@@ -140,8 +146,7 @@ class Brws
 
     delPlaylistItem: ->
         return if not @playlist?
-        tile = @getFocusTile()
-        return if not tile?
+        return if not @focusTile?
         
     # 000       0000000    0000000   0000000    0000000    000  00000000   
     # 000      000   000  000   000  000   000  000   000  000  000   000  
@@ -200,14 +205,19 @@ class Brws
     #    000     000  000      000            000
     #    000     000  0000000  00000000  0000000 
     
-    onTileFocus: (tile) => @focusTile = tile
-    onUnfocus:    => @focusTile = null
-    getFocusTile: -> @focusTile or @getFirstTile()
-    getFirstTile: -> @tiles.firstChild.tile
-    getLastTile:  -> @tiles.lastChild.tile
-    getTiles:     -> (t.tile for t in @tiles.childNodes)
-    tilesWidth:   -> @tiles.clientWidth
-    tilesHeight:  -> @tiles.clientHeight
+    onTileFocus: (tile) => 
+        @activeTile = tile
+        if tile?.div.parentNode == @tiles
+            @focusTile = tile
+        else
+            @focusTile = null
+            
+    onUnfocus:     => @focusTile = null
+    getFirstTile:  -> @tiles.firstChild.tile
+    getLastTile:   -> @tiles.lastChild.tile
+    getTiles:      -> (t.tile for t in @tiles.childNodes)
+    tilesWidth:    -> @tiles.clientWidth
+    tilesHeight:   -> @tiles.clientHeight
 
     setTileSize: (size) ->
         @tileSize = Math.floor size
@@ -257,7 +267,7 @@ class Brws
     #  0000000   0000000       0      00000000  000   000  
     
     pasteCover: ->
-        tile = @getFocusTile()
+        tile = @focusTile
         if tile?.isDir()
             electron = require 'electron'
             clipboard = electron.clipboard
@@ -281,27 +291,30 @@ class Brws
     # 000   000  00000000     000   
     
     modKeyComboEventDown: (mod, key, combo, event) ->
-        focusTile = @getFocusTile()
+        
         switch combo
-            when 'command+v'         then @pasteCover()
-            when 'command+n'         then @createPlaylist()
-            when 'command+enter'     then focusTile.commandEnter()
-            when 'command+backspace' then focusTile.delete()
-            when 'backspace'         then @delPlaylistItem()
-            when 'command+e'         then focusTile.editTitle()
-            when 'enter'             then focusTile.enter()
-            when 'command+left'      then focusTile.collapse()
-            when 'command+right'     then focusTile.add()
-            when 'command+down'      then @expandAllTiles()
-            when 'command+up'        then @collapseAllTiles()
-            when '-'                 then @setTileNum @tileNum + 1
-            when '='                 then @setTileNum @tileNum - 1
-            when 'esc'               then @goUp()
-            when 'home'              then @getFirstTile().setFocus()
-            when 'end'               then @getLastTile().setFocus()
-            when 'space'             then focusTile.add()
+            when 'esc'                   then @goUp()
+            when 'command+v'             then @pasteCover()
+            when 'command+n'             then @createPlaylist()
+            when 'command+down'          then @expandAllTiles()
+            when 'command+up'            then @collapseAllTiles()
+            when 'backspace'             then @delPlaylistItem()
+            when 'home'                  then @getFirstTile().setFocus()
+            when 'end'                   then @getLastTile().setFocus()
+            when '-'                     then @setTileNum @tileNum + 1
+            when '='                     then @setTileNum @tileNum - 1
+            when 'command+enter'         then @activeTile?.play()
+            when 'command+f'             then @activeTile?.showInFinder()
+            when 'space'                 then @activeTile.showContextMenu()
+            when 'command+e'             then @focusTile?.editTitle()
+            when 'command+a'             then @focusTile?.add()
+            when 'enter'                 then @focusTile?.enter()
+            when 'command+left'          then @focusTile?.collapse()
+            when 'command+right'         then @focusTile?.expand()
+            when 'command+backspace'     then @activeTile?.delete()
+            when 'command+alt+backspace' then @focusTile?.delete(trashDir:true)
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
-                focusTile.focusNeighbor key
+                @focusTile?.focusNeighbor key
             when 'command+u' 
                 tags.pruneCache()
                 imgs.pruneCache()

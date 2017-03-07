@@ -37,9 +37,10 @@ class Song
         tileSize = 160
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
         
-        post.on 'currentSong', @onCurrentSong
-        post.on 'seek', =>  @tile?.setFocus()
-        post.on 'status', @onStatus
+        post.on 'currentSong',  @onCurrentSong
+        post.on 'focusSong', => @tile?.setFocus()
+        post.on 'seek',      => @tile?.setFocus()
+        post.on 'status',       @onStatus
 
     resized: => @wave?.resized()
         

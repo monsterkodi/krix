@@ -6,6 +6,7 @@
 #    000     000  0000000  00000000
 {
 encodePath,
+escapePath,
 resolve,
 last,
 $}      = require './tools/tools'
@@ -16,6 +17,7 @@ tags    = require './tags'
 imgs    = require './imgs'
 walk    = require './walk'
 prefs   = require './prefs'
+popup   = require './popup'
 path    = require 'path'
 fs      = require 'fs'
         
@@ -78,14 +80,17 @@ class Tile
         else
             imgs.enqueue @
             
-        @div.addEventListener "click", @onClick
-        @div.addEventListener "dblclick", @onDblClick
-        @div.addEventListener "mouseenter", @onHover
+        @div.addEventListener "click",       @onClick
+        @div.addEventListener "dblclick",    @onDblClick
+        @div.addEventListener "mouseenter",  @onHover
+        @div.addEventListener "contextmenu", @onContextMenu
 
     del: =>
         if @div?
-            @div.removeEventListener "click", @onClick
-            @div.removeEventListener "dblclick", @onDblClick
+            @div.removeEventListener "click",       @onClick
+            @div.removeEventListener "dblclick",    @onDblClick
+            @div.removeEventListener "mouseenter",  @onHover
+            @div.removeEventListener "contextmenu", @onContextMenu
         @unFocus() if @hasFocus()
         @div?.remove()
         
@@ -98,7 +103,7 @@ class Tile
     setCover: (coverFile) ->
         @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
         @pad.firstChild.style.backgroundSize = "100% 100%"
-        @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @opt?.isUp
+        @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @isUp()
 
     setText: (top, sub) -> 
         artist = @pad.firstChild.firstChild.firstChild
@@ -122,13 +127,14 @@ class Tile
     # 000       000  000      000     
     # 000       000  0000000  00000000
    
-    isFile: -> @opt?.isFile
+    isFile:     -> @opt?.isFile
     isPlaylist: -> @opt?.playlist?
-    isDir: -> not @isFile() and not @isPlaylist()
+    isDir:      -> not @isFile() and not @isPlaylist()
+    isUp:       -> @opt?.isUp
     
-    absFilePath: -> path.join Tile.musicDir, @file
+    absFilePath:      -> path.join Tile.musicDir, @file
     isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
-    isCurrentSong: -> @div.parentNode.classList.contains "song"
+    isCurrentSong:    -> @div.parentNode.classList.contains "song"
     krixDir: -> 
         if @isFile()
             path.join path.dirname(@absFilePath()), '.krix'
@@ -136,9 +142,10 @@ class Tile
             path.join @absFilePath(), ".krix" 
     coverFile: -> path.join @krixDir(), "cover.jpg" 
 
-    delete: -> 
+    delete: (opt) => 
+        return if @isDir() and not opt?.trashDir
         if @isPlaylist()
-            @focusNeighbor 'right'
+            @focusNeighbor 'right', 'left'
             post.emit 'delPlaylist', @file, @del
             return
         fs.rename @absFilePath(), path.join(resolve('~/.Trash'), path.basename(@absFilePath())), (err) => 
@@ -148,13 +155,9 @@ class Tile
                 if @isCurrentSong()
                     post.emit 'nextSong' 
                 else
-                    @focusNeighbor 'right'
+                    @focusNeighbor 'right', 'left'
                     @del()
 
-    commandEnter: -> 
-        if @isFile() then @showInFinder()
-        else @play()
-    
     enter: ->
         if @isFile() then @play()
         else @open()
@@ -180,9 +183,10 @@ class Tile
         post.emit 'tileFocus', @
         $("main").focus()
        
-    focusNeighbor: (nb) ->
+    focusNeighbor: (nb, bn) ->
         tile = @neighbor nb
-        tile = @neighbor(nb == 'right' and 'left' or 'right') if tile == @
+        if tile == @ and bn
+            tile = @neighbor bn
         tile?.setFocus()  
 
     neighbor: (dir) ->
@@ -194,7 +198,7 @@ class Tile
                     sib = dir == 'up' and 'previousSibling' or 'nextSibling'
                     cols = Math.floor @div.parentNode.clientWidth / @div.clientWidth
                     div = @div
-                    while cols > 0 and div[sib]
+                    while (cols > 0) and div[sib]
                         cols -= 1
                         div = div[sib]
                     div
@@ -220,11 +224,11 @@ class Tile
     isExpanded: -> @children?.length
 
     expand: ->
-        return if not @isDir() or @isExpanded() or @opt?.isUp
+        return if not @isDir() or @isExpanded() or @isUp()
         @doExpand()
             
     collapse: ->
-        return if not @isDir() or not @isExpanded() or @opt?.isUp
+        return if not @isDir() or not @isExpanded() or @isUp()
         @doCollapse()
 
     doExpand: =>
@@ -245,9 +249,9 @@ class Tile
             @addChild new Tile dir, @div.parentNode, openDir: dir
             
         @walker.on 'done', =>
-            if @children.length == 1
-                @focusNeighbor 'right' if @hasFocus()
-                @del()
+            # if @children.length == 1
+            @focusNeighbor 'right' if @hasFocus()
+            @del()
     
     addChild: (child) ->
         @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
@@ -267,9 +271,13 @@ class Tile
         else if @isPlaylist() then post.emit 'playlist', @file
         else if @isDir()      then post.emit 'loadDir',  @file, @file
         
-    showInFinder: -> post.emit 'showFile', @file
+    showInFinder: => 
+        if @isPlaylist()
+            post.emit 'showFile', resolve "~/.mpd/playlists/#{escapePath @opt.playlist}.m3u"
+        else
+            post.emit 'showFile', @file
             
-    add:  -> post.emit 'addFile',  @file
+    add: => post.emit 'addFile', @file
        
     # 00     00   0000000   000   000   0000000  00000000
     # 000   000  000   000  000   000  000       000     
@@ -289,6 +297,26 @@ class Tile
         @setFocus()
         if event.shiftKey
             @add()
+    
+    #  0000000   0000000   000   000  000000000  00000000  000   000  000000000   
+    # 000       000   000  0000  000     000     000        000 000      000      
+    # 000       000   000  000 0 000     000     0000000     00000       000      
+    # 000       000   000  000  0000     000     000        000 000      000      
+    #  0000000   0000000   000   000     000     00000000  000   000     000     
+    
+    onContextMenu: (event) => @showContextMenu x:event.clientX, y:event.clientY
+        
+    showContextMenu: (opt={}) ->
+        opt.x ?= @div.getBoundingClientRect().left
+        opt.y ?= @div.getBoundingClientRect().top
+        opt.items = [
+            text: 'Show in Finder'
+            cb:   @showInFinder
+        ,
+            text: 'Move to Trash'
+            cb:   @delete
+        ]
+        popup.menu opt
     
     # 000000000  000  000000000  000      00000000  
     #    000     000     000     000      000       

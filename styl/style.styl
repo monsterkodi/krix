@@ -183,6 +183,32 @@ body
     text-align          left
     padding-left        15px
 
+// 00000000    0000000   00000000   000   000  00000000   
+// 000   000  000   000  000   000  000   000  000   000  
+// 00000000   000   000  00000000   000   000  00000000   
+// 000        000   000  000        000   000  000        
+// 000         0000000   000         0000000   000        
+
+.popup
+    position            absolute
+    background-color    #333
+    border-radius       frameWidth
+    
+.popupItem
+    color               #888
+    padding-top         frameWidth
+    padding-bottom      frameWidth
+    padding-left        2 * frameWidth
+    padding-right       2 * frameWidth
+    cursor              pointer
+    &:not(:last-child)
+        border-bottom       1px solid #222
+    &.selected
+        color           #fff
+
+.popupItem:active
+    color               #ff0
+
 // 000000000  000  000      00000000
 //    000     000  000      000     
 //    000     000  000      0000000 
@@ -205,6 +231,9 @@ body
     display             inline-block
     padding             0
     margin              0
+    
+.tileName
+    cursor              pointer
         
 .tileExpanded .tileName     
     color               #fa0
