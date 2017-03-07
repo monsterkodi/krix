@@ -8,16 +8,17 @@
 encodePath,
 resolve,
 last,
-$}    = require './tools/tools'
-log   = require './tools/log'
-post  = require './post'
-tags  = require './tags'
-imgs  = require './imgs'
-walk  = require './walk'
-prefs = require './prefs'
-path  = require 'path'
-fs    = require 'fs'
-
+$}      = require './tools/tools'
+keyinfo = require './tools/keyinfo'
+log     = require './tools/log'
+post    = require './post'
+tags    = require './tags'
+imgs    = require './imgs'
+walk    = require './walk'
+prefs   = require './prefs'
+path    = require 'path'
+fs      = require 'fs'
+        
 class Tile
     
     @scrollLock = false
@@ -137,6 +138,7 @@ class Tile
 
     delete: -> 
         if @isPlaylist()
+            @focusNeighbor 'right'
             post.emit 'delPlaylist', @file, @del
             return
         fs.rename @absFilePath(), path.join(resolve('~/.Trash'), path.basename(@absFilePath())), (err) => 
@@ -175,10 +177,12 @@ class Tile
             @pad.classList.add 'tilePadFocus'
             post.on 'unfocus', @unFocus
             @pad.scrollIntoViewIfNeeded() if not @isParentClipping()
-            post.emit 'tileFocus', @
+        post.emit 'tileFocus', @
+        $("main").focus()
        
     focusNeighbor: (nb) ->
         tile = @neighbor nb
+        tile = @neighbor(nb == 'right' and 'left' or 'right') if tile == @
         tile?.setFocus()  
 
     neighbor: (dir) ->
@@ -290,23 +294,56 @@ class Tile
     #    000     000     000     000      000       
     #    000     000     000     0000000  00000000  
             
-    onTitleClick: =>
-        return if @input?
+    onTitleClick: => @editTitle()
+        
+    editTitle: ->
+        return if @input? 
+        return if not @isPlaylist()
         title = $('.tileName', @div)
-        title.innerHTML = ""
+        title.textContent = ""
         @input = document.createElement 'input'
         @input.classList.add 'tileInput'
+        @input.value = @file
         title.appendChild @input
         @input.addEventListener 'change', @onTitleChange
-        @input.addEventListener 'keydown', (event) -> event.stopImmediatePropagation()
+        @input.addEventListener 'keydown', @onTitleKeyDown
+        @input.addEventListener 'focusout', @onTitleFocusOut
         @input.focus()
 
-    onTitleChange: (event) =>
+    onTitleKeyDown: (event) =>
+        {mod, key, combo} = keyinfo.forEvent event
+        switch combo
+            when 'enter', 'esc'
+                if @input.value == @file or combo != 'enter'
+                    @input.value = @file
+                    event.preventDefault()
+                    event.stopPropagation()
+                    event.stopImmediatePropagation()
+                    @onTitleFocusOut()
         event.stopPropagation()
-        post.emit 'renamePlaylist', @file, event.target.value
+
+    onTitleFocusOut: (event) =>
         title = $('.tileName', @div)
-        title.innerHTML = event.target.value
+        title.textContent = @file
+        @removeInput()
+        
+    removeInput: ->
+        return if not @input?
+        @input.removeEventListener 'focusout', @onTitleFocusOut
+        @input.removeEventListener 'change',   @onTitleChange
+        @input.removeEventListener 'keydown',  @onTitleKeyDown
+        @input.remove()
         delete @input
-        $('main').focus()
+        @input = null
+        if not document.activeElement? or document.activeElement == document.body
+            @setFocus()
+    
+    onTitleChange: (event) =>
+        if @input.value.length
+            post.emit 'renamePlaylist', @file, @input.value
+            @file = @input.value
+            title = $('.tileName', @div)
+            title.textContent = @file
+        @removeInput()
                 
 module.exports = Tile

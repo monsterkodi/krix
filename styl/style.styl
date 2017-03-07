@@ -85,12 +85,31 @@ body
 .gutter-vertical
     cursor    row-resize
 
+// 00     00   0000000   000  000   000  
+// 000   000  000   000  000  0000  000  
+// 000000000  000000000  000  000 0 000  
+// 000 0 000  000   000  000  000  0000  
+// 000   000  000   000  000  000   000  
+
 .main
     position            relative
     overflow            hidden
     background          #181818
     pointer-events      auto
     min-height          ctrlHeight
+
+.logview
+.main
+    position            relative
+    background          #000
+    color               #ddd 
+
+.logview
+    font-size           12px
+    overflow            scroll
+    font-family         fontMono
+    border-bottom       frameWidth solid #222
+    box-sizing          border-box
 
 //    0000000  000000000  00000000   000    
 //   000          000     000   000  000    
@@ -102,6 +121,64 @@ body
     height              ctrlHeight
     background          #222
     overflow            hidden
+
+//   0000000    000   000  000000000  000000000   0000000   000   000   0000000
+//   000   000  000   000     000        000     000   000  0000  000  000     
+//   0000000    000   000     000        000     000   000  000 0 000  0000000 
+//   000   000  000   000     000        000     000   000  000  0000       000
+//   0000000     0000000      000        000      0000000   000   000  0000000 
+        
+.buttons
+    position            absolute
+    top                 frameWidth
+    left                0
+    
+.button     
+    margin-top          frameWidth
+    vertical-align      bottom
+    opacity             1.0
+    color               #444
+    background          #111
+    padding             10px
+    padding-top         11px
+    padding-bottom      9px
+    border-radius       frameWidth
+    margin-right        frameWidth
+    min-width           20px
+    text-align          center
+    display             inline-block
+    white-space         nowrap
+    cursor              pointer
+    
+.button:hover            
+    color               #fff
+.button:active           
+    background          #222
+.buttonActive     
+    color               #fa0
+.buttonInactive     
+    color               #444
+
+.label
+    display             inline-block
+    margin-left         10px
+    padding             0
+    color               #444
+    font-size           14px
+    font-weight         bold
+#play     
+    width               50px
+    height              50px
+    
+#next     
+#prev
+    width               30px
+    
+#song
+#playlist
+    width               66px
+    text-align          left
+    padding-left        15px
 
 // 000000000  000  000      00000000
 //    000     000  000      000     
@@ -181,23 +258,16 @@ body
     padding             frameWidth
     overflow            hidden
     background-color    rgba(0,0,100,0.7)
-
-.logview
-    font-size           12px
-    overflow            scroll
-    font-family         fontMono
-    border-bottom       frameWidth solid #222
-    box-sizing          border-box
-
-.main
-    overflow            hidden
     
-.logview
-.main
-    position            relative
-
-    background          #000
-    color               #ddd 
+.tileInput
+    color               #fff
+    background-color    rgba(0,0,0,0)
+    padding             2px
+    padding-left        frameWidth
+    border              1px solid #fff
+    border-radius       3px
+    margin-left         - frameWidth
+    margin-right          frameWidth
 
 //    0000000   0000000   000   000   0000000 
 //   000       000   000  0000  000  000      
@@ -250,6 +320,7 @@ body
     height              160px
     overflow            hidden
     opacity             0.25
+    cursor              crosshair
 
 .waveLine 
     position            absolute
@@ -265,62 +336,6 @@ body
     height              160px
     background-color    rgba(19,19,19,0.6)
         
-//   0000000    000   000  000000000  000000000   0000000   000   000   0000000
-//   000   000  000   000     000        000     000   000  0000  000  000     
-//   0000000    000   000     000        000     000   000  000 0 000  0000000 
-//   000   000  000   000     000        000     000   000  000  0000       000
-//   0000000     0000000      000        000      0000000   000   000  0000000 
-        
-.buttons
-    position            absolute
-    top                 frameWidth
-    left                0
-    
-.button     
-    margin-top          frameWidth
-    vertical-align      bottom
-    opacity             1.0
-    color               #444
-    background          #111
-    padding             10px
-    padding-top         11px
-    padding-bottom      9px
-    border-radius       frameWidth
-    margin-right        frameWidth
-    min-width           20px
-    text-align          center
-    display             inline-block
-    white-space         nowrap
-.button:hover            
-    color               #fff
-.button:active           
-    background          #222
-.buttonActive     
-    color               #fa0
-.buttonInactive     
-    color               #444
-
-.label
-    display             inline-block
-    margin-left         10px
-    padding             0
-    color               #444
-    font-size           14px
-    font-weight         bold
-#play     
-    width               50px
-    height              50px
-    
-#next     
-#prev
-    width               30px
-    
-#song
-#playlist
-    width               66px
-    text-align          left
-    padding-left        15px
-
 //    0000000   000   000  000  00     00   0000000   000000000  000   0000000   000   000
 //   000   000  0000  000  000  000   000  000   000     000     000  000   000  0000  000
 //   000000000  000 0 000  000  000000000  000000000     000     000  000   000  000 0 000

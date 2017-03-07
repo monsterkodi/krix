@@ -86,9 +86,7 @@ winWithID   = (winID) ->
     for w in wins()
         return w if w.id == wid
 
-hideDock = ->
-    return if prefs.get 'trayOnly', false
-    app.dock.hide() if app.dock
+hideDock = -> app.dock.hide() if app.dock
 
 # 000  00000000    0000000
 # 000  000   000  000     

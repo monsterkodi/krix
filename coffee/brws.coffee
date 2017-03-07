@@ -106,6 +106,21 @@ class Brws
                     tile = new Tile file, @tiles, isFile: true
                     if file == song?.file
                         tile.setFocus()
+
+    connected: () =>
+        post.removeListener 'connected', @loadPlaylists
+        @loadPlaylists()
+        
+    loadPlaylists: ->
+        Play.mpc 'listplaylists', (playlists) =>
+            for list in playlists
+                tile = new Tile list, @tiles, playlist: list
+
+    createPlaylist: (name='new playlist') ->
+        return if @dir != ''
+        Play.newPlaylist name, (playlist) =>
+            tile = new Tile playlist, @tiles, playlist: playlist
+            tile.setFocus()
         
     # 000       0000000    0000000   0000000    0000000    000  00000000   
     # 000      000   000  000   000  000   000  000   000  000  000   000  
@@ -155,17 +170,6 @@ class Brws
             if @tilesDir == @musicDir
                 @loadPlaylists()
 
-    connected: =>
-        log 'loadPlaylists'
-        post.removeListener 'connected', @loadPlaylists
-        @loadPlaylists()
-        
-    loadPlaylists: ->
-        Play.mpc 'listplaylists', (playlists) =>
-            for list in playlists
-                tile = new Tile list, @tiles, playlist: list
-                tile.setText list
-     
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
             
     # 000000000  000  000      00000000   0000000
@@ -175,13 +179,13 @@ class Brws
     #    000     000  0000000  00000000  0000000 
     
     onTileFocus: (tile) => @focusTile = tile
-    onUnfocus: => @focusTile = null
+    onUnfocus:    => @focusTile = null
     getFocusTile: -> @focusTile or @getFirstTile()
     getFirstTile: -> @tiles.firstChild.tile
     getLastTile:  -> @tiles.lastChild.tile
-    getTiles: -> (t.tile for t in @tiles.childNodes)
-    tilesWidth: -> @tiles.clientWidth
-    tilesHeight: -> @tiles.clientHeight
+    getTiles:     -> (t.tile for t in @tiles.childNodes)
+    tilesWidth:   -> @tiles.clientWidth
+    tilesHeight:  -> @tiles.clientHeight
 
     setTileSize: (size) ->
         @tileSize = Math.floor size
@@ -189,8 +193,9 @@ class Brws
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         
         fontSize = Math.max 8, Math.min 18, @tileSize / 10
-        style '.tiles .tileSqr', "font-size: #{fontSize}px"
-        style '.tiles .tileImg', "width: #{@tileSize}px; height: #{@tileSize}px;"
+        style '.tiles .tileSqr',   "font-size: #{fontSize}px"
+        style '.tiles .tileInput', "font-size: #{fontSize}px; width: #{@tileSize-12}px;"
+        style '.tiles .tileImg',   "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
@@ -223,6 +228,12 @@ class Brws
         tile.expand() for tile in tiles
         prefs.set "expanded:#{@dir}", true
 
+    #  0000000   0000000   000   000  00000000  00000000   
+    # 000       000   000  000   000  000       000   000  
+    # 000       000   000   000 000   0000000   0000000    
+    # 000       000   000     000     000       000   000  
+    #  0000000   0000000       0      00000000  000   000  
+    
     pasteCover: ->
         tile = @getFocusTile()
         if tile?.isDir()
@@ -241,10 +252,6 @@ class Brws
                                 del imgs.cache[coverFile]
                                 tile.setCover coverFile
 
-    createPlaylist: (name='new playlist') ->
-        Play.newPlaylist name, (playlist) ->
-            log 'created new playlist', playlist
-
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  
@@ -254,34 +261,27 @@ class Brws
     modKeyComboEventDown: (mod, key, combo, event) ->
         focusTile = @getFocusTile()
         switch combo
-            when 'command+v' then @pasteCover()
-            when 'command+n' then @createPlaylist()
+            when 'command+v'         then @pasteCover()
+            when 'command+n'         then @createPlaylist()
+            when 'command+enter'     then focusTile.commandEnter()
+            when 'command+backspace' then focusTile.delete()
+            when 'command+e'         then focusTile.editTitle()
+            when 'enter'             then focusTile.enter()
+            when 'command+left'      then focusTile.collapse()
+            when 'command+right'     then focusTile.add()
+            when 'command+down'      then @expandAllTiles()
+            when 'command+up'        then @collapseAllTiles()
+            when '-'                 then @setTileNum @tileNum + 1
+            when '='                 then @setTileNum @tileNum - 1
+            when 'esc'               then @goUp()
+            when 'home'              then @getFirstTile().setFocus()
+            when 'end'               then @getLastTile().setFocus()
+            when 'space'             then focusTile.add()
+            when 'left', 'right', 'up', 'down', 'page up', 'page down'  
+                focusTile.focusNeighbor key
             when 'command+u' 
                 tags.pruneCache()
                 imgs.pruneCache()
                 @loadDir @dir
-            when 'command+enter' then focusTile.commandEnter()
-            when 'enter'         then focusTile.enter()
-        switch key
-            when '-'         then @setTileNum @tileNum + 1
-            when '='         then @setTileNum @tileNum - 1
-            when 'esc'       then @goUp()
-            when 'home'      then @getFirstTile().setFocus()
-            when 'end'       then @getLastTile().setFocus()
-            when 'space'     then focusTile.add()
-            when 'backspace' 
-                if mod == 'command' 
-                    focusTile.delete()
-            when 'left', 'right', 'up', 'down', 'page up', 'page down'  
-                if combo == 'command+left'
-                    focusTile.collapse()
-                else if combo == 'command+right'
-                    focusTile.expand()
-                else if combo == 'command+down'
-                    @expandAllTiles()
-                else if combo == 'command+up'
-                    @collapseAllTiles()
-                else
-                    focusTile.focusNeighbor key
         
 module.exports = Brws

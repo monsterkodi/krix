@@ -97,13 +97,13 @@ class Play
     newPlaylist: (name, cb) ->
         @mpcc?.sendCommand mpd.cmd('save', [name]), (err, msg) =>
             if err?
-                log 'saving playlist failed', err
                 @newPlaylist name+'_', cb
             else
                 cb? name
             
     onServerChange: (change) =>
-        if change =='player' then @onCurrent()
+        if change == 'player' then @onCurrent()
+        if change == 'stored_playlist' then log 'playlist changed'
         @onRefresh()
         
     @mpc: (cmmd, args=[], cb=null) -> Play.instance.mpc cmmd, args, cb
@@ -113,7 +113,7 @@ class Play
             args = []
         @mpcc?.sendCommand mpd.cmd(cmmd, args), (err, msg) ->
             if err?
-                log "[ERROR] mpc command failed: #{cmmd} #{args}", err
+                log "[ERROR] mpc command failed: #{cmmd} #{args} #{err}"
             else
                 if cmmd in ['playlistinfo', 'listplaylist']
                     files = []
