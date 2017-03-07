@@ -261,9 +261,12 @@ class Tile
     play: -> 
         if @isPlaylist() then post.emit 'playPlaylist', @file
         else                  post.emit 'playFile',    @file
+        
     open: ->
-        if @isPlaylist() then post.emit 'playlist', @file
-        if @isDir()      then post.emit 'loadDir', (@opt?.openDir or @file), @file
+        log 'open', @opt?.openDir
+        if @opt?.openDir      then post.emit 'loadDir',  @opt.openDir, @file
+        else if @isPlaylist() then post.emit 'playlist', @file
+        else if @isDir()      then post.emit 'loadDir',  @file, @file
         
     showInFinder: -> post.emit 'showFile', @file
             
@@ -294,7 +297,12 @@ class Tile
     #    000     000     000     000      000       
     #    000     000     000     0000000  00000000  
             
-    onTitleClick: => @editTitle()
+    onTitleClick: (event) =>
+        event.preventDefault()
+        event.stopPropagation()
+        event.stopImmediatePropagation()
+        return if @input
+        @editTitle()
         
     editTitle: ->
         return if @input? 

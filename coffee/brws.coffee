@@ -60,7 +60,7 @@ class Brws
     # 000      000   000  000   000  000   000
     # 0000000   0000000   000   000  0000000  
 
-    goUp: => 
+    goUp: =>
         if @playlist
             @loadDir '', @playlist
         else
@@ -91,17 +91,23 @@ class Brws
     # 000        0000000  000   000     000     0000000  000  0000000      000   
         
     showPlaylist: (@playlist, song) =>
+        
         delete @dir
+        
+        @clear()
+        tile = new Tile @playlist, @tiles, 
+            playlist: @playlist
+            openDir:  '.'
+            isUp:     true
+        
         if @playlist == ''
             Play.instance.mpc 'playlistinfo', (playlist) =>
-                @clear()
                 queue playlist, timeout: 1, cb: (file) =>
                     tile = new Tile file, @tiles, isFile: true
                     if file == song?.file
                         tile.setFocus()
         else
             Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
-                @clear()
                 queue playlist, timeout: 1, cb: (file) =>
                     tile = new Tile file, @tiles, isFile: true
                     if file == song?.file
@@ -129,6 +135,7 @@ class Brws
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
     
     loadDir: (@dir, highlightFile) =>
+        log "Brws.loadDir @dir:#{@dir} highlightFile:#{highlightFile}"
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
@@ -140,8 +147,8 @@ class Brws
         
         if @dir.length and @dir != '.'
             tile = new Tile @dir, @tiles, 
-                openDir:  path.dirname @dir
-                isUp: true
+                openDir: path.dirname @dir
+                isUp:    true
             tile.setText path.dirname(@dir), path.basename(@dir)
             tile.setFocus()
 
