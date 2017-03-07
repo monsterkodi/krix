@@ -69,7 +69,9 @@ class Ctrl
         bttn.addEventListener 'click', opt.cb if opt.cb?
         @buttons.appendChild bttn
 
-    onPlayButton: => post.emit 'toggle'
+    onPlayButton: => 
+        @song.tile?.setFocus() if @state != 'play'
+        post.emit 'toggle'
 
     onStatus: (status) =>
         $('random').classList.toggle 'buttonInactive', (status.random == '0')
@@ -91,7 +93,8 @@ class Ctrl
             clone.innerHTML = status.playlistlength
             node.parentNode.replaceChild clone, node
 
-        $('play').innerHTML = "<div class=\"fa fa-#{status.state} fa-3x\"></div>"
+        @state = status.state
+        $('play').innerHTML = "<div class=\"fa fa-#{@state} fa-3x\"></div>"
 
     resized: => @song.resized()
 
@@ -106,7 +109,7 @@ class Ctrl
         switch combo
             when 'n' then post.emit 'nextSong'
             when 'b' then post.emit 'prevSong'
-            when 'p' then post.emit 'toggle'
+            when 'p' then @onPlayButton()
                     
         if @song?.tile?.hasFocus()
             switch combo                    

@@ -263,7 +263,6 @@ class Tile
         else                  post.emit 'playFile',    @file
         
     open: ->
-        log 'open', @opt?.openDir
         if @opt?.openDir      then post.emit 'loadDir',  @opt.openDir, @file
         else if @isPlaylist() then post.emit 'playlist', @file
         else if @isDir()      then post.emit 'loadDir',  @file, @file
@@ -307,6 +306,7 @@ class Tile
     editTitle: ->
         return if @input? 
         return if not @isPlaylist()
+        return if @file == ""
         title = $('.tileName', @div)
         title.textContent = ""
         @input = document.createElement 'input'

@@ -6,8 +6,8 @@
 {
 resolve,
 style,
-queue
-}      = require './tools/tools'
+queue,
+$ }    = require './tools/tools'
 fs     = require 'fs'
 path   = require 'path'
 mkpath = require 'mkpath'
@@ -91,7 +91,6 @@ class Brws
     # 000        0000000  000   000     000     0000000  000  0000000      000   
         
     showPlaylist: (@playlist, @highlight) =>
-        
         delete @dir        
         @clear()
         @focusTile = null
@@ -107,6 +106,9 @@ class Brws
         tile.setFocus()
         
         if @playlist == ''
+            
+            $('.tileName', tile.div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
+            
             Play.instance.mpc 'playlistinfo', (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
                     tile = new Tile file, @tiles, isFile: true
@@ -135,6 +137,11 @@ class Brws
         Play.newPlaylist name, (playlist) =>
             tile = new Tile playlist, @tiles, playlist: playlist
             tile.setFocus()
+
+    delPlaylistItem: ->
+        return if not @playlist?
+        tile = @getFocusTile()
+        return if not tile?
         
     # 000       0000000    0000000   0000000    0000000    000  00000000   
     # 000      000   000  000   000  000   000  000   000  000  000   000  
@@ -264,7 +271,7 @@ class Brws
                         coverFile = path.join(tile.krixDir(), 'cover.jpg')
                         fs.writeFile coverFile, data, (err) =>
                             if !err?
-                                del imgs.cache[coverFile]
+                                delete imgs.cache[coverFile]
                                 tile.setCover coverFile
 
     # 000   000  00000000  000   000
@@ -280,6 +287,7 @@ class Brws
             when 'command+n'         then @createPlaylist()
             when 'command+enter'     then focusTile.commandEnter()
             when 'command+backspace' then focusTile.delete()
+            when 'backspace'         then @delPlaylistItem()
             when 'command+e'         then focusTile.editTitle()
             when 'enter'             then focusTile.enter()
             when 'command+left'      then focusTile.collapse()
