@@ -213,6 +213,8 @@ module.exports =
         else
             return pos(event.clientX + window.scrollX, event.clientY + window.scrollY)
 
+    childIndex: (e) -> Array.prototype.indexOf.call(e.parentNode.childNodes, e)
+
     sw: () -> document.body.clientWidth
     sh: () -> document.body.clientHeight
 

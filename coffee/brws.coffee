@@ -4,6 +4,7 @@
 #   000   000  000   000  000   000       000
 #   0000000    000   000  00     00  0000000 
 {
+childIndex,
 resolve,
 style,
 queue,
@@ -61,8 +62,8 @@ class Brws
     # 0000000   0000000   000   000  0000000  
 
     goUp: =>
-        if @playlist
-            @loadDir '', @playlist
+        if @playlist?
+            @loadDir '.', @playlist
         else if @dir in ['', '.']
             if @focusTile?
                 post.emit 'focusSong'
@@ -117,13 +118,13 @@ class Brws
             
             Play.instance.mpc 'playlistinfo', (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true
+                    tile = new Tile file, @tiles, isFile: true, playlistItem: @playlist
                     if file == @highlight
                         tile.setFocus()
         else
             Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true
+                    tile = new Tile file, @tiles, isFile: true, playlistItem: @playlist
                     if file == @highlight
                         tile.setFocus()
 
@@ -147,6 +148,7 @@ class Brws
     delPlaylistItem: ->
         return if not @playlist?
         return if not @focusTile?
+        @focusTile.delFromPlaylist()
         
     # 000       0000000    0000000   0000000    0000000    000  00000000   
     # 000      000   000  000   000  000   000  000   000  000  000   000  
@@ -291,7 +293,7 @@ class Brws
     # 000   000  00000000     000   
     
     modKeyComboEventDown: (mod, key, combo, event) ->
-        
+        stop = -> event.preventDefault()
         switch combo
             when 'esc'                   then @goUp()
             when 'command+v'             then @pasteCover()
@@ -306,8 +308,8 @@ class Brws
             when 'command+enter'         then @activeTile?.play()
             when 'command+f'             then @activeTile?.showInFinder()
             when 'space'                 then @activeTile.showContextMenu()
-            when 'command+e'             then @focusTile?.editTitle()
-            when 'command+a'             then @focusTile?.add()
+            when 'e'                     then @focusTile?.editTitle(); stop()
+            when 'a'                     then @focusTile?.add(focusNeighbor: 'right')
             when 'enter'                 then @focusTile?.enter()
             when 'command+left'          then @focusTile?.collapse()
             when 'command+right'         then @focusTile?.expand()

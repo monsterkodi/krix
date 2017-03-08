@@ -59,7 +59,10 @@ class Prefs
                 object = object[k]
                 
         if keypath.length == 1 and object?
-            object[keypath[0]] = value
+            if value
+                object[keypath[0]] = value
+            else
+                delete object[keypath[0]]
                     
     @del: (key, value) -> @set key
 

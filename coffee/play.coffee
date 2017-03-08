@@ -101,9 +101,9 @@ class Play
             else
                 cb? name
             
-    onServerChange: (change) =>
+    onServerChange: (change, arg) =>
         if change == 'player' then @onCurrent()
-        if change == 'stored_playlist' then log 'playlist changed'
+        if change == 'stored_playlist' then log 'playlist changed', arg
         @onRefresh()
         
     @mpc: (cmmd, args=[], cb=null) -> Play.instance.mpc cmmd, args, cb

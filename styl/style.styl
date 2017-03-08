@@ -150,7 +150,9 @@ body
     white-space         nowrap
     cursor              pointer
 
-.fa-play    
+.fa-play 
+    color               #666
+
 .buttonActive     
     color               #fa0
 .buttonInactive     
@@ -191,16 +193,19 @@ body
 
 .popup
     position            absolute
-    background-color    #333
-    border-radius       frameWidth
+    background-color    #222
+    border-radius       3px
     
 .popupItem
     color               #888
-    padding-top         frameWidth
-    padding-bottom      frameWidth
+    padding             2px
     padding-left        2 * frameWidth
-    padding-right       2 * frameWidth
+    padding-right       2 * frameWidth + 70px
     cursor              pointer
+    &:last-child
+        padding-bottom  frameWidth
+    &:first-child
+        padding-top     frameWidth
     &:not(:last-child)
         border-bottom       1px solid #222
     &.selected
@@ -208,6 +213,11 @@ body
 
 .popupItem:active
     color               #ff0
+
+.popupCombo
+    color               #333
+    position            absolute
+    right               2 * frameWidth
 
 // 000000000  000  000      00000000
 //    000     000  000      000     
@@ -251,7 +261,7 @@ body
     
 .tilePadDir                 
 .tilePadPlaylist
-    border-radius       8px
+    border-radius       5px
     
 .tilePadFocus.tilePadDir    
     background-color    #333
@@ -277,7 +287,7 @@ body
     
 .tileImgDir                
 .tileImgPlaylist
-    border-radius       frameWidth
+    border-radius       3px
 
 .tileImg
     background-color    rgba(0,0,100,0.5)

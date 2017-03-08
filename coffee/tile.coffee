@@ -127,14 +127,15 @@ class Tile
     # 000       000  000      000     
     # 000       000  0000000  00000000
    
-    isFile:     -> @opt?.isFile
-    isPlaylist: -> @opt?.playlist?
-    isDir:      -> not @isFile() and not @isPlaylist()
-    isUp:       -> @opt?.isUp
+    isFile:         -> @opt?.isFile
+    isPlaylist:     -> @opt?.playlist?
+    isPlaylistItem: -> @opt?.playlistItem?
+    isDir:          -> not @isFile() and not @isPlaylist()
+    isUp:           -> @opt?.isUp
     
     absFilePath:      -> path.join Tile.musicDir, @file
-    isParentClipping: -> @div.parentNode.clientHeight < @div.clientHeight  
-    isCurrentSong:    -> @div.parentNode.classList.contains "song"
+    isParentClipping: -> @div.parentNode?.clientHeight < @div.clientHeight  
+    isCurrentSong:    -> @div.parentNode?.classList.contains "song"
     krixDir: -> 
         if @isFile()
             path.join path.dirname(@absFilePath()), '.krix'
@@ -157,6 +158,11 @@ class Tile
                 else
                     @focusNeighbor 'right', 'left'
                     @del()
+
+    delFromPlaylist: =>
+        Play.mpc 'playlistdelete', [@opt.playlistItem, childIndex(@div) - 1], ->
+        @focusNeighbor 'right', 'left'
+        @del()
 
     enter: ->
         if @isFile() then @play()
@@ -277,7 +283,9 @@ class Tile
         else
             post.emit 'showFile', @file
             
-    add: => post.emit 'addFile', @file
+    add: (opt) => 
+        post.emit 'addFile', @file
+        @focusNeighbor opt.focusNeighbor if opt?.focusNeighbor
        
     # 00     00   0000000   000   000   0000000  00000000
     # 000   000  000   000  000   000  000       000     
@@ -310,11 +318,27 @@ class Tile
         opt.x ?= @div.getBoundingClientRect().left
         opt.y ?= @div.getBoundingClientRect().top
         opt.items = [
-            text: 'Show in Finder'
-            cb:   @showInFinder
+            text:  'Add to Current Playlist'
+            combo: 'A' # ⇧⌥⏎
+            cb:    @add
         ,
-            text: 'Move to Trash'
-            cb:   @delete
+            text:  'Edit Playlist Name'
+            combo: 'E'
+            hide:  not @isPlaylist()
+            cb:    @editTitle
+        ,
+            text:  'Show in Finder'
+            combo: '⌘F'
+            cb:    @showInFinder
+        , 
+            text:  'Remove from Playlist'
+            combo: '⌫'
+            hide:  not @isPlaylistItem()
+            cb:    @delFromPlaylist
+        ,
+            text:  @isPlaylist() and 'Delete Playlist' or 'Move to Trash'
+            combo: @isDir() and '⌥⌘⌫' or '⌘⌫'
+            cb:    @delete
         ]
         popup.menu opt
     
@@ -331,7 +355,7 @@ class Tile
         return if @input
         @editTitle()
         
-    editTitle: ->
+    editTitle: =>
         return if @input? 
         return if not @isPlaylist()
         return if @file == ""
