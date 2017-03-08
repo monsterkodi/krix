@@ -136,11 +136,11 @@ class Tile
     # 000       000  000      000     
     # 000       000  0000000  00000000
    
-    isFile:         -> @opt?.isFile
-    isPlaylist:     -> @opt?.playlist?
+    isFile:         -> true
+    isPlaylist:     -> false
+    isDir:          -> false
     isPlaylistItem: -> @opt?.playlistItem?
-    isDir:          -> not @isFile() and not @isPlaylist()
-    isUp:           -> @opt?.isUp
+    isUp:           -> @opt?.openDir?
     
     absFilePath:      -> path.join Tile.musicDir, @file
     isParentClipping: -> @div.parentNode?.clientHeight < @div.clientHeight  
@@ -225,55 +225,9 @@ class Tile
                     div
         div?.tile or @
 
-    # 00000000  000   000  00000000    0000000   000   000  0000000  
-    # 000        000 000   000   000  000   000  0000  000  000   000
-    # 0000000     00000    00000000   000000000  000 0 000  000   000
-    # 000        000 000   000        000   000  000  0000  000   000
-    # 00000000  000   000  000        000   000  000   000  0000000  
-
-    isExpanded: -> @children?.length
-
-    expand: ->
-        return if not @isDir() or @isExpanded() or @isUp()
-        @doExpand()
-            
-    collapse: ->
-        return if not @isDir() or not @isExpanded() or @isUp()
-        @doCollapse()
-
-    doExpand: =>
-        @div.classList.add 'tileExpanded'
-        @children = []
-        @walker?.stop()
-        @walker = new walk @absFilePath()
-        
-        @walker.on 'file', (file) =>
-            return if not @div.parentNode?
-            return if path.basename(file).startsWith '.'
-            @addChild new Tile file, @div.parentNode, isFile: true
-            
-        @walker.on 'directory', (dir) =>
-            return if not @div.parentNode?
-            dirname = path.basename(dir)
-            return if dirname.startsWith('.') or dirname == 'iTunes'
-            @addChild new Tile dir, @div.parentNode, openDir: dir
-            
-        @walker.on 'done', =>
-            @focusNeighbor 'right' if @hasFocus()
-            @del() # remove expanded tile when children are loaded
-    
-    addChild: (child) ->
-        @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
-        @children.push child
-        
-    doCollapse: ->
-        @div.classList.remove 'tileExpanded'
-        while child = @children?.pop()
-            child.del()
-        
     play: => 
         if @isPlaylist() then post.emit 'playPlaylist', @file
-        else                  post.emit 'playFile',    @file
+        else                  post.emit 'playFile',     @file
         
     open: =>
         if @opt?.openDir      then post.emit 'loadDir',  @opt.openDir, @file
@@ -386,73 +340,5 @@ class Tile
         post.emit 'mpc', 'playlistdelete', [@opt.playlistItem, childIndex(@div) - 1]
         @focusNeighbor 'right', 'left'
         @del()
-
-    onPlaylistInfo: (info) =>
-        text =  "<span class='playlistCount'><span class='fa fa-music'></span> #{info.count}</span> "
-        text += "<span class='playlistTime'><span class='fa fa-clock-o'></span> #{info.time}</span>"
-        @setText info.name, null, text
-
-    # 000000000  000  000000000  000      00000000  
-    #    000     000     000     000      000       
-    #    000     000     000     000      0000000   
-    #    000     000     000     000      000       
-    #    000     000     000     0000000  00000000  
-            
-    onTitleClick: (event) =>
-        event.preventDefault()
-        event.stopPropagation()
-        event.stopImmediatePropagation()
-        return if @input
-        @editTitle()
-        
-    editTitle: =>
-        return if @input? 
-        return if not @isPlaylist()
-        return if @file == ""
-        title = $('.playlistName', @div)
-        title.textContent = ""
-        @input = document.createElement 'input'
-        @input.classList.add 'tileInput'
-        @input.value = @file
-        title.appendChild @input
-        @input.addEventListener 'change',   @onTitleChange
-        @input.addEventListener 'keydown',  @onTitleKeyDown
-        @input.addEventListener 'focusout', @onTitleFocusOut
-        @input.focus()
-
-    onTitleKeyDown: (event) =>
-        {mod, key, combo} = keyinfo.forEvent event
-        switch combo
-            when 'enter', 'esc'
-                if @input.value == @file or combo != 'enter'
-                    @input.value = @file
-                    event.preventDefault()
-                    event.stopPropagation()
-                    event.stopImmediatePropagation()
-                    @onTitleFocusOut()
-        event.stopPropagation()
-
-    onTitleFocusOut: (event) =>
-        $('.playlistName', @div).textContent = @file
-        @removeInput()
-        
-    removeInput: ->
-        return if not @input?
-        @input.removeEventListener 'focusout', @onTitleFocusOut
-        @input.removeEventListener 'change',   @onTitleChange
-        @input.removeEventListener 'keydown',  @onTitleKeyDown
-        @input.remove()
-        delete @input
-        @input = null
-        if not document.activeElement? or document.activeElement == document.body
-            @setFocus()
-    
-    onTitleChange: (event) =>
-        if @input.value.length
-            post.emit 'renamePlaylist', @file, @input.value
-            @file = @input.value
-            @opt.playlist = @file
-            $('.playlistName', @div).textContent = @file
-        @removeInput()
                 
 module.exports = Tile

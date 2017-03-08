@@ -62,7 +62,7 @@ class Song
             @tile?.del()
             if @song.file?
                 @infoDuration.innerHTML = "#{@duration @song.duration}"
-                @tile = new Tile @song.file, @elem, isFile: true
+                @tile = new Tile @song.file, @elem
                 @wave.showFile @tile.absFilePath(), @song
                 @tile.setFocus() if setFocus
     

@@ -7,20 +7,22 @@
 resolve,
 style,
 queue,
-$ }    = require './tools/tools'
-fs     = require 'fs'
-path   = require 'path'
-mkpath = require 'mkpath'
-childp = require 'child_process'
-_      = require 'lodash'
-log    = require './tools/log'
-Tile   = require './tile'
-Play   = require './play'
-prefs  = require './prefs'
-tags   = require './tags' 
-imgs   = require './imgs'
-walk   = require './walk'
-post   = require './post'
+$ }      = require './tools/tools'
+fs       = require 'fs'
+path     = require 'path'
+mkpath   = require 'mkpath'
+childp   = require 'child_process'
+_        = require 'lodash'
+log      = require './tools/log'
+Playlist = require './playlist'
+Folder   = require './folder'
+Tile     = require './tile'
+Play     = require './play'
+prefs    = require './prefs'
+tags     = require './tags' 
+imgs     = require './imgs'
+walk     = require './walk'
+post     = require './post'
 
 MIN_TILE_SIZE = 50
 MAX_TILE_SIZE = 500
@@ -106,10 +108,9 @@ class Brws
         if num != -1 and @tileNum != num
             @setTileNum num
         
-        tile = new Tile @playlist, @tiles, 
+        tile = new Playlist @playlist, @tiles, 
             playlist: @playlist
             openDir:  '.'
-            isUp:     true
         tile.setFocus()
         
         if @playlist == ''
@@ -118,13 +119,13 @@ class Brws
             
             Play.instance.mpc 'playlistinfo', (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true, playlistItem: @playlist
+                    tile = new Tile file, @tiles, playlistItem: @playlist
                     if file == @highlight
                         tile.setFocus()
         else
             Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, isFile: true, playlistItem: @playlist
+                    tile = new Tile file, @tiles, playlistItem: @playlist
                     if file == @highlight
                         tile.setFocus()
 
@@ -135,7 +136,7 @@ class Brws
     loadPlaylists: ->
         Play.mpc 'listplaylists', (playlists) =>
             for list in playlists
-                tile = new Tile list, @tiles, playlist: list
+                tile = new Playlist list, @tiles, playlist: list
                 if @highlight == list
                     tile.setFocus()
 
@@ -168,9 +169,7 @@ class Brws
             @setTileNum num
         
         if @dir.length and @dir != '.'
-            tile = new Tile @dir, @tiles, 
-                openDir: path.dirname @dir
-                isUp:    true
+            tile = new Folder @dir, @tiles, openDir: path.dirname @dir
             tile.setText path.dirname(@dir), path.basename(@dir)
             tile.setFocus()
 
@@ -179,7 +178,7 @@ class Brws
         @walker.on 'file', (file) =>
             return if path.basename(file).startsWith '.'
             musicPath = file.substr @musicDir.length+1
-            tile = new Tile musicPath, @tiles, isFile: true
+            tile = new Tile musicPath, @tiles
             if musicPath == @highlight
                 tile.setFocus()
             
@@ -187,7 +186,7 @@ class Brws
             dirname = path.basename(dir)
             return if dirname.startsWith('.') or dirname == 'iTunes'
             musicPath = dir.substr @musicDir.length+1
-            tile = new Tile musicPath, @tiles
+            tile = new Folder musicPath, @tiles
             tile.setFocus() if not @focusTile
             if musicPath == @highlight
                 tile.setFocus()
