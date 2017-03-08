@@ -19,6 +19,7 @@ imgs    = require './imgs'
 walk    = require './walk'
 prefs   = require './prefs'
 popup   = require './popup'
+moment  = require 'moment'
 path    = require 'path'
 fs      = require 'fs'
         
@@ -66,9 +67,13 @@ class Tile
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
         else if @isPlaylist()
-            tit.innerHTML = @file
-            tit.classList.add 'tileName'
-            tit.addEventListener 'click', @onTitleClick
+            art.addEventListener 'click', @onTitleClick
+            art.classList.add 'playlistName'
+            art.innerHTML = @file
+            inf = document.createElement 'div'
+            inf.classList.add 'playlistInfo'
+            img.appendChild inf
+            
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
@@ -107,14 +112,15 @@ class Tile
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @isUp()
 
-    setText: (top, sub) -> 
+    setText: (top, sub, info) -> 
         artist = @pad.firstChild.firstChild.firstChild
         title = artist.nextSibling
-        if sub
-            artist.innerHTML = top
+        artist.innerHTML = top
+        if sub?
             title.innerHTML = sub
-        else
-            title.innerHTML = top
+        if info?
+            inf = @pad.firstChild.lastChild
+            inf.innerHTML = info
         
     setTag: (@tag) =>
         @setText @tag.artist, @tag.title
@@ -382,7 +388,10 @@ class Tile
         @del()
 
     onPlaylistInfo: (info) =>
-        @setText(info.name, "<span class='fa fa-music'></span> #{info.count}<br><span class='fa fa-clock-o'></span> #{info.time}")
+        duration = moment.duration(info.time, 'seconds').humanize()
+        text =  "<span class='playlistCount'><span class='fa fa-music'></span> #{info.count}</span> "
+        text += "<span class='playlistTime'><span class='fa fa-clock-o'></span> #{duration}</span>"
+        @setText info.name, null, text
 
     # 000000000  000  000000000  000      00000000  
     #    000     000     000     000      000       
@@ -401,14 +410,14 @@ class Tile
         return if @input? 
         return if not @isPlaylist()
         return if @file == ""
-        title = $('.tileName', @div)
+        title = $('.playlistName', @div)
         title.textContent = ""
         @input = document.createElement 'input'
         @input.classList.add 'tileInput'
         @input.value = @file
         title.appendChild @input
-        @input.addEventListener 'change', @onTitleChange
-        @input.addEventListener 'keydown', @onTitleKeyDown
+        @input.addEventListener 'change',   @onTitleChange
+        @input.addEventListener 'keydown',  @onTitleKeyDown
         @input.addEventListener 'focusout', @onTitleFocusOut
         @input.focus()
 
@@ -425,8 +434,7 @@ class Tile
         event.stopPropagation()
 
     onTitleFocusOut: (event) =>
-        title = $('.tileName', @div)
-        title.textContent = @file
+        $('.playlistName', @div).textContent = @file
         @removeInput()
         
     removeInput: ->
@@ -444,8 +452,8 @@ class Tile
         if @input.value.length
             post.emit 'renamePlaylist', @file, @input.value
             @file = @input.value
-            title = $('.tileName', @div)
-            title.textContent = @file
+            @opt.playlist = @file
+            $('.playlistName', @div).textContent = @file
         @removeInput()
                 
 module.exports = Tile

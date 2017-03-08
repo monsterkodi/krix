@@ -114,7 +114,7 @@ class Brws
         
         if @playlist == ''
             
-            $('.tileName', tile.div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
+            $('.playlistName', tile.div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
             
             Play.instance.mpc 'playlistinfo', (playlist) =>
                 queue playlist, timeout: 1, cb: (file) =>

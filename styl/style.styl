@@ -242,7 +242,7 @@ body
     padding             0
     margin              0
     
-.tileName
+.tileSqr
     cursor              pointer
         
 .tileExpanded .tileName     
@@ -252,22 +252,11 @@ body
     display             inline-block
     padding             frameWidth
     border-radius       3px
-    
-.tilePadFocus               
-    background-color    #44a
-    
-.tilePadFocus .tileSqrCover 
-    opacity             1.0
-    
+        
 .tilePadDir                 
 .tilePadPlaylist
     border-radius       5px
-    
-.tilePadFocus.tilePadDir    
-    background-color    #333
-.tilePadFocus.tilePadPlaylist 
-    background-color    #a00
-    
+        
 .tileSqrDir                 
 .tileSqrPlaylist
     padding             frameWidth
@@ -279,11 +268,37 @@ body
 .tileSqrPlaylist
     background-color    rgba(255,0,0,0.5)
     
+// hide playlist info and name of tiles with covers
+
 .tileSqrCover               
-    opacity             0
+.playlistInfo
+    opacity             0 
+
+// focus tiles show playlist info and name of tiles with covers
+
+.tilePadFocus .tileSqrCover 
+.tilePadFocus .playlistInfo  
+    opacity             1.0
+
+// focus tile border color
+    
+.tilePadFocus               
+    background-color        #44a
+    &.tilePadDir    
+        background-color    #333
+    &.tilePadPlaylist 
+        background-color    #a00
     
 .tileArtist                 
     color               #88f
+    
+.playlistInfo
+    padding             frameWidth
+    color               #b00
+    font-weight         bold
+    font-size           12px
+    & .playlistTime
+        float           right
     
 .tileImgDir                
 .tileImgPlaylist
