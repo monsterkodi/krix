@@ -10,7 +10,7 @@ last
 log       = require './tools/log'
 post      = require './post'
 _         = require 'lodash'
-duration  = require 'duration-time-format'
+moment    = require 'moment'
 childp    = require 'child_process' 
 mpd       = require 'mpd'
 
@@ -149,8 +149,7 @@ class Play
                         time += secs
             @playlists[name].count = files.length
             @playlists[name].secs  = time
-            @playlists[name].time  = duration().format(time).replace(/^0+/, '').replace(/^:0?/, '')
-            # log "playlist", @playlists[name]
+            @playlists[name].time  = moment.duration(time, 'seconds').humanize()
             @playlists[name].files = files
             post.emit "playlist:#{name}", @playlists[name]
             

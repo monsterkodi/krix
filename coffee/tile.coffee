@@ -19,7 +19,6 @@ imgs    = require './imgs'
 walk    = require './walk'
 prefs   = require './prefs'
 popup   = require './popup'
-moment  = require 'moment'
 path    = require 'path'
 fs      = require 'fs'
         
@@ -388,9 +387,8 @@ class Tile
         @del()
 
     onPlaylistInfo: (info) =>
-        duration = moment.duration(info.time, 'seconds').humanize()
         text =  "<span class='playlistCount'><span class='fa fa-music'></span> #{info.count}</span> "
-        text += "<span class='playlistTime'><span class='fa fa-clock-o'></span> #{duration}</span>"
+        text += "<span class='playlistTime'><span class='fa fa-clock-o'></span> #{info.time}</span>"
         @setText info.name, null, text
 
     # 000000000  000  000000000  000      00000000  

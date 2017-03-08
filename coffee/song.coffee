@@ -5,12 +5,13 @@
 # 0000000    0000000   000   000   0000000 
 {
 style
-}    = require './tools/tools'
-Tile = require './tile'
-Wave = require './wave'
-post = require './post'
-log  = require './tools/log'
-durt = require 'duration-time-format'
+}      = require './tools/tools'
+Tile   = require './tile'
+Wave   = require './wave'
+post   = require './post'
+log    = require './tools/log'
+moment = require 'moment'
+require 'moment-duration-format'
 
 class Song
     
@@ -44,7 +45,7 @@ class Song
 
     resized: => @wave?.resized()
         
-    duration: (s) -> durt().format(parseInt s).replace(/^0+/, '').replace(/^:0?/, '')
+    duration: (s) -> moment.duration(parseInt(s), 'seconds').format('hh:mm:ss')
         
     onStatus: (status) =>
         if @song?.duration? and status?.elapsed?
