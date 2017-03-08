@@ -76,13 +76,15 @@ class Tile
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
-            post.on "playlist:#{@file}", @onPlaylistInfo
+            post.on "playlist:#{@file}", @onPlaylistInfo            
              
         @pad.appendChild img
         elem.appendChild @div
 
         if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
             tags.enqueue @ 
+        else if @isPlaylist()
+            post.emit "playlistInfo", @file
         else
             imgs.enqueue @
             
@@ -257,9 +259,8 @@ class Tile
             @addChild new Tile dir, @div.parentNode, openDir: dir
             
         @walker.on 'done', =>
-            # if @children.length == 1
             @focusNeighbor 'right' if @hasFocus()
-            @del()
+            @del() # remove expanded tile when children are loaded
     
     addChild: (child) ->
         @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling

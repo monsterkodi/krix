@@ -45,7 +45,7 @@ class Song
 
     resized: => @wave?.resized()
         
-    duration: (s) -> moment.duration(parseInt(s), 'seconds').format('hh:mm:ss')
+    duration: (s) -> moment.duration(parseInt(s), 'seconds').format('h:mm:ss')
         
     onStatus: (status) =>
         if @song?.duration? and status?.elapsed?

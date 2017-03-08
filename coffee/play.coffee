@@ -31,6 +31,7 @@ class Play
         post.on 'playFile',       @playFile
         post.on 'delPlaylist',    @delPlaylist
         post.on 'playPlaylist',   @playPlaylist
+        post.on 'playlistInfo',   @playlistInfo
         post.on 'renamePlaylist', @renamePlaylist
         post.on 'addToPlaylist',  @addToPlaylist
         post.on 'addToCurrent',   @addToCurrent
@@ -55,7 +56,6 @@ class Play
         @mpcc = @client
         @onRefresh()
         @onCurrent()
-        @updatePlaylists()
         post.emit 'connected'
 
     onServerChange: (change) =>
@@ -128,12 +128,23 @@ class Play
             for i in [0...lines.length-1] by 2
                 name = lines[i  ].split(': ', 2)[1]
                 date = lines[i+1].split(': ', 2)[1]
-                if not @playlists[name]? or @playlists[name].date != date
-                    @updatePlaylist name, date 
+                if not @playlists[name]? 
+                    @playlists[name] = name: name, date: date
+                    @playlistInfo name, update: true
+                else if @playlists[name].date != date
+                    @playlists[name].date = date
+                    @playlistInfo name, update: true
                 
-    updatePlaylist: (name, date) => 
-        @playlists[name] = date: date, name: name if not @playlists[name]?
+    playlistInfo: (name, opt) => 
+        if not opt?.update and @playlists[name]?.count?
+            post.emit "playlist:#{name}", @playlists[name]
+            return
+            
+        if not @playlists[name]? 
+            @playlists[name] = name: name, date: ''
+            
         @mpcc?.sendCommand mpd.cmd('listplaylistinfo', [name]), (err, msg) => 
+            
             lines = msg.split '\n'
             time = 0
             files = []
