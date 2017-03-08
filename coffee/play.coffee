@@ -4,12 +4,15 @@
 # 00000000   000      000000000    00000  
 # 000        000      000   000     000   
 # 000        0000000  000   000     000   
-
-childp    = require 'child_process' 
-mpd       = require 'mpd'
-_         = require 'lodash'
+{
+last
+}         = require './tools/tools'
 log       = require './tools/log'
 post      = require './post'
+_         = require 'lodash'
+duration  = require 'duration-time-format'
+childp    = require 'child_process' 
+mpd       = require 'mpd'
 
 class Play
     
@@ -18,9 +21,10 @@ class Play
     constructor: () ->
         
         Play.instance = @
-        @random = 0
-        @client = null
-        @mpcc   = null
+        @playlists = {}
+        @random    = 0
+        @client    = null
+        @mpcc      = null
         
         @connect()
             
@@ -28,7 +32,8 @@ class Play
         post.on 'delPlaylist',    @delPlaylist
         post.on 'playPlaylist',   @playPlaylist
         post.on 'renamePlaylist', @renamePlaylist
-        post.on 'addFile',        @addFile
+        post.on 'addToPlaylist',  @addToPlaylist
+        post.on 'addToCurrent',   @addToCurrent
         post.on 'nextSong',       @nextSong
         post.on 'prevSong',       @prevSong
         post.on 'current',        @onCurrent
@@ -37,6 +42,7 @@ class Play
         post.on 'repeat',         @onRepeat
         post.on 'seek',           @onSeek
         post.on 'refresh',        @onRefresh
+        post.on 'mpc',            @mpc
         
     connect: =>
         @client = mpd.connect port: 6600, host: 'localhost'
@@ -49,7 +55,13 @@ class Play
         @mpcc = @client
         @onRefresh()
         @onCurrent()
+        @updatePlaylists()
         post.emit 'connected'
+
+    onServerChange: (change) =>
+        if change == 'player' then @onCurrent()
+        if change == 'stored_playlist' then @updatePlaylists()
+        @onRefresh()
         
     onClientError: (err) =>
         if err.code == 'ECONNREFUSED'
@@ -79,11 +91,20 @@ class Play
     onRefresh:       => @mpc 'status', (@status) => post.emit 'status', @status
     onSeek: (pos)    => @mpc 'seekcur', [pos]    
     nextSong:        => @mpc 'next'
-    prevSong:        => @mpc 'previous'        
-    addFile:  (file) => @mpc "add", [file]
+    prevSong:        => @mpc 'previous' 
+
     playFile: (file) =>
         @mpcc?.sendCommands ['clear', mpd.cmd('add', [file]), 'play'], (err, msg) ->
             log "[ERROR] playFile failed:", err if err?
+    
+    # 00000000   000       0000000   000   000  000      000   0000000  000000000  
+    # 000   000  000      000   000   000 000   000      000  000          000     
+    # 00000000   000      000000000    00000    000      000  0000000      000     
+    # 000        000      000   000     000     000      000       000     000     
+    # 000        0000000  000   000     000     0000000  000  0000000      000     
+    
+    addToCurrent:  (uri) => @mpc 'add', [uri]
+    addToPlaylist: (uri, playlist) => @mpc 'playlistadd', [playlist, uri]
 
     renamePlaylist: (oldName, newName) => @mpc 'rename', [oldName, newName]
     
@@ -100,14 +121,47 @@ class Play
                 @newPlaylist name+'_', cb
             else
                 cb? name
+
+    updatePlaylists: =>
+        @mpcc?.sendCommand 'listplaylists', (err, msg) =>
+            lines = msg.split '\n'
+            for i in [0...lines.length-1] by 2
+                name = lines[i  ].split(': ', 2)[1]
+                date = lines[i+1].split(': ', 2)[1]
+                if not @playlists[name]? or @playlists[name].date != date
+                    @updatePlaylist name, date 
+                
+    updatePlaylist: (name, date) => 
+        @playlists[name] = date: date, name: name if not @playlists[name]?
+        @mpcc?.sendCommand mpd.cmd('listplaylistinfo', [name]), (err, msg) => 
+            lines = msg.split '\n'
+            time = 0
+            files = []
+            for l in lines
+                [key, val] = l.split(': ', 2)
+                switch key 
+                    when 'file'   then files.push file: val
+                    when 'Artist' then last(files).artist = val
+                    when 'Title'  then last(files).title = val
+                    when 'Time'   
+                        secs = parseInt val
+                        last(files).time = secs
+                        time += secs
+            @playlists[name].count = files.length
+            @playlists[name].secs  = time
+            @playlists[name].time  = duration().format(time).replace(/^0+/, '').replace(/^:0?/, '')
+            # log "playlist", @playlists[name]
+            @playlists[name].files = files
+            post.emit "playlist:#{name}", @playlists[name]
             
-    onServerChange: (change, arg) =>
-        if change == 'player' then @onCurrent()
-        if change == 'stored_playlist' then log 'playlist changed', arg
-        @onRefresh()
-        
+    # 00     00  00000000    0000000  
+    # 000   000  000   000  000       
+    # 000000000  00000000   000       
+    # 000 0 000  000        000       
+    # 000   000  000         0000000  
+    
     @mpc: (cmmd, args=[], cb=null) -> Play.instance.mpc cmmd, args, cb
-    mpc: (cmmd, args=[], cb=null) -> 
+    mpc: (cmmd, args=[], cb=null) => 
         if _.isFunction args
             cb = args
             args = []

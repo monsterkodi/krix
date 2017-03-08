@@ -5,6 +5,7 @@
 #    000     000  000      000     
 #    000     000  0000000  00000000
 {
+childIndex,
 encodePath,
 escapePath,
 resolve,
@@ -71,6 +72,7 @@ class Tile
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
+            post.on "playlist:#{@file}", @onPlaylistInfo
              
         @pad.appendChild img
         elem.appendChild @div
@@ -158,11 +160,6 @@ class Tile
                 else
                     @focusNeighbor 'right', 'left'
                     @del()
-
-    delFromPlaylist: =>
-        Play.mpc 'playlistdelete', [@opt.playlistItem, childIndex(@div) - 1], ->
-        @focusNeighbor 'right', 'left'
-        @del()
 
     enter: ->
         if @isFile() then @play()
@@ -268,11 +265,11 @@ class Tile
         while child = @children?.pop()
             child.del()
         
-    play: -> 
+    play: => 
         if @isPlaylist() then post.emit 'playPlaylist', @file
         else                  post.emit 'playFile',    @file
         
-    open: ->
+    open: =>
         if @opt?.openDir      then post.emit 'loadDir',  @opt.openDir, @file
         else if @isPlaylist() then post.emit 'playlist', @file
         else if @isDir()      then post.emit 'loadDir',  @file, @file
@@ -282,11 +279,7 @@ class Tile
             post.emit 'showFile', resolve "~/.mpd/playlists/#{escapePath @opt.playlist}.m3u"
         else
             post.emit 'showFile', @file
-            
-    add: (opt) => 
-        post.emit 'addFile', @file
-        @focusNeighbor opt.focusNeighbor if opt?.focusNeighbor
-       
+                   
     # 00     00   0000000   000   000   0000000  00000000
     # 000   000  000   000  000   000  000       000     
     # 000000000  000   000  000   000  0000000   0000000 
@@ -313,23 +306,37 @@ class Tile
     #  0000000   0000000   000   000     000     00000000  000   000     000     
     
     onContextMenu: (event) => @showContextMenu x:event.clientX, y:event.clientY
-        
+              
     showContextMenu: (opt={}) ->
+        
         opt.x ?= @div.getBoundingClientRect().left
         opt.y ?= @div.getBoundingClientRect().top
-        opt.items = [
-            text:  'Add to Current Playlist'
-            combo: 'A' # ⇧⌥⏎
+        opt.items = [ # ⇧⌥⌘⏎
+            text:  'Add to Queue'
+            combo: 'Q' 
             cb:    @add
+        ,
+            text:  'Add to Playlist ...'
+            combo: 'A' 
+            cb:    => @showPlaylistMenu opt
+        ,
+            text:  'Play'
+            combo: '⌘⏎' 
+            cb:    @play
+        ,
+            text:  'Show in Finder'
+            combo: '⌘F'
+            cb:    @showInFinder
+        ,
+            text:  'New Playlist'
+            combo: '⌘N'
+            hide:  @isUp() or path.dirname(@file) != '.'
+            cb:    -> post.emit 'newPlaylist'
         ,
             text:  'Edit Playlist Name'
             combo: 'E'
             hide:  not @isPlaylist()
             cb:    @editTitle
-        ,
-            text:  'Show in Finder'
-            combo: '⌘F'
-            cb:    @showInFinder
         , 
             text:  'Remove from Playlist'
             combo: '⌫'
@@ -338,10 +345,45 @@ class Tile
         ,
             text:  @isPlaylist() and 'Delete Playlist' or 'Move to Trash'
             combo: @isDir() and '⌥⌘⌫' or '⌘⌫'
+            hide:  @isDir() and path.dirname(@file) == '.'
             cb:    @delete
         ]
         popup.menu opt
+
+    # 00000000   000       0000000   000   000  000      000   0000000  000000000  
+    # 000   000  000      000   000   000 000   000      000  000          000     
+    # 00000000   000      000000000    00000    000      000  0000000      000     
+    # 000        000      000   000     000     000      000       000     000     
+    # 000        0000000  000   000     000     0000000  000  0000000      000     
     
+    showPlaylistMenu: (opt={}) ->
+        
+        opt.x ?= @div.getBoundingClientRect().left
+        opt.y ?= @div.getBoundingClientRect().top
+        opt.items = []
+        
+        post.emit 'mpc', 'listplaylists', (playlists) =>
+            
+            for list in playlists
+                opt.items.push text: list, cb: @addToPlaylist
+        
+            popup.menu opt
+
+    addToCurrent: (opt) => 
+        post.emit 'addToCurrent', @file
+        @focusNeighbor opt.focusNeighbor if opt?.focusNeighbor?
+
+    addToPlaylist: (playlist) =>
+        post.emit 'addToPlaylist', @file, playlist
+
+    delFromPlaylist: =>
+        post.emit 'mpc', 'playlistdelete', [@opt.playlistItem, childIndex(@div) - 1]
+        @focusNeighbor 'right', 'left'
+        @del()
+
+    onPlaylistInfo: (info) =>
+        @setText(info.name, "<span class='fa fa-music'></span> #{info.count}<br><span class='fa fa-clock-o'></span> #{info.time}")
+
     # 000000000  000  000000000  000      00000000  
     #    000     000     000     000      000       
     #    000     000     000     000      0000000   

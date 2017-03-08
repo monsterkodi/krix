@@ -56,18 +56,19 @@ class Popup
         
     activate: (item) ->
         @close()
-        item.item?.cb?()
+        item.item?.cb?(item.item.arg ? item.item.text)
      
     onHover: (event) => @select event.target   
     onFocusOut: (event) => @close()
     onKeyDown: (event) =>
         {mod, key, combo} = keyinfo.forEvent event
-        # log 'key down', combo
         switch combo
-            when 'enter'        then @activate @selected
-            when 'esc', 'space' then @close()
-            when 'down'         then @select @selected?.nextSibling
-            when 'up'           then @select @selected?.previousSibling
+            when 'end', 'page down' then @select @items.lastChild
+            when 'home', 'page up'  then @select @items.firstChild
+            when 'enter'            then @activate @selected
+            when 'esc', 'space'     then @close()
+            when 'down'             then @select @selected?.nextSibling
+            when 'up'               then @select @selected?.previousSibling ? @items.lastChild 
         event.stopPropagation()
      
     onClick: (e) => @activate e.target

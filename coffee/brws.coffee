@@ -4,7 +4,6 @@
 #   000   000  000   000  000   000       000
 #   0000000    000   000  00     00  0000000 
 {
-childIndex,
 resolve,
 style,
 queue,
@@ -43,15 +42,16 @@ class Brws
         @tiles.addEventListener "dblclick", @onDblClick
         @tiles.addEventListener "scroll",   @onScroll
                 
-        post.on 'tileFocus', @onTileFocus
-        post.on 'unfocus',   @onUnfocus
-        post.on 'playlist',  @showPlaylist
-        post.on 'song',      @showSong
-        post.on 'loadDir',   @loadDir
-        post.on 'showFile',  @showFile
-        post.on 'home',      @goHome
-        post.on 'up',        @goUp
-        post.on 'connected', @connected
+        post.on 'tileFocus',   @onTileFocus
+        post.on 'unfocus',     @onUnfocus
+        post.on 'playlist',    @showPlaylist
+        post.on 'newPlaylist', @newPlaylist
+        post.on 'song',        @showSong
+        post.on 'loadDir',     @loadDir
+        post.on 'showFile',    @showFile
+        post.on 'home',        @goHome
+        post.on 'up',          @goUp
+        post.on 'connected',   @connected
         
     del: -> @tiles.remove()
         
@@ -139,7 +139,7 @@ class Brws
                 if @highlight == list
                     tile.setFocus()
 
-    createPlaylist: (name='new playlist') ->
+    newPlaylist: (name='new playlist') =>
         return if @dir != ''
         Play.newPlaylist name, (playlist) =>
             tile = new Tile playlist, @tiles, playlist: playlist
@@ -157,7 +157,7 @@ class Brws
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
     
     loadDir: (@dir, @highlight) =>
-        # log "Brws.loadDir @dir:#{@dir} highlightFile:#{highlightFile}"
+
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
@@ -196,9 +196,9 @@ class Brws
             if prefs.get "expanded:#{@dir}", false
                 @expandAllTiles()
                 
-            if @tilesDir == @musicDir
-                @loadPlaylists()
+            if @inMusicDir() then @loadPlaylists()
 
+    inMusicDir: => @tilesDir == @musicDir
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
             
     # 000000000  000  000      00000000   0000000
@@ -242,7 +242,7 @@ class Brws
             
     onDblClick: (event) =>
         if event.target.classList.contains 'tiles'
-            if @tilesDir.length > @musicDir.length
+            if not @inMusicDir()
                 @loadDir path.dirname @tilesDir.substr @musicDir.length + 1
 
     onScroll: =>
@@ -297,10 +297,10 @@ class Brws
         switch combo
             when 'esc'                   then @goUp()
             when 'command+v'             then @pasteCover()
-            when 'command+n'             then @createPlaylist()
+            when 'command+n'             then @newPlaylist()
             when 'command+down'          then @expandAllTiles()
             when 'command+up'            then @collapseAllTiles()
-            when 'backspace'             then @delPlaylistItem()
+            when 'backspace', 'delete'   then @delPlaylistItem()
             when 'home'                  then @getFirstTile().setFocus()
             when 'end'                   then @getLastTile().setFocus()
             when '-'                     then @setTileNum @tileNum + 1
@@ -309,12 +309,13 @@ class Brws
             when 'command+f'             then @activeTile?.showInFinder()
             when 'space'                 then @activeTile.showContextMenu()
             when 'e'                     then @focusTile?.editTitle(); stop()
-            when 'a'                     then @focusTile?.add(focusNeighbor: 'right')
+            when 'a'                     then @focusTile?.showPlaylistMenu()
+            when 'q'                     then @focusTile?.addToCurrent(focusNeighbor: @focusTile.isFile() and 'right' or null)
             when 'enter'                 then @focusTile?.enter()
             when 'command+left'          then @focusTile?.collapse()
             when 'command+right'         then @focusTile?.expand()
             when 'command+backspace'     then @activeTile?.delete()
-            when 'command+alt+backspace' then @focusTile?.delete(trashDir:true)
+            when 'command+alt+backspace' then if not @inMusicDir() then @focusTile?.delete(trashDir:true)
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @focusTile?.focusNeighbor key
             when 'command+u' 
