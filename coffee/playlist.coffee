@@ -12,6 +12,7 @@ Tile    = require './tile'
 post    = require './post'
 Play    = require './play'
 keyinfo = require './tools/keyinfo'
+_       = require 'lodash'
 
 class Playlist extends Folder
     
@@ -21,7 +22,7 @@ class Playlist extends Folder
         if @file == '' # current playlist
             $('.playlistName', @div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
         
-        if @opt.openDir == '.' then setImmediate @loadItems
+        setImmediate @loadItems
             
         post.on "playlist:#{@file}", @onPlaylistInfo
             
@@ -38,15 +39,13 @@ class Playlist extends Folder
                     if item == @opt.highlight
                         tile.setFocus()
         else
-            post.emit 'playlistInfo', @file, cb: (info) =>
-                for item in info.files
-                    tile = new Tile item.file, @div.parentNode, playlist: @file, item: item
-                    tile.setFocus() if item.file == @opt.highlight
-            # Play.instance.mpc 'listplaylist', [@file], (list) =>
-                # queue list, timeout: 1, cb: (item) =>
-                    # tile = new Tile item, @div.parentNode, playlistItem: @file
-                    # if item == @opt.highlight
-                        # tile.setFocus()
+            post.emit 'playlistInfo', @file, cb: (@info) =>
+                @onPlaylistInfo @info
+                if @opt.openDir == '.' 
+                    files = _.clone @info.files
+                    queue files, batch: 500, cb: (item) =>
+                        tile = new Tile item.file, @div.parentNode, playlist: @file, item: item
+                        tile.setFocus() if item.file == @opt.highlight
 
     isDir:      -> false
     isPlaylist: -> true

@@ -136,7 +136,9 @@ class Play
                     @playlistInfo name, update: true
                 
     playlistInfo: (name, opt) => 
+        
         if not opt?.update and @playlists[name]?.count?
+            # log "cached playlist #{name} #{@playlists[name].count} #{@playlists[name].files.length}"
             if opt?.cb?
                 opt.cb @playlists[name]
             else
@@ -145,6 +147,8 @@ class Play
             
         if not @playlists[name]? 
             @playlists[name] = name: name, date: ''
+
+        # log "get info #{name}"
             
         @mpcc?.sendCommand mpd.cmd('listplaylistinfo', [name]), (err, msg) => 
             if err?
@@ -168,6 +172,7 @@ class Play
             @playlists[name].secs  = time
             @playlists[name].time  = moment.duration(time, 'seconds').humanize()
             @playlists[name].files = files
+            # log "loaded #{name} #{files.length}"
             if opt?.cb?
                 opt.cb @playlists[name]
             else

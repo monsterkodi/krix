@@ -37,11 +37,32 @@ class Song
         
         tileSize = 160
         style '.song .tileImg', "width: #{tileSize}px; height: #{tileSize}px;"
+
+        @elem.addEventListener "click",       @onClick
+        @elem.addEventListener "dblclick",    @onDblClick
+        @elem.addEventListener "mouseover",   @onHover
+        @elem.addEventListener "contextmenu", @onContextMenu
         
         post.on 'currentSong',  @onCurrentSong
         post.on 'focusSong', => @tile?.setFocus()
         post.on 'seek',      => @tile?.setFocus()
         post.on 'status',       @onStatus
+
+    # 00     00   0000000   000   000   0000000  00000000  
+    # 000   000  000   000  000   000  000       000       
+    # 000000000  000   000  000   000  0000000   0000000   
+    # 000 0 000  000   000  000   000       000  000       
+    # 000   000   0000000    0000000   0000000   00000000  
+
+    onDblClick: (event) => @tileForEvent(event)?.onDblClick event
+    onHover: (event) => @tileForEvent(event)?.onHover event
+    onClick: => @tileForEvent(event)?.onClick event
+    onContextMenu: (event) => @focusTile?.onContextMenu event
+
+    tileForEvent: (event) -> @tileForElem event.target
+    tileForElem: (elem) -> 
+        if elem.tile? then return elem.tile
+        if elem.parentNode? then return @tileForElem elem.parentNode
 
     resized: => @wave?.resized()
         
@@ -61,9 +82,12 @@ class Song
             setFocus = @tile?.hasFocus()
             @tile?.del()
             if @song.file?
-                @infoDuration.innerHTML = "#{@duration @song.duration}"
-                @tile = new Tile @song.file, @elem
-                @wave.showFile @tile.absFilePath(), @song
-                @tile.setFocus() if setFocus
-    
+                @createTile setFocus
+                
+    createTile: (setFocus) ->
+        @infoDuration.innerHTML = "#{@duration @song.duration}"
+        @tile = new Tile @song.file, @elem
+        @wave.showFile @tile.absFilePath(), @song
+        @tile.setFocus() if setFocus
+        
 module.exports = Song

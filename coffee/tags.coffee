@@ -75,6 +75,7 @@ class Tags
     @saveJson: (tile, tag, cover) ->
                 
             jsonFile = swapExt path.join(tile.krixDir(), path.basename tile.file), '.json'
+            log 'saveJson', jsonFile
             
             t = 
                 title:  tag.title
@@ -95,6 +96,9 @@ class Tags
         picExt    = '.' + last format.split '/'
         coverFile = swapExt path.join(tile.krixDir(), path.basename tile.file), picExt
         data      = picture.data.data ? picture.data 
+        
+        log 'saveCover', coverFile
+        
         fs.writeFile coverFile, Buffer.from(data), (err) =>
             if err?
                 log "[ERROR] can't save cover image for", tile.file

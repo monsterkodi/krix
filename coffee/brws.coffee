@@ -112,9 +112,7 @@ class Brws
         if num != -1 and @tileNum != num
             @setTileNum num
         
-        log 'playlist ...'
         tile = new Playlist @playlist, @tiles, playlist: @playlist, openDir: '.', highlight: @highlight
-        log '... loaded'
         tile.setFocus()
         
     connected: () =>

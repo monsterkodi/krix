@@ -78,12 +78,13 @@ class Tile
         @pad.appendChild img
         elem.appendChild @div
 
-        if @opt?.item
+        if @opt?.item?
             @setTag @opt.item
+            tags.enqueue @ if not @opt.item.cover?
         else if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
             tags.enqueue @
         else if @isPlaylist()
-            post.emit "playlistInfo", @file
+            # post.emit "playlistInfo", @file
         else
             imgs.enqueue @
             
@@ -101,6 +102,7 @@ class Tile
         @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @isUp()
+        @opt.item.cover = coverFile if @opt?.item?
 
     setText: (top, sub, info) -> 
         artist = @pad.firstChild.firstChild.firstChild
@@ -256,14 +258,14 @@ class Tile
     
     onContextMenu: (event) => @showContextMenu x:event.clientX, y:event.clientY
               
-    showContextMenu: (opt={}) ->
+    showContextMenu: (opt={}) =>
         
         opt.x ?= @div.getBoundingClientRect().left
         opt.y ?= @div.getBoundingClientRect().top
         opt.items = [ # ⇧⌥⌘⏎
             text:  'Add to Queue'
             combo: 'Q' 
-            cb:    @add
+            cb:    @addToCurrent
         ,
             text:  'Add to Playlist ...'
             combo: 'A' 
@@ -305,7 +307,7 @@ class Tile
     # 000        000      000   000     000     000      000       000     000     
     # 000        0000000  000   000     000     0000000  000  0000000      000     
     
-    showPlaylistMenu: (opt={}) ->
+    showPlaylistMenu: (opt={}) =>
         
         opt.x ?= @div.getBoundingClientRect().left
         opt.y ?= @div.getBoundingClientRect().top
