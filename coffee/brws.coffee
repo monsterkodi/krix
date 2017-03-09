@@ -41,8 +41,11 @@ class Brws
         
         @setTileNum prefs.get "tileNum:#{@musicDir}", 8
         
-        @tiles.addEventListener "dblclick", @onDblClick
-        @tiles.addEventListener "scroll",   @onScroll
+        @tiles.addEventListener "click",       @onClick
+        @tiles.addEventListener "dblclick",    @onDblClick
+        @tiles.addEventListener "mouseover",   @onHover
+        @tiles.addEventListener "contextmenu", @onContextMenu
+        @tiles.addEventListener "scroll",      @onScroll
                 
         post.on 'tileFocus',   @onTileFocus
         post.on 'unfocus',     @onUnfocus
@@ -80,7 +83,9 @@ class Brws
         @walker?.stop()
         tags.clearQueue()
         post.emit 'unfocus'
-        @tiles.lastChild.tile.del() while @tiles.lastChild
+        @tiles.firstChild?.tile.del()
+        @tiles.innerHTML = ''
+        @focusTile = null
 
     showFile: (file) =>
         if not path.isAbsolute file
@@ -102,33 +107,16 @@ class Brws
     showPlaylist: (@playlist, @highlight) =>
         delete @dir        
         @clear()
-        @focusTile = null
         
         num = prefs.get "tileNum:#{@playlist}", -1
         if num != -1 and @tileNum != num
             @setTileNum num
         
-        tile = new Playlist @playlist, @tiles, 
-            playlist: @playlist
-            openDir:  '.'
+        log 'playlist ...'
+        tile = new Playlist @playlist, @tiles, playlist: @playlist, openDir: '.', highlight: @highlight
+        log '... loaded'
         tile.setFocus()
         
-        if @playlist == ''
-            
-            $('.playlistName', tile.div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
-            
-            Play.instance.mpc 'playlistinfo', (playlist) =>
-                queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, playlistItem: @playlist
-                    if file == @highlight
-                        tile.setFocus()
-        else
-            Play.instance.mpc 'listplaylist', [@playlist], (playlist) =>
-                queue playlist, timeout: 1, cb: (file) =>
-                    tile = new Tile file, @tiles, playlistItem: @playlist
-                    if file == @highlight
-                        tile.setFocus()
-
     connected: () =>
         post.removeListener 'connected', @loadPlaylists
         @loadPlaylists()
@@ -162,7 +150,6 @@ class Brws
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
-        @focusTile = null
         
         num = prefs.get "tileNum:#{@tilesDir}", -1
         if num != -1 and @tileNum != num
@@ -220,15 +207,22 @@ class Brws
     tilesWidth:    -> @tiles.clientWidth
     tilesHeight:   -> @tiles.clientHeight
 
+    #  0000000  000  0000000  00000000  
+    # 000       000     000   000       
+    # 0000000   000    000    0000000   
+    #      000  000   000     000       
+    # 0000000   000  0000000  00000000  
+    
     setTileSize: (size) ->
         @tileSize = Math.floor size
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
         
         fontSize = Math.max 8, Math.min 18, @tileSize / 10
-        style '.tiles .tileSqr',   "font-size: #{fontSize}px"
-        style '.tiles .tileInput', "font-size: #{fontSize}px; width: #{@tileSize-12}px;"
-        style '.tiles .tileImg',   "width: #{@tileSize}px; height: #{@tileSize}px;"
+        style '.tiles .playlistInfo', "font-size: #{fontSize-2}px"
+        style '.tiles .tileSqr',      "font-size: #{fontSize}px"
+        style '.tiles .tileInput',    "font-size: #{fontSize}px; width: #{@tileSize-12}px;"
+        style '.tiles .tileImg',      "width: #{@tileSize}px; height: #{@tileSize}px;"
 
     setTileNum: (num) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
@@ -239,11 +233,6 @@ class Brws
     
     resized: => @setTileNum @tileNum
             
-    onDblClick: (event) =>
-        if event.target.classList.contains 'tiles'
-            if not @inMusicDir()
-                @loadDir path.dirname @tilesDir.substr @musicDir.length + 1
-
     onScroll: =>
         Tile.scrollLock = true
         unlock = () -> 
@@ -252,14 +241,36 @@ class Brws
         @scrollTimer = setTimeout unlock, 100
 
     collapseAllTiles: -> 
-        tiles = @getTiles()
-        tile.collapse() for tile in tiles
         prefs.del "expanded:#{@dir}"
+        tiles = @getTiles()
+        tile.collapse?() for tile in tiles
             
     expandAllTiles: -> 
-        tiles = @getTiles()
-        tile.expand() for tile in tiles
         prefs.set "expanded:#{@dir}", true
+        tiles = @getTiles()
+        tile.expand?() for tile in tiles
+    
+    # 00     00   0000000   000   000   0000000  00000000  
+    # 000   000  000   000  000   000  000       000       
+    # 000000000  000   000  000   000  0000000   0000000   
+    # 000 0 000  000   000  000   000       000  000       
+    # 000   000   0000000    0000000   0000000   00000000  
+
+    onDblClick: (event) =>
+        if event.target.classList.contains 'tiles'
+            if not @inMusicDir()
+                @loadDir path.dirname @tilesDir.substr @musicDir.length + 1
+        else 
+            @tileForEvent(event)?.onDblClick event
+
+    onHover: (event) => @tileForEvent(event)?.onHover event
+    onClick: => @tileForEvent(event)?.onClick event
+    onContextMenu: (event) => @focusTile?.onContextMenu event
+
+    tileForEvent: (event) -> @tileForElem event.target
+    tileForElem: (elem) -> 
+        if elem.tile? then return elem.tile
+        if elem.parentNode? then return @tileForElem elem.parentNode
 
     #  0000000   0000000   000   000  00000000  00000000   
     # 000       000   000  000   000  000       000   000  
@@ -307,7 +318,7 @@ class Brws
             when 'command+enter'         then @activeTile?.play()
             when 'command+f'             then @activeTile?.showInFinder()
             when 'space'                 then @activeTile.showContextMenu()
-            when 'e'                     then @focusTile?.editTitle(); stop()
+            when 'e'                     then @focusTile?.editName?(); stop()
             when 'a'                     then @focusTile?.showPlaylistMenu()
             when 'q'                     then @focusTile?.addToCurrent(focusNeighbor: @focusTile.isFile() and 'right' or null)
             when 'enter'                 then @focusTile?.enter()

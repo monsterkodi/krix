@@ -11,12 +11,10 @@ escapePath,
 resolve,
 last,
 $}      = require './tools/tools'
-keyinfo = require './tools/keyinfo'
 log     = require './tools/log'
 post    = require './post'
 tags    = require './tags'
 imgs    = require './imgs'
-walk    = require './walk'
 prefs   = require './prefs'
 popup   = require './popup'
 path    = require 'path'
@@ -66,7 +64,7 @@ class Tile
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
         else if @isPlaylist()
-            art.addEventListener 'click', @onTitleClick
+            art.addEventListener 'click', @onNameClick
             art.classList.add 'playlistName'
             art.innerHTML = @file
             inf = document.createElement 'div'
@@ -76,29 +74,20 @@ class Tile
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
-            post.on "playlist:#{@file}", @onPlaylistInfo            
              
         @pad.appendChild img
         elem.appendChild @div
 
-        if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
-            tags.enqueue @ 
+        if @opt?.item
+            @setTag @opt.item
+        else if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
+            tags.enqueue @
         else if @isPlaylist()
             post.emit "playlistInfo", @file
         else
             imgs.enqueue @
             
-        @div.addEventListener "click",       @onClick
-        @div.addEventListener "dblclick",    @onDblClick
-        @div.addEventListener "mouseenter",  @onHover
-        @div.addEventListener "contextmenu", @onContextMenu
-
     del: =>
-        if @div?
-            @div.removeEventListener "click",       @onClick
-            @div.removeEventListener "dblclick",    @onDblClick
-            @div.removeEventListener "mouseenter",  @onHover
-            @div.removeEventListener "contextmenu", @onContextMenu
         @unFocus() if @hasFocus()
         @div?.remove()
         
@@ -139,7 +128,7 @@ class Tile
     isFile:         -> true
     isPlaylist:     -> false
     isDir:          -> false
-    isPlaylistItem: -> @opt?.playlistItem?
+    isPlaylistItem: -> @opt?.playlist?
     isUp:           -> @opt?.openDir?
     
     absFilePath:      -> path.join Tile.musicDir, @file
@@ -296,7 +285,7 @@ class Tile
             text:  'Edit Playlist Name'
             combo: 'E'
             hide:  not @isPlaylist()
-            cb:    @editTitle
+            cb:    @editName
         , 
             text:  'Remove from Playlist'
             combo: '⌫'
@@ -333,11 +322,10 @@ class Tile
         post.emit 'addToCurrent', @file
         @focusNeighbor opt.focusNeighbor if opt?.focusNeighbor?
 
-    addToPlaylist: (playlist) =>
-        post.emit 'addToPlaylist', @file, playlist
+    addToPlaylist: (playlist) => post.emit 'addToPlaylist', @file, playlist
 
     delFromPlaylist: =>
-        post.emit 'mpc', 'playlistdelete', [@opt.playlistItem, childIndex(@div) - 1]
+        post.emit 'mpc', 'playlistdelete', [@opt.playlist, childIndex(@div) - 1]
         @focusNeighbor 'right', 'left'
         @del()
                 

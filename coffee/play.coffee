@@ -137,13 +137,19 @@ class Play
                 
     playlistInfo: (name, opt) => 
         if not opt?.update and @playlists[name]?.count?
-            post.emit "playlist:#{name}", @playlists[name]
+            if opt?.cb?
+                opt.cb @playlists[name]
+            else
+                post.emit "playlist:#{name}", @playlists[name]
             return
             
         if not @playlists[name]? 
             @playlists[name] = name: name, date: ''
             
         @mpcc?.sendCommand mpd.cmd('listplaylistinfo', [name]), (err, msg) => 
+            if err?
+                log "[ERROR] listplaylistinfo failed: #{err}"
+                return
             
             lines = msg.split '\n'
             time = 0
@@ -162,7 +168,10 @@ class Play
             @playlists[name].secs  = time
             @playlists[name].time  = moment.duration(time, 'seconds').humanize()
             @playlists[name].files = files
-            post.emit "playlist:#{name}", @playlists[name]
+            if opt?.cb?
+                opt.cb @playlists[name]
+            else
+                post.emit "playlist:#{name}", @playlists[name]
             
     # 00     00  00000000    0000000  
     # 000   000  000   000  000       

@@ -3,8 +3,13 @@
 # 000000    000   000  000      000   000  0000000   0000000  
 # 000       000   000  000      000   000  000       000   000
 # 000        0000000   0000000  0000000    00000000  000   000
-
+{
+last
+}    = require './tools/tools'
+log  = require './tools/log'
 Tile = require './tile'
+walk = require './walk'
+path = require 'path'
 
 class Folder extends Tile
     
