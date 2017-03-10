@@ -9,6 +9,7 @@ $ }  = require './tools/tools'
 log  = require './tools/log'
 post = require './post'
 Song = require './song'
+path = require 'path'
 
 class Ctrl
     
@@ -73,6 +74,10 @@ class Ctrl
         @song.tile?.setFocus() if @state != 'play'
         post.emit 'toggle'
 
+    loadDirOfCurrentSong: ->
+        if @song.tile?.file
+            post.emit 'loadDir', path.dirname(@song.tile.file), @song.tile.file
+        
     onStatus: (status) =>
         $('random').classList.toggle 'buttonInactive', (status.random == '0')
         $('random').classList.toggle 'buttonActive',   (status.random == '1')
@@ -110,6 +115,7 @@ class Ctrl
             when 'n' then post.emit 'nextSong'
             when 'b' then post.emit 'prevSong'
             when 'p' then @onPlayButton()
+            when 'f' then @loadDirOfCurrentSong()
                     
         if @song?.tile?.hasFocus()
             switch combo                    

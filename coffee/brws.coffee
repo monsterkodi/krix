@@ -143,7 +143,7 @@ class Brws
     # 000      000   000  000000000  000   000  000   000  000  0000000    
     # 000      000   000  000   000  000   000  000   000  000  000   000  
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
-    
+        
     loadDir: (@dir, @highlight) =>
         cache.unwatch()
         cache.watch @dir
@@ -282,14 +282,7 @@ class Brws
         if tile?.isDir()
             electron = require 'electron'
             clipboard = electron.clipboard
-            image = clipboard.readImage()
-            data = image.toJPEG 95
-            if data.length
-                coverFile = imgs.coverForTile tile
-                fs.writeFile coverFile, data, (err) =>
-                    if !err?
-                        cache.set "#{tile.file}:cover", coverFile
-                        tile.setCover coverFile
+            imgs.setDirTileImageData tile, clipboard.readImage()?.toJPEG 95
 
     copyCover: ->
         tile = @activeTile
@@ -334,7 +327,7 @@ class Brws
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @focusTile?.focusNeighbor key
             when 'command+u' 
-                cache.prune()
+                cache.prune @dir
                 @loadDir @dir
         
 module.exports = Brws

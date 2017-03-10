@@ -74,6 +74,7 @@ class Cache
     @set:  (key, value) -> @store.set key, value
     @del:  (key, value) -> @store.del key
     @save: (cb)         -> @store.save cb
-    @prune:             -> @store.clear()
+    @prune: (dir)       -> 
+        log 'prune', dir
 
 module.exports = Cache

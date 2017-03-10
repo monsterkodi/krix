@@ -29,6 +29,7 @@ class Imgs
             @dequeue() if @queue.length == 1
     
     @coverForTile: (tile) -> path.join cache.imgDir, tile.file.hash() + '.jpg'
+    @kirxForTile:  (tile) -> path.join tile.absFilePath, '.krix.jpg'
         
     @dequeue: ->
         if @queue.length
@@ -48,47 +49,49 @@ class Imgs
             childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
         else
             log "[ERROR] unknown image format: #{extname}"
-                            
+    
+    @setDirTileImageData: (tile, data) -> 
+        if data?.length
+            krixFile = @krixForTile tile
+            fs.writeFile krixFile, data, (err) =>
+                if !err? then @cloneDirTileImage tile
+    
+    @cloneDirTileImage: (tile) ->
+        coverFile = @coverForTile tile
+        krixFile  = @krixForTile  tile
+        fsextra.copy krixFile, coverFile, (err) ->
+            if not err
+                cache.set "#{tile.file}:cover", coverFile
+                tile.setCover coverFile
+            else
+                log "[ERROR] copying #{krixFile} to #{coverFile}: #{err}"
+        
     @checkDirForCover: () ->
         if tile = @queue.shift()
             dir = tile.absFilePath()
             coverFile = @coverForTile tile
-            krixFile = path.join dir, '.krix.jpg'
-            # log 'checkDirForCover -------', dir
+            krixFile  = @krixForTile  tile
             cache.set "#{tile.file}:cover", false
             fs.readdir dir, (err, files) ->
                 if not err
                     for file in files
                         absFile = path.join dir, file 
                         extname = path.extname(file).toLowerCase()
-                        # log 'checkDirForCover absFile:', absFile
                         if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
-                            # log 'checkDirForCover convert img'
                             childp.exec "convert \"#{absFile}\" \"#{krixFile}\"", (err) ->
                                 if not err
-                                    fsextra.copy krixFile, coverFile, (err) ->
-                                        if not err
-                                            cache.set "#{tile.file}:cover", coverFile
-                                            tile.setCover coverFile
-                                        else
-                                            log "[ERROR] copying #{krixFile} to #{coverFile}: #{err}"
+                                    @cloneDirTileImage tile
                                 else
                                     log "[ERROR] converting #{absFile} to #{krixFile}: #{err}"
                             return
                         else if extname in ['.jpg', '.jpeg']
-                            # log 'checkDirForCover rename jpg'
                             if file == '.krix.jpg'
                                 cache.set "#{tile.file}:cover", coverFile
                                 tile.setCover coverFile
                             else
                                 fs.rename absFile, krixFile, (err) ->
                                     if not err
-                                        fsextra.copy krixFile, coverFile, (err) ->
-                                            if not err
-                                                cache.set "#{tile.file}:cover", coverFile
-                                                tile.setCover coverFile
-                                            else
-                                                log "[ERROR] copying #{krixFile} to #{coverFile}: #{err}"
+                                        @cloneDirTileImage tile
                                     else
                                         log "[ERROR] moving #{absFile} to #{krixFile}: #{err}"
                             return
