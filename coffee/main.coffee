@@ -4,20 +4,28 @@
 #   000000000  000000000  000  000 0 000
 #   000 0 000  000   000  000  000  0000
 #   000   000  000   000  000  000   000
-
+{
+resolve
+}       = require './tools/tools'
 keyinfo = require './tools/keyinfo'
 log     = require './tools/log'
 Brws    = require './brws'
 Ctrl    = require './ctrl'
 Play    = require './play'
 post    = require './post'
+cache   = require './cache'
+path    = require 'path'
 
 class Main
     
     constructor: (@view) -> 
+
+        @musicDir = resolve "~/Music"
+        log 'Main.constructor', @musicDir
+        cache.init path.join @musicDir, '.krix'
                 
+        @brws = new Brws @view, @musicDir
         @ctrl = new Ctrl @view
-        @brws = new Brws @view
         @play = new Play
         @brws.loadDir ''
         

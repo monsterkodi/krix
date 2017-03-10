@@ -19,6 +19,7 @@ Folder   = require './folder'
 Tile     = require './tile'
 Play     = require './play'
 prefs    = require './prefs'
+cache    = require './cache'
 tags     = require './tags' 
 imgs     = require './imgs'
 walk     = require './walk'
@@ -29,13 +30,12 @@ MAX_TILE_SIZE = 500
 
 class Brws
     
-    constructor: (@view) ->
+    constructor: (@view, @musicDir) ->
         
         @tiles = document.createElement 'div'
         @tiles.classList.add 'tiles'
         @view.appendChild @tiles
-        
-        @musicDir = resolve "~/Music"
+                
         @tilesDir = @musicDir
         Tile.musicDir = @musicDir
         
@@ -284,15 +284,11 @@ class Brws
             image = clipboard.readImage()
             data = image.toJPEG 95
             if data.length
-                mkpath tile.krixDir(), (err) =>
-                    if err?
-                        log "[ERROR] can't create .krix folder for", tile.file
-                    else
-                        coverFile = path.join(tile.krixDir(), 'cover.jpg')
-                        fs.writeFile coverFile, data, (err) =>
-                            if !err?
-                                delete imgs.cache[coverFile]
-                                tile.setCover coverFile
+                coverFile = imgs.coverForTile tile
+                fs.writeFile coverFile, data, (err) =>
+                    if !err?
+                        cache.set "#{tile.file}:cover", coverFile
+                        tile.setCover coverFile
 
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
@@ -327,8 +323,7 @@ class Brws
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @focusTile?.focusNeighbor key
             when 'command+u' 
-                tags.pruneCache()
-                imgs.pruneCache()
+                cache.prune()
                 @loadDir @dir
         
 module.exports = Brws

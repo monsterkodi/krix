@@ -4,13 +4,14 @@
 #    000     000   000  000   000  000           000
 #    000      0000000    0000000   0000000  0000000 
 
-pos  = require './pos'
-log  = require './log'
-_    = require 'lodash'
-sfmt = require 'sprintf-js'
-path = require 'path'
-os   = require 'os'
-fs   = require 'fs'
+pos    = require './pos'
+log    = require './log'
+_      = require 'lodash'
+sfmt   = require 'sprintf-js'
+path   = require 'path'
+crypto = require 'crypto'
+os     = require 'os'
+fs     = require 'fs'
 
 #  0000000   000   000  00000000  000   000  00000000
 # 000   000  000   000  000       000   000  000     
@@ -238,7 +239,8 @@ if not String.prototype.splice
     String.prototype.splice = (start, delCount, newSubStr='') ->
         @slice(0, start) + newSubStr + @slice(start + Math.abs(delCount))
     String.prototype.strip = String.prototype.trim
-    String.prototype.fmt = -> sfmt.vsprintf @, [].slice.call arguments
+    String.prototype.fmt  = -> sfmt.vsprintf @, [].slice.call arguments
+    String.prototype.hash = -> crypto.createHash('md5').update(@.valueOf(), 'utf8').digest('hex')
 
 #  0000000   00000000   00000000    0000000   000   000
 # 000   000  000   000  000   000  000   000   000 000 

@@ -35,14 +35,14 @@ class Play
         post.on 'renamePlaylist', @renamePlaylist
         post.on 'addToPlaylist',  @addToPlaylist
         post.on 'addToCurrent',   @addToCurrent
+        post.on 'refresh',        @onRefresh
+        post.on 'current',        @onCurrent
         post.on 'nextSong',       @nextSong
         post.on 'prevSong',       @prevSong
-        post.on 'current',        @onCurrent
         post.on 'toggle',         @onToggle
         post.on 'random',         @onRandom
         post.on 'repeat',         @onRepeat
         post.on 'seek',           @onSeek
-        post.on 'refresh',        @onRefresh
         post.on 'mpc',            @mpc
         
     connect: =>

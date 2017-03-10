@@ -34,7 +34,7 @@ class Playlist extends Folder
         
         if @file == '' # current playlist
             Play.instance.mpc 'playlistinfo', (list) =>
-                queue list, timeout: 1, cb: (item) =>
+                queue list, cb: (item) =>
                     tile = new Tile item, @div.parentNode, playlist: @file
                     if item == @opt.highlight
                         tile.setFocus()

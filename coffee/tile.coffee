@@ -136,12 +136,6 @@ class Tile
     absFilePath:      -> path.join Tile.musicDir, @file
     isParentClipping: -> @div.parentNode?.clientHeight < @div.clientHeight  
     isCurrentSong:    -> @div.parentNode?.classList.contains "song"
-    krixDir: -> 
-        if @isFile()
-            path.join path.dirname(@absFilePath()), '.krix'
-        else
-            path.join @absFilePath(), ".krix" 
-    coverFile: -> path.join @krixDir(), "cover.jpg" 
 
     delete: (opt) => 
         return if @isDir() and not opt?.trashDir
