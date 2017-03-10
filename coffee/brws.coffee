@@ -240,8 +240,7 @@ class Brws
 
     collapseAllTiles: -> 
         prefs.del "expanded:#{@dir}"
-        tiles = @getTiles()
-        tile.collapse?() for tile in tiles
+        @loadDir @dir, @focusTile?.file
             
     expandAllTiles: -> 
         prefs.set "expanded:#{@dir}", true
@@ -316,7 +315,6 @@ class Brws
             when 'a'                     then @focusTile?.showPlaylistMenu()
             when 'q'                     then @focusTile?.addToCurrent(focusNeighbor: @focusTile.isFile() and 'right' or null)
             when 'enter'                 then @focusTile?.enter()
-            when 'command+left'          then @focusTile?.collapse()
             when 'command+right'         then @focusTile?.expand()
             when 'command+backspace'     then @activeTile?.delete()
             when 'command+alt+backspace' then if not @inMusicDir() then @focusTile?.delete(trashDir:true)

@@ -13,8 +13,8 @@ class Prefs
     
     @init: (file, defs={}) -> @store = new Store file:file, defaults:defs
     @get:  (key, value)    -> @store.get key, value
-    @set:  (key, value)    -> @store.get key, value
-    @del:  (key, value)    -> @store.set key
+    @set:  (key, value)    -> @store.set key, value
+    @del:  (key, value)    -> @store.del key
     @save: (cb)            -> @store.save cb
         
 module.exports = Prefs

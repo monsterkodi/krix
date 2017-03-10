@@ -10,7 +10,6 @@ log    = require './tools/log'
 cache  = require './cache'
 fs     = require 'fs'
 path   = require 'path'
-mkpath = require 'mkpath'
 childp = require 'child_process'
 
 class Imgs
@@ -49,13 +48,7 @@ class Imgs
             childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
         else
             log "[ERROR] unknown image format: #{extname}"
-    
-    @potentialAlbumCover: (coverFile) ->
-        albumCover = path.join path.dirname(coverFile), "cover.jpg"
-        fs.stat albumCover, (err, stat) =>
-            if err
-                childp.exec "convert \"#{coverFile}\" \"#{albumCover}\"", (err) -> 
-                        
+                            
     @checkDirForCover: (dir, coverFile) ->
         if tile = @queue.shift()
             cache.set "#{tile.file}:cover", false

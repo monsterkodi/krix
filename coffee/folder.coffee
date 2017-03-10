@@ -31,10 +31,6 @@ class Folder extends Tile
         return if not @isDir() or @isExpanded() or @isUp()
         @doExpand()
             
-    collapse: ->
-        return if not @isDir() or not @isExpanded() or @isUp()
-        @doCollapse()
-
     doExpand: =>
         @div.classList.add 'tileExpanded'
         @children = []
@@ -59,11 +55,5 @@ class Folder extends Tile
     addChild: (child) ->
         @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
         @children.push child
-        
-    doCollapse: ->
-        @div.classList.remove 'tileExpanded'
-        while child = @children?.pop()
-            child.del()
-        
         
 module.exports = Folder

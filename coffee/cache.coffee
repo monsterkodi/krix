@@ -17,7 +17,7 @@ class Cache
 
     @init: (cacheDir)   -> 
         log 'Cache.@init', cacheDir
-        @store   = new Store file: path.join cacheDir, 'cache.noon'
+        @store   = new Store timeout: 10000, file: path.join cacheDir, 'cache.noon'
         @imgDir  = path.join cacheDir, 'img' 
         @waveDir = path.join cacheDir, 'wave' 
         try

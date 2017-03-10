@@ -13,23 +13,13 @@ imgs        = require './imgs'
 cache       = require './cache'
 jsmediatags = require 'jsmediatags'
 childp      = require 'child_process'
-mkpath      = require 'mkpath'
 path        = require 'path'
 fs          = require 'fs'
 
 class Tags
             
     @queue = []
-    
-    # @pruneCache: ->
-        # for key in Object.keys Tags.cache
-            # if not Tags.cache[key].cover?
-                # delete Tags.cache[key] 
-                # jsonFile = path.join path.dirname(key), ".krix", swapExt path.basename(key), '.json'
-                # fs.unlink jsonFile, (err) ->
-                    # if err
-                        # log "[ERROR] can't remove", jsonFile
-            
+                
     @clearQueue: -> @queue = []
     
     @enqueue: (tile) ->
@@ -41,30 +31,35 @@ class Tags
         if Tags.queue.length
             tile = Tags.queue[0]
             if cache.get tile.file
-                # setImmediate Tags.cachedTag 
-                Tags.cachedTag()
+                if tile = Tags.queue.shift()
+                    tile.setTag cache.get tile.file
+                    Tags.dequeue()
             else
-                jsmediatags.read tile.absFilePath(), onSuccess: Tags.tagLoaded, onError: Tags.tagError
+                jsmediatags.read tile.absFilePath(), 
+                    onSuccess: Tags.tagLoaded
+                    onError:   Tags.tagError
 
-    @cachedTag: ->
-        if tile = Tags.queue.shift()
-            tile.setTag cache.get tile.file
-            Tags.dequeue()
-        
     @tagLoaded: (tag) ->
         if tile = Tags.queue.shift()
             if tag.tags.APIC? or tag.tags.picture
                 Tags.saveCover tile, tag.tags
             else
-                Tags.saveTag tile, tag.tags
+                Tags.setTag tile, tag.tags
+
+    @tagError: (err) ->
+        if tile = Tags.queue.shift()
+            Tags.dequeue()
                   
-    @saveTag: (tile, tag, cover) ->
+    @setTag: (tile, tag, cover) ->
             
         cache.set "#{tile.file}:artist", tag.artist
         cache.set "#{tile.file}:title", tag.title
         if cover?
             cache.set "#{tile.file}:cover", cover 
-            imgs.potentialAlbumCover cover
+            
+            if not cache.get "#{path.dirname(tile.file)}:cover"
+                cache.set "#{path.dirname(tile.file)}:cover", cover
+            
             tag.cover = cover
         else
             delete tag.cover
@@ -81,30 +76,25 @@ class Tags
         data      = picture.data.data ? picture.data 
                 
         if format == 'jpg'
-            log 'saveCover', coverFile
             fs.writeFile coverFile, Buffer.from(data), (err) =>
                 if err?
                     log "[ERROR] can't save cover image for", tile.file
-                    Tags.saveTag tile, tag
+                    Tags.setTag tile, tag
                 else
-                    Tags.saveTag tile, tag, coverFile
+                    Tags.setTag tile, tag, coverFile
         else        
             tmpFile = path.join process.env.TMPDIR, path.basename swapExt coverFile, picExt
-            log 'write tmp image', tmpFile
             fs.writeFile tmpFile, Buffer.from(data), (err) =>
                 if err?
                     log "[ERROR] can't save tmp image", tmpFile
-                    Tags.saveTag tile, tag
+                    Tags.setTag tile, tag
                 else
                     childp.exec "convert \"#{tmpFile}\" \"#{coverFile}\"", (err) =>
                         if err?
                             log "[ERROR] can't convert cover for", tile.file
-                            Tags.saveTag tile, tag
+                            Tags.setTag tile, tag
                         else
-                            Tags.saveTag tile, tag, coverFile
-                    
-    @tagError: (err) ->
-        if tile = Tags.queue.shift()
-            Tags.dequeue()
-        
+                            Tags.setTag tile, tag, coverFile
+                        fs.unlink tmpFile, ->
+                            
 module.exports = Tags
