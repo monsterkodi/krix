@@ -201,8 +201,8 @@ class Brws
             @focusTile = null
             
     onUnfocus:     => @focusTile = null
-    getFirstTile:  -> @tiles.firstChild.tile
-    getLastTile:   -> @tiles.lastChild.tile
+    getFirstTile:  -> @tiles.firstChild?.tile
+    getLastTile:   -> @tiles.lastChild?.tile
     getTiles:      -> (t.tile for t in @tiles.childNodes)
     tilesWidth:    -> @tiles.clientWidth
     tilesHeight:   -> @tiles.clientHeight
@@ -291,6 +291,15 @@ class Brws
                         cache.set "#{tile.file}:cover", coverFile
                         tile.setCover coverFile
 
+    copyCover: ->
+        tile = @activeTile
+        if cache.get "#{tile.file}:cover"
+            electron = require 'electron'
+            nativeImage = electron.nativeImage
+            clipboard = electron.clipboard
+            image = nativeImage.createFromPath cache.get "#{tile.file}:cover"
+            clipboard.writeImage image
+
     # 000   000  00000000  000   000
     # 000  000   000        000 000 
     # 0000000    0000000     00000  
@@ -302,6 +311,7 @@ class Brws
         switch combo
             when 'esc'                   then @goUp()
             when 'command+v'             then @pasteCover()
+            when 'command+c'             then @copyCover()
             when 'command+n'             then @newPlaylist()
             when 'command+down'          then @expandAllTiles()
             when 'command+up'            then @collapseAllTiles()
