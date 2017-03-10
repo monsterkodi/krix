@@ -87,7 +87,7 @@ class Song
     createTile: (setFocus) ->
         @infoDuration.innerHTML = "#{@duration @song.duration}"
         @tile = new Tile @song.file, @elem
-        @wave.showFile @tile.absFilePath(), @song
+        @wave.showTile @tile, @song
         @tile.setFocus() if setFocus
         
 module.exports = Song

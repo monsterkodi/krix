@@ -11,18 +11,25 @@ mkpath = require 'mkpath'
 
 class Cache
     
-    @store  = null
-    @imgDir = null
+    @store   = null
+    @imgDir  = null
+    @waveDir = null
 
     @init: (cacheDir)   -> 
         log 'Cache.@init', cacheDir
-        @store  = new Store file: path.join cacheDir, 'cache.noon'
-        @imgDir = path.join(cacheDir, 'img')
+        @store   = new Store file: path.join cacheDir, 'cache.noon'
+        @imgDir  = path.join cacheDir, 'img' 
+        @waveDir = path.join cacheDir, 'wave' 
         try
             mkpath.sync @imgDir
         catch err
             log "[ERROR] can't create image cache directory #{@imgDir}", err
             @imgDir = null
+        try
+            mkpath.sync @waveDir
+        catch err
+            log "[ERROR] can't create wave cache directory @{waveDir}", err
+            @waveDir = null
         
     @get:  (key, value) -> @store.get key, value
     @set:  (key, value) -> @store.set key, value

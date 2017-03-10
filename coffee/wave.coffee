@@ -14,6 +14,7 @@ process = require 'process'
 path    = require 'path'
 fs      = require 'fs'
 post    = require './post'
+cache   = require './cache'
 
 class Wave
     
@@ -34,7 +35,7 @@ class Wave
         post.on 'status', @onStatus
 
         @width = null
-        @file  = null
+        @tile  = null
         @song  = null
 
         @drag = new drag 
@@ -42,11 +43,6 @@ class Wave
             onStart: @onDragStart
             onMove:  @onDragMove
             cursor: 'pointer'
-
-    onDragMove: (drag, event) => @seekTo event.clientX
-    onDragStart: (drag,event) => @seekTo event.clientX
-    seekTo: (x) -> 
-        post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/(@pps*@scale)
       
     onStatus: (status) => 
         left = parseInt @scale * @pps * status.elapsed / 2
@@ -70,38 +66,35 @@ class Wave
     resized: =>
         pps = @pps
         @calc()
-        if @file and pps != @pps
+        if @tile and pps != @pps
             clearTimeout @resizeTimer
-            reloadWave = => @showFile @file, @song
-            @resizeTimer = setTimeout reloadWave, 500
-        
-    showFile: (@file, @song) ->      
+            @resizeTimer = setTimeout @showFile, 500
+    
+    showTile: (@tile, @song) -> @showFile()
+    
+    waveFile: -> path.join cache.waveDir, @tile.file.hash() + "_#{@pps}.png"
+    showFile: =>      
         @elem.style.backgroundImage = ""
         @calc()
-        if @pps == 1
-            waveFile = path.join path.dirname(@file), '.krix', path.basename(@file) + ".png"
-            fs.stat waveFile, (err, stat) =>
-                if !err? and stat.isFile()
-                    @showWave waveFile
-                else
-                    @createWave waveFile, @showWave
-        else
-            waveFile = path.join process.env.TMPDIR, 'krixWave.png'
-            @createWave waveFile, @showWaveData
+        fs.stat @waveFile(), (err, stat) =>
+            if !err? and stat.isFile()
+                @showWave()
+            else
+                @createWave()
             
-    createWave: (waveFile, cb) ->
-        inp = escapePath @file
-        out = escapePath waveFile
+    createWave: () ->
+        inp = escapePath @tile.absFilePath()
+        out = escapePath @waveFile()
         cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
         childp.exec cmmd, (err) =>
             if err?
-                # log "[ERROR] can't create waveform for #{@file}", err
-                @convertWav waveFile, cb
+                # log "[ERROR] can't create waveform for #{@tile.file}", err
+                @convertWav()
             else
-                cb waveFile
+                @showWave()
 
-    convertWav: (waveFile, cb) ->
-        inp  = escapePath @file
+    convertWav: () ->
+        inp  = escapePath @tile.file
         out  = path.join process.env.TMPDIR, 'krixWave.wav'
         cmmd = "/usr/local/bin/ffmpeg -y -i \"#{inp}\" \"#{out}\""
         childp.exec cmmd, (err) =>
@@ -109,23 +102,27 @@ class Wave
                 log "[ERROR] can't convert #{inp} to #{out}", err
             else
                 inp = out
-                out = escapePath waveFile
+                out = escapePath @waveFile()
                 cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
                 childp.exec cmmd, (err) =>
                     if err?
                         log "[ERROR] can't create waveform for #{inp}", err
                     else
-                        cb waveFile
+                        @showWave()
         
-    showWave: (waveFile) =>
-        @elem.style.backgroundImage = "url(\"file://#{encodePath(waveFile)}\")"
+    showWave: () =>
+        @elem.style.backgroundImage = "url(\"file://#{encodePath(@waveFile())}\")"
         @elem.style.backgroundSize = "100% 100%"
 
-    showWaveData: (waveFile) =>
-        fs.readFile waveFile, (err, data) =>
-            if !err? and data?
-                base = data.toString 'base64' 
-                @elem.style.backgroundImage = "url('data:image/png;base64,#{base}')"
-                @elem.style.backgroundSize = "100% 100%"
+    #  0000000  00000000  00000000  000   000  
+    # 000       000       000       000  000   
+    # 0000000   0000000   0000000   0000000    
+    #      000  000       000       000  000   
+    # 0000000   00000000  00000000  000   000  
+
+    onDragMove: (drag, event) => @seekTo event.clientX
+    onDragStart: (drag,event) => @seekTo event.clientX
+    seekTo: (x) -> 
+        post.emit 'seek', 2*Math.max(0,x-@elem.getBoundingClientRect().left)/(@pps*@scale)
         
 module.exports = Wave
