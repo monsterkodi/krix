@@ -146,6 +146,7 @@ class Brws
     
     loadDir: (@dir, @highlight) =>
         cache.unwatch()
+        cache.watch @dir
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir
@@ -311,6 +312,7 @@ class Brws
             when '='                     then @setTileNum @tileNum - 1
             when 'command+enter'         then @activeTile?.play()
             when 'command+f'             then @activeTile?.showInFinder()
+            when 'command+m'             then @activeTile?.openInMeta()
             when 'space'                 then @activeTile.showContextMenu()
             when 'e'                     then @focusTile?.editName?(); stop()
             when 'a'                     then @focusTile?.showPlaylistMenu()

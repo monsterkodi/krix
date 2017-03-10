@@ -95,7 +95,7 @@ class Play
 
     playFile: (file) =>
         @mpcc?.sendCommands ['clear', mpd.cmd('add', [file]), 'play'], (err, msg) ->
-            log "[ERROR] playFile failed:", err if err?
+            log "[ERROR] playFile failed: #{err}" if err?
     
     # 00000000   000       0000000   000   000  000      000   0000000  000000000  
     # 000   000  000      000   000   000 000   000      000  000          000     

@@ -17,7 +17,7 @@ tags    = require './tags'
 imgs    = require './imgs'
 prefs   = require './prefs'
 popup   = require './popup'
-cache   = require './cache'
+childp  = require 'child_process'
 path    = require 'path'
 fs      = require 'fs'
         
@@ -58,14 +58,12 @@ class Tile
             art.innerHTML = path.basename @file
             tit.classList.add 'tileTrack'
             sqr.classList.add "tileSqrFile"
-            cache.watch @absFilePath()
         else if @isDir()
             tit.innerHTML = path.basename @file
             tit.classList.add 'tileName'
             img.classList.add "tileImgDir"
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
-            cache.watch @absFilePath()
         else if @isPlaylist()
             art.addEventListener 'click', @onNameClick
             art.classList.add 'playlistName'
@@ -133,7 +131,7 @@ class Tile
     isFile:         -> true
     isPlaylist:     -> false
     isDir:          -> false
-    isPlaylistItem: -> @opt?.playlist?
+    isPlaylistItem: -> @opt?.item?
     isUp:           -> @opt?.openDir?
     
     absFilePath:      -> path.join Tile.musicDir, @file
@@ -234,6 +232,9 @@ class Tile
             post.emit 'showFile', resolve "~/.mpd/playlists/#{escapePath @opt.playlist}.m3u"
         else
             post.emit 'showFile', @file
+
+    openInMeta: =>
+        childp.spawn "open", ['-a', "Meta.app", escapePath @absFilePath()]
                    
     # 00     00   0000000   000   000   0000000  00000000
     # 000   000  000   000  000   000  000       000     
@@ -282,6 +283,10 @@ class Tile
             text:  'Show in Finder'
             combo: '⌘F'
             cb:    @showInFinder
+        ,
+            text:  'Open in Meta'
+            combo: '%M'
+            cb:    @openInMeta
         ,
             text:  'New Playlist'
             combo: '⌘N'

@@ -5,6 +5,7 @@
 # 000        0000000  000   000     000     0000000  000  0000000      000   
 {
 queue,
+escapePath
 $}      = require './tools/tools'
 log     = require './tools/log'
 Folder  = require './folder'
@@ -12,6 +13,8 @@ Tile    = require './tile'
 post    = require './post'
 Play    = require './play'
 keyinfo = require './tools/keyinfo'
+childp  = require 'child_process'
+path    = require 'path'
 _       = require 'lodash'
 
 class Playlist extends Folder
@@ -116,6 +119,12 @@ class Playlist extends Folder
             @opt.playlist = @file
             $('.playlistName', @div).textContent = @file
         @removeInput()
+
+    openInMeta: =>
+        args = ['-a', 'Meta.app']
+        for file in @info.files
+            args.push path.join Tile.musicDir, file.file
+        childp.spawn "open", args
 
     addToPlaylist: (playlist) => 
         for file in @info.files

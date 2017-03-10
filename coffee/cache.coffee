@@ -52,15 +52,22 @@ class Cache
         @watcher
             .on 'add',    @onFileChange
             .on 'change', @onFileChange
+            .on 'unlink', @onFileUnlink
             .on 'error' , (err) -> log 'chokidar error', err
             
     @onFileChange: (p) => 
         log "Cache.@onFileChange #{p}"
         relpath = relative p, @musicDir
         @del relpath
-        $(relpath).tile?.fileChanged?()
+        $(relpath)?.tile?.fileChanged?()
+
+    @onFileUnlink: (p) => 
+        log "Cache.@onFileUnlink #{p}"
+        relpath = relative p, @musicDir
+        @del relpath
+        $(relpath)?.tile?.del?()
     
-    @watch:   (p) -> @watcher.add p
+    @watch:   (p) -> @watcher.add path.join @musicDir, p
     @unwatch: () -> @watcher.unwatch '*'
         
     @get:  (key, value) -> @store.get key, value
