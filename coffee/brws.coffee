@@ -105,6 +105,7 @@ class Brws
     # 000        0000000  000   000     000     0000000  000  0000000      000   
         
     showPlaylist: (@playlist, @highlight) =>
+        cache.unwatch()
         delete @dir        
         @clear()
         
@@ -144,7 +145,7 @@ class Brws
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
     
     loadDir: (@dir, @highlight) =>
-
+        cache.unwatch()
         delete @playlist
         @clear()
         @tilesDir = path.join @musicDir, @dir

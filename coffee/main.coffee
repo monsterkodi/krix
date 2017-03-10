@@ -22,7 +22,7 @@ class Main
 
         @musicDir = resolve "~/Music"
         log 'Main.constructor', @musicDir
-        cache.init path.join @musicDir, '.krix'
+        cache.init @musicDir
                 
         @brws = new Brws @view, @musicDir
         @ctrl = new Ctrl @view

@@ -17,6 +17,7 @@ tags    = require './tags'
 imgs    = require './imgs'
 prefs   = require './prefs'
 popup   = require './popup'
+cache   = require './cache'
 path    = require 'path'
 fs      = require 'fs'
         
@@ -57,12 +58,14 @@ class Tile
             art.innerHTML = path.basename @file
             tit.classList.add 'tileTrack'
             sqr.classList.add "tileSqrFile"
+            cache.watch @absFilePath()
         else if @isDir()
             tit.innerHTML = path.basename @file
             tit.classList.add 'tileName'
             img.classList.add "tileImgDir"
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
+            cache.watch @absFilePath()
         else if @isPlaylist()
             art.addEventListener 'click', @onNameClick
             art.classList.add 'playlistName'
@@ -156,6 +159,13 @@ class Tile
     enter: ->
         if @isFile() then @play()
         else @open()
+                
+    fileChanged: -> 
+        log 'Tile.fileChanged', @file
+        if @isFile()
+            tags.enqueue @
+        else if @isDir()
+            imgs.enqueue @
                 
     # 00000000   0000000    0000000  000   000   0000000
     # 000       000   000  000       000   000  000     
