@@ -48,24 +48,6 @@ class Song
         post.on 'seek',      => @tile?.setFocus()
         post.on 'status',       @onStatus
 
-    # 00     00   0000000   000   000   0000000  00000000  
-    # 000   000  000   000  000   000  000       000       
-    # 000000000  000   000  000   000  0000000   0000000   
-    # 000 0 000  000   000  000   000       000  000       
-    # 000   000   0000000    0000000   0000000   00000000  
-
-    onDblClick: (event) => @tileForEvent(event)?.onDblClick event
-    onHover: (event) => @tileForEvent(event)?.onHover event
-    onClick: => @tileForEvent(event)?.onClick event
-    onContextMenu: (event) => @focusTile?.onContextMenu event
-
-    tileForEvent: (event) -> @tileForElem event.target
-    tileForElem: (elem) -> 
-        if elem.tile? then return elem.tile
-        if elem.parentNode? then return @tileForElem elem.parentNode
-
-    resized: => @wave?.resized()
-        
     duration: (s) -> moment.duration(parseInt(s), 'seconds').format('h:mm:ss')
         
     onStatus: (status) =>
@@ -83,11 +65,31 @@ class Song
             @tile?.del()
             if @song.file?
                 @createTile setFocus
+            else
+                @wave.clear()
                 
     createTile: (setFocus) ->
         @infoDuration.innerHTML = "#{@duration @song.duration}"
         @tile = new Tile @song.file, @elem
         @wave.showTile @tile, @song
         @tile.setFocus() if setFocus
+
+    # 00     00   0000000   000   000   0000000  00000000  
+    # 000   000  000   000  000   000  000       000       
+    # 000000000  000   000  000   000  0000000   0000000   
+    # 000 0 000  000   000  000   000       000  000       
+    # 000   000   0000000    0000000   0000000   00000000  
+
+    onDblClick: (event) => @tileForEvent(event)?.onDblClick event
+    onHover: (event) => @tileForEvent(event)?.onHover event
+    onClick: => @tileForEvent(event)?.onClick event
+    onContextMenu: (event) => @tile?.onContextMenu event
+
+    tileForEvent: (event) -> @tileForElem event.target
+    tileForElem: (elem) -> 
+        if elem.tile? then return elem.tile
+        if elem.parentNode? then return @tileForElem elem.parentNode
+
+    resized: => @wave?.resized()        
         
 module.exports = Song

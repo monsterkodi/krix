@@ -73,5 +73,4 @@ class Popup
      
     onClick: (e) => @activate e.target
         
-        
 module.exports = menu: (opt) -> new Popup opt

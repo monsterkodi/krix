@@ -87,11 +87,8 @@ class Wave
         out = escapePath @waveFile()
         cmmd = "/usr/local/bin/audiowaveform --pixels-per-second #{@pps} --no-axis-labels -h 360 -w #{parseInt @pps * @seconds} --background-color 00000000 --waveform-color ffffff -i \"#{inp}\" -o \"#{out}\""
         childp.exec cmmd, (err) =>
-            if err?
-                # log "[ERROR] can't create waveform for #{@tile.file}", err
-                @convertWav()
-            else
-                @showWave()
+            if err? then @convertWav()
+            else @showWave()
 
     convertWav: () ->
         inp  = escapePath @tile.file
@@ -113,6 +110,9 @@ class Wave
     showWave: () =>
         @elem.style.backgroundImage = "url(\"file://#{encodePath(@waveFile())}\")"
         @elem.style.backgroundSize = "100% 100%"
+        
+    clear: () =>
+        @elem.style.backgroundImage = 'none'
 
     #  0000000  00000000  00000000  000   000  
     # 000       000       000       000  000   
