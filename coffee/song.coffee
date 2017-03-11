@@ -47,9 +47,14 @@ class Song
         post.on 'focusSong', => @tile?.setFocus()
         post.on 'seek',      => @tile?.setFocus()
         post.on 'status',       @onStatus
+        post.on 'trashed',      @onTrashed
 
     duration: (s) -> moment.duration(parseInt(s), 'seconds').format('h:mm:ss')
-        
+    
+    onTrashed: (file) =>
+        if file == @tile?.file 
+            post.emit 'nextSong' 
+    
     onStatus: (status) =>
         if @song?.duration? and status?.elapsed?
             @infoElapsed.innerHTML = "#{@duration status.elapsed}"

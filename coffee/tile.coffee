@@ -147,11 +147,7 @@ class Tile
             if err
                 log "[ERROR] trashing file #{@absFilePath()} failed!", err
             else
-                if @isCurrentSong()
-                    post.emit 'nextSong' 
-                else
-                    @focusNeighbor 'right', 'left'
-                    @del()
+                post.emit 'trashed', @file
 
     enter: ->
         if @isFile() then @play()

@@ -55,6 +55,7 @@ class Cache
         $(relpath)?.tile?.del?()
     
     @watch: (p) ->
+        return
         @unwatch()
         absPath = path.join @musicDir, p
         @watcher = chokidar.watch absPath,
@@ -73,6 +74,7 @@ class Cache
         # log 'watch:', absPath, @watcher?.getWatched()
         
     @unwatch: () -> 
+        return
         @watcher?.unwatch()
         @watcher?.close()
         delete @watcher

@@ -25,7 +25,9 @@ queue = (items, opt) ->
         count -= 1
         if item = items.shift()
             r = opt.cb? item
-            return if r == 'stop'
+            if r == 'stop'
+                log 'stop queue'
+                return 
         else
             opt.done?()
             return

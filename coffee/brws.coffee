@@ -38,8 +38,6 @@ class Brws
         @tilesDir = @musicDir
         Tile.musicDir = @musicDir
         
-        @setTileNum prefs.get "tileNum:#{@musicDir}", 8
-        
         @tiles.addEventListener "click",       @onClick
         @tiles.addEventListener "dblclick",    @onDblClick
         @tiles.addEventListener "mouseover",   @onHover
@@ -56,6 +54,7 @@ class Brws
         post.on 'home',        @goHome
         post.on 'up',          @goUp
         post.on 'connected',   @connected
+        post.on 'trashed',     @onTrashed
         
     del: -> @tiles.remove()
         
@@ -67,7 +66,7 @@ class Brws
 
     goUp: =>
         if @playlist?
-            @loadDir '.', @playlist
+            @loadDir '', @playlist
         else if @dir in ['', '.']
             if @focusTile?
                 post.emit 'focusSong'
@@ -207,6 +206,11 @@ class Brws
     getTiles:      -> (t.tile for t in @tiles.childNodes)
     tilesWidth:    -> @tiles.clientWidth
     tilesHeight:   -> @tiles.clientHeight
+
+    onTrashed: (file) =>
+        if file == @focusTile?.file
+            @focusTile.focusNeighbor 'right', 'left'
+        $(file, @tiles)?.tile?.del()
 
     #  0000000  000  0000000  00000000  
     # 000       000     000   000       
