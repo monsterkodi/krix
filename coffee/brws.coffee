@@ -210,6 +210,19 @@ class Brws
             @focusTile.focusNeighbor 'right', 'left'
         $(file, @tiles)?.tile?.del()
 
+    collapseFocusTile: =>
+        return if not @focusTile?
+        return if not @focusTile.expanded?
+        collapse = @focusTile.expanded
+            
+        tile = new Folder @focusTile.expanded, @tiles
+        @tiles.insertBefore tile.div, @focusTile.div
+        tile.setFocus()
+        
+        for tile in @getTiles()
+            if tile.expanded == collapse
+                tile.del()
+
     #  0000000  000  0000000  00000000  
     # 000       000     000   000       
     # 0000000   000    000    0000000   
@@ -364,6 +377,7 @@ class Brws
             when 'q'                     then @focusTile?.addToCurrent(focusNeighbor: @focusTile.isFile() and 'right' or null)
             when 'enter'                 then @focusTile?.enter()
             when 'command+right'         then @focusTile?.expand()
+            when 'command+left'          then @collapseFocusTile()
             when 'command+backspace'     then @activeTile?.delete()
             when 'command+alt+backspace' then if not @inMusicDir() then @focusTile?.delete(trashDir:true)
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  

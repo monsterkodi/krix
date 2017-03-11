@@ -21,10 +21,7 @@ class Playlist extends Folder
     
     constructor: (@file, elem, @opt) ->
         super @file, elem, @opt
-        
-        if @file == '' # current playlist
-            $('.playlistName', @div).innerHTML = "<span class=\"fa fa-bars fa-1\"></span>"
-        
+                
         setImmediate @loadItems
             
         post.on "playlist:#{@file}", @onPlaylistInfo
@@ -35,22 +32,14 @@ class Playlist extends Folder
             
     loadItems: =>
         
-        if @file == '' # current playlist
-            Play.instance.mpc 'playlistinfo', (list) =>
-                queue list, cb: (item) =>
+        post.emit 'playlistInfo', @file, cb: (@info) =>
+            @onPlaylistInfo @info
+            if @opt.openDir == '.' 
+                files = _.clone @info.files
+                queue files, batch: 500, cb: (item) =>
                     return 'stop' if not @div.parentNode
-                    tile = new Tile item, @div.parentNode, playlist: @file
-                    if item == @opt.highlight
-                        tile.setFocus()
-        else
-            post.emit 'playlistInfo', @file, cb: (@info) =>
-                @onPlaylistInfo @info
-                if @opt.openDir == '.' 
-                    files = _.clone @info.files
-                    queue files, batch: 500, cb: (item) =>
-                        return 'stop' if not @div.parentNode
-                        tile = new Tile item.file, @div.parentNode, playlist: @file, item: item
-                        tile.setFocus() if item.file == @opt.highlight
+                    tile = new Tile item.file, @div.parentNode, playlist: @file, item: item
+                    tile.setFocus() if item.file == @opt.highlight
 
     isDir:      -> false
     isPlaylist: -> true
@@ -58,7 +47,10 @@ class Playlist extends Folder
     onPlaylistInfo: (@info) =>
         text =  "<span class='playlistCount'><span class='fa fa-music'></span> #{@info.count}</span> "
         text += "<span class='playlistTime'><span class='fa fa-clock-o'></span> #{@info.time}</span>"
-        @setText @info.name, null, text
+        
+        name = @info.name
+        name = "<span class=\"fa fa-bars fa-1\"></span> #{@info.count}" if not name?.length
+        @setText name, null, text
 
     # 000   000   0000000   00     00  00000000  
     # 0000  000  000   000  000   000  000       

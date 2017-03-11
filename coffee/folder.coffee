@@ -16,8 +16,8 @@ class Folder extends Tile
     constructor: (@file, elem, @opt) ->
         super @file, elem, @opt
 
-    isFile:         -> false
-    isDir:          -> true
+    isFile: -> false
+    isDir:  -> true
 
     # 00000000  000   000  00000000    0000000   000   000  0000000  
     # 000        000 000   000   000  000   000  0000  000  000   000
@@ -25,7 +25,7 @@ class Folder extends Tile
     # 000        000 000   000        000   000  000  0000  000   000
     # 00000000  000   000  000        000   000  000   000  0000000  
 
-    isExpanded: -> @children?.length
+    isExpanded: -> @expanded?
 
     expand: ->
         return if not @isDir() or @isExpanded() or @isUp()
@@ -33,7 +33,6 @@ class Folder extends Tile
             
     doExpand: =>
         @div.classList.add 'tileExpanded'
-        @children = []
         @walker?.stop()
         @walker = new walk @absFilePath()
         
@@ -46,14 +45,18 @@ class Folder extends Tile
             return if not @div.parentNode?
             dirname = path.basename(dir)
             return if dirname.startsWith('.') or dirname == 'iTunes'
-            @addChild new Folder dir, @div.parentNode
+            tile = new Folder dir, @div.parentNode
+            tile.setText @file, path.basename dir
+            @addChild tile
             
         @walker.on 'done', =>
+            delete @lastChild
             @focusNeighbor 'right' if @hasFocus()
             @del() # remove expanded tile when children are loaded
     
     addChild: (child) ->
-        @div.parentNode.insertBefore child.div, last(@children)?.div?.nextSibling or @div.nextSibling
-        @children.push child
+        @div.parentNode.insertBefore child.div, @lastChild?.div?.nextSibling or @div.nextSibling
+        @lastChild = child
+        child.expanded = @file
         
 module.exports = Folder

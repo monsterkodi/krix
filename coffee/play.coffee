@@ -151,10 +151,12 @@ class Play
             @playlists[name] = name: name, date: ''
 
         # log "get info #{name}"
-            
-        @mpcc?.sendCommand mpd.cmd('listplaylistinfo', [name]), (err, msg) => 
+
+        cmd = mpd.cmd 'listplaylistinfo', [name] 
+        cmd = mpd.cmd 'playlistinfo', [] if name == ''
+        @mpcc?.sendCommand cmd, (err, msg) => 
             if err?
-                log "[ERROR] listplaylistinfo failed: #{err}"
+                log "[ERROR] playlist command failed: #{err}"
                 return
             
             lines = msg.split '\n'
