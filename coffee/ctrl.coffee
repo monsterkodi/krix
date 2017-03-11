@@ -42,12 +42,12 @@ class Ctrl
         @buttons.appendChild document.createElement 'br'
         @button id: 'random',   icon: 'random fa-1x',        cb: -> post.emit 'random'
         @button id: 'repeat',   icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
-        @button id: 'song',     icon: 'music fa-1x',         cb: => post.emit 'song', @song.song
+        @button id: 'song',     icon: 'music fa-1x',         cb: @showDirOfCurrentSong
         @label  id: 'songid', $('song')
         @buttons.appendChild document.createElement 'br'
         @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
         @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
-        @button id: 'playlist', icon: 'bars fa-1x',          cb: => post.emit 'playlist', '', @song.song.file
+        @button id: 'playlist', icon: 'bars fa-1x',          cb: @showCurrentPlaylist
         @label  id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->
@@ -74,7 +74,9 @@ class Ctrl
         @song.tile?.setFocus() if @state != 'play'
         post.emit 'toggle'
 
-    loadDirOfCurrentSong: ->
+    showCurrentPlaylist: => post.emit 'playlist', '', @song.song.file
+
+    showDirOfCurrentSong: =>
         if @song.tile?.file
             post.emit 'loadDir', path.dirname(@song.tile.file), @song.tile.file
         
@@ -116,7 +118,8 @@ class Ctrl
             when 'b' then post.emit 'prevSong'
             when 'c' then post.emit 'focusSong'
             when 'p' then @onPlayButton()
-            when 'f' then @loadDirOfCurrentSong()
+            when 'f' then @showDirOfCurrentSong()
+            when 'v' then @showCurrentPlaylist()
                     
         if @song?.tile?.hasFocus()
             switch combo                    

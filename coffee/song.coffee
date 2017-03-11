@@ -53,6 +53,7 @@ class Song
     
     onTrashed: (file) =>
         if file == @tile?.file 
+            @focusSong = @tile.hasFocus()
             post.emit 'nextSong' 
     
     onStatus: (status) =>
@@ -66,12 +67,13 @@ class Song
     onCurrentSong: (@song) =>
         if not @tile or @song.file != @tile.file
             @infoDuration.innerHTML = ""
-            setFocus = @tile?.hasFocus()
+            setFocus = @tile?.hasFocus() or @focusSong
             @tile?.del()
             if @song.file?
                 @createTile setFocus
             else
                 @wave.clear()
+            delete @focusSong
                 
     createTile: (setFocus) ->
         @infoDuration.innerHTML = "#{@duration @song.duration}"

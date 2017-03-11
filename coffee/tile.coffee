@@ -331,6 +331,7 @@ class Tile
     addToPlaylist: (playlist) => post.emit 'addToPlaylist', @file, playlist
 
     delFromPlaylist: =>
+        return if childIndex(@div) < 2
         post.emit 'mpc', 'playlistdelete', [@opt.playlist, childIndex(@div) - 1]
         @focusNeighbor 'right', 'left'
         @del()

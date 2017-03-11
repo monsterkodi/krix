@@ -48,7 +48,6 @@ class Brws
         post.on 'unfocus',     @onUnfocus
         post.on 'playlist',    @showPlaylist
         post.on 'newPlaylist', @newPlaylist
-        post.on 'song',        @showSong
         post.on 'loadDir',     @loadDir
         post.on 'showFile',    @showFile
         post.on 'home',        @goHome
@@ -150,7 +149,7 @@ class Brws
         @clear()
         @tilesDir = path.join @musicDir, @dir
         
-        num = prefs.get "tileNum:#{@tilesDir}", -1
+        num = prefs.get "tileNum:#{@dir}", -1
         if num != -1 and @tileNum != num
             @setTileNum num
         
@@ -185,7 +184,6 @@ class Brws
             else @adjustTiles()
 
     inMusicDir: => @tilesDir == @musicDir
-    showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
             
     # 000000000  000  000      00000000   0000000
     #    000     000  000      000       000     
@@ -230,7 +228,7 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
-        prefs.set "tileNum:#{@playlist ? @tilesDir}", @tileNum
+        prefs.set "tileNum:#{@playlist ? @dir}", @tileNum
         @setTileSize parseInt (@tilesWidth()-12)/@tileNum-12
     
     #  0000000   0000000          000  000   000   0000000  000000000  
@@ -239,8 +237,8 @@ class Brws
     # 000   000  000   000  000   000  000   000       000     000     
     # 000   000  0000000     0000000    0000000   0000000      000     
     
-    adjustTiles: ->
-        num = prefs.get "tileNum:#{@playlist ? @tilesDir}"
+    adjustTiles: =>
+        num = prefs.get "tileNum:#{@playlist ? @dir}"
         if num
             @setTileNum num
         else
@@ -272,7 +270,7 @@ class Brws
         else num = Math.floor num
 
         @setTileNum num
-        prefs.del "tileNum:#{@playlist ? @tilesDir}"
+        prefs.del "tileNum:#{@playlist ? @dir}"
                 
     onScroll: =>
         Tile.scrollLock = true
@@ -290,6 +288,7 @@ class Brws
         prefs.set "expanded:#{@dir}", true
         tiles = @getTiles()
         tile.expand?() for tile in tiles
+        setTimeout @adjustTiles, 300
     
     # 00     00   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000       000       
