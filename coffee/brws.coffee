@@ -125,8 +125,10 @@ class Brws
                 tile = new Playlist list, @tiles, playlist: list
                 if @highlight == list
                     tile.setFocus()
+            @adjustTiles()
 
     newPlaylist: (name='new playlist') =>
+        log 'new playlist', @dir
         return if @dir != ''
         Play.newPlaylist name, (playlist) =>
             tile = new Tile playlist, @tiles, playlist: playlist
@@ -181,6 +183,7 @@ class Brws
                 @expandAllTiles()
                 
             if @inMusicDir() then @loadPlaylists()
+            else @adjustTiles()
 
     inMusicDir: => @tilesDir == @musicDir
     showSong: (song) => if song?.file then @loadDir path.dirname(song.file), song.file
@@ -215,7 +218,6 @@ class Brws
         @tileSize = Math.floor size
         @tileSize = MIN_TILE_SIZE if @tileSize < MIN_TILE_SIZE
         @tileSize = MAX_TILE_SIZE if @tileSize > MAX_TILE_SIZE
-        
         fontSize = Math.max 8, Math.min 18, @tileSize / 10
         style '.tiles .playlistInfo', "font-size: #{fontSize-2}px"
         style '.tiles .tileSqr',      "font-size: #{fontSize}px"
@@ -224,13 +226,50 @@ class Brws
 
     setTileNum: (num) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
-        # log "setTileNum #{@tileNum} #{@tilesWidth()} #{num}"
-        tileSize = parseInt (@tilesWidth()-8)/@tileNum-12
         prefs.set "tileNum:#{@playlist ? @tilesDir}", @tileNum
-        @setTileSize tileSize
+        @setTileSize parseInt (@tilesWidth()-12)/@tileNum-12
     
-    resized: => @setTileNum @tileNum
-            
+    #  0000000   0000000          000  000   000   0000000  000000000  
+    # 000   000  000   000        000  000   000  000          000     
+    # 000000000  000   000        000  000   000  0000000      000     
+    # 000   000  000   000  000   000  000   000       000     000     
+    # 000   000  0000000     0000000    0000000   0000000      000     
+    
+    adjustTiles: ->
+        num = prefs.get "tileNum:#{@playlist ? @tilesDir}"
+        if num
+            @setTileNum num
+        else
+            @adjustTileNum() 
+
+    resized: => @adjustTiles()
+        
+    adjustTileNum: ->
+        
+        x = @tilesWidth()-12
+        y = @tilesHeight()-12
+        n = @tiles.childNodes.length
+
+        px = Math.ceil Math.sqrt n*x/y
+        if Math.floor(px*y/x)*px < n
+            sx = y / Math.ceil px*y/x 
+        else
+            sx = x / px
+        
+        py = Math.ceil Math.sqrt n*y/x
+        if Math.floor(py*x/y)*py < n
+            sy = x / Math.ceil x*py/y
+        else
+            sy = y / py
+
+        sx  = Math.max sx, sy
+        num = x/sx
+        if num % 1 > 0.25 then num = Math.ceil num
+        else num = Math.floor num
+
+        @setTileNum num
+        prefs.del "tileNum:#{@playlist ? @tilesDir}"
+                
     onScroll: =>
         Tile.scrollLock = true
         unlock = () -> 
@@ -239,6 +278,7 @@ class Brws
         @scrollTimer = setTimeout unlock, 100
 
     collapseAllTiles: -> 
+        return if not @dir?
         prefs.del "expanded:#{@dir}"
         @loadDir @dir, @focusTile?.file
             
@@ -309,6 +349,7 @@ class Brws
             when 'backspace', 'delete'   then @delPlaylistItem()
             when 'home'                  then @getFirstTile().setFocus()
             when 'end'                   then @getLastTile().setFocus()
+            when '0', 'o'                then @adjustTileNum()
             when '-'                     then @setTileNum @tileNum + 1
             when '='                     then @setTileNum @tileNum - 1
             when 'command+enter'         then @activeTile?.play()

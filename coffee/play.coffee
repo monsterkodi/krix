@@ -90,7 +90,7 @@ class Play
     onRepeat:        => @mpc 'repeat', [@status?.repeat == '0'    and '1' or '0']
     onCurrent:       => @mpc 'currentsong', (info) -> post.emit 'currentSong', info 
     onRefresh:       => @mpc 'status', (@status) => post.emit 'status', @status
-    onUpdate: (p)    => @mpc 'update', [p]; log "mpd update #{p}"
+    onUpdate: (p)    => @mpc 'rescan', [p]; log "mpd update #{p}"
     onSeek: (pos)    => @mpc 'seekcur', [pos]    
     nextSong:        => @mpc 'next'
     prevSong:        => @mpc 'previous' 

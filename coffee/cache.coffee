@@ -73,6 +73,7 @@ class Cache
         # log 'watch:', absPath, @watcher?.getWatched()
         
     @unwatch: () -> 
+        @watcher?.unwatch()
         @watcher?.close()
         delete @watcher
         
