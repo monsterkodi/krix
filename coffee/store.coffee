@@ -16,7 +16,6 @@ class Store
     
     constructor: (opt) ->
         
-        log 'Store.constructor', opt
         @timer   = null
         @file    = opt?.file
         @sep     = opt?.separator ? ':'
@@ -85,7 +84,6 @@ class Store
     # 0000000   000   000      0      00000000
 
     save: (cb) =>
-        log 'Store.save', @file
         return if not @file
         clearTimeout @timer if @timer
         @timer = null

@@ -29,7 +29,7 @@ class Imgs
             @dequeue() if @queue.length == 1
     
     @coverForTile: (tile) -> path.join cache.imgDir, tile.file.hash() + '.jpg'
-    @kirxForTile:  (tile) -> path.join tile.absFilePath, '.krix.jpg'
+    @krixForTile:  (tile) -> path.join tile.absFilePath(), '.krix.jpg'
         
     @dequeue: ->
         if @queue.length
@@ -50,6 +50,11 @@ class Imgs
         else
             log "[ERROR] unknown image format: #{extname}"
     
+    @didSetFileCover: (file, cover) ->
+        relDir = path.dirname file
+        if not cache.get "#{relDir}:cover"
+            cache.set "#{relDir}:cover", cover        
+        
     @setDirTileImageData: (tile, data) -> 
         if data?.length
             krixFile = @krixForTile tile

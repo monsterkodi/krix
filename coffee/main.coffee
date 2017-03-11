@@ -21,7 +21,6 @@ class Main
     constructor: (@view) -> 
 
         @musicDir = resolve "~/Music"
-        log 'Main.constructor', @musicDir
         cache.init @musicDir
                 
         @brws = new Brws @view, @musicDir

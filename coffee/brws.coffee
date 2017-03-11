@@ -6,7 +6,6 @@
 {
 resolve,
 style,
-queue,
 $ }      = require './tools/tools'
 fs       = require 'fs'
 path     = require 'path'
@@ -145,7 +144,6 @@ class Brws
     # 0000000   0000000   000   000  0000000    0000000    000  000   000  
         
     loadDir: (@dir, @highlight) =>
-        cache.unwatch()
         cache.watch @dir
         delete @playlist
         @clear()

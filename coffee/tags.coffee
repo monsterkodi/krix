@@ -49,23 +49,7 @@ class Tags
     @tagError: (err) ->
         if tile = Tags.queue.shift()
             Tags.dequeue()
-                  
-    @setTag: (tile, tag, cover) ->
-            
-        cache.set "#{tile.file}:artist", tag.artist
-        cache.set "#{tile.file}:title", tag.title
-        if cover?
-            cache.set "#{tile.file}:cover", cover 
-            
-            if not cache.get "#{path.dirname(tile.file)}:cover"
-                cache.set "#{path.dirname(tile.file)}:cover", cover
-            
-            tag.cover = cover
-        else
-            delete tag.cover
-        tile.setTag tag
-        Tags.dequeue()
-    
+                      
     @saveCover: (tile, tag) ->
 
         picture   = first(tag.APIC) ? tag.picture 
@@ -96,5 +80,18 @@ class Tags
                         else
                             Tags.setTag tile, tag, coverFile
                         fs.unlink tmpFile, ->
+
+    @setTag: (tile, tag, cover) ->
+            
+        cache.set "#{tile.file}:artist", tag.artist
+        cache.set "#{tile.file}:title",  tag.title
+        if cover?
+            cache.set "#{tile.file}:cover", cover 
+            imgs.didSetFileCover tile.file, cover            
+            tag.cover = cover
+        else
+            delete tag.cover
+        tile.setTag tag
+        Tags.dequeue()
                             
 module.exports = Tags

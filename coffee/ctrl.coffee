@@ -114,6 +114,7 @@ class Ctrl
         switch combo
             when 'n' then post.emit 'nextSong'
             when 'b' then post.emit 'prevSong'
+            when 'c' then post.emit 'focusSong'
             when 'p' then @onPlayButton()
             when 'f' then @loadDirOfCurrentSong()
                     

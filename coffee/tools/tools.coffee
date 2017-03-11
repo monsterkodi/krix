@@ -24,7 +24,8 @@ queue = (items, opt) ->
     while count > 0
         count -= 1
         if item = items.shift()
-            opt.cb? item
+            r = opt.cb? item
+            return if r == 'stop'
         else
             opt.done?()
             return

@@ -38,6 +38,7 @@ class Playlist extends Folder
         if @file == '' # current playlist
             Play.instance.mpc 'playlistinfo', (list) =>
                 queue list, cb: (item) =>
+                    return 'stop' if not @div.parentNode
                     tile = new Tile item, @div.parentNode, playlist: @file
                     if item == @opt.highlight
                         tile.setFocus()
@@ -47,6 +48,7 @@ class Playlist extends Folder
                 if @opt.openDir == '.' 
                     files = _.clone @info.files
                     queue files, batch: 500, cb: (item) =>
+                        return 'stop' if not @div.parentNode
                         tile = new Tile item.file, @div.parentNode, playlist: @file, item: item
                         tile.setFocus() if item.file == @opt.highlight
 

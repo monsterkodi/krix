@@ -56,7 +56,6 @@ class Tile
         if @isFile()
             art.classList.add 'tileArtist'
             art.innerHTML = path.basename @file
-            tit.classList.add 'tileTrack'
             sqr.classList.add "tileSqrFile"
         else if @isDir()
             tit.innerHTML = path.basename @file

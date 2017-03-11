@@ -8,8 +8,7 @@ relative,
 $ }      = require './tools/tools'
 log      = require './tools/log'
 Store    = require './store'
-# graceful = require 'graceful-fs'
-# graceful.gracefulify require 'fs' 
+post     = require './post'
 path     = require 'path'
 mkpath   = require 'mkpath'
 chokidar = require 'chokidar'
@@ -25,7 +24,6 @@ class Cache
     @init: (@musicDir)   -> 
         
         @cacheDir = path.join @musicDir, '.krix'
-        log 'Cache.@init', @cacheDir
         
         @store   = new Store timeout: 10000, file: path.join @cacheDir, 'cache.noon'
         @imgDir  = path.join @cacheDir, 'img' 
@@ -41,8 +39,25 @@ class Cache
         catch err
             log "[ERROR] can't create wave cache directory @{waveDir}", err
             @waveDir = null
-            
-        @watcher = chokidar.watch path.dirname(@cacheDir), 
+                        
+    @onFileChange: (p) => 
+        log "Cache.@onFileChange #{p}"
+        relpath = relative p, @musicDir
+        @del relpath
+        post.emit 'update', path.dirname relpath
+        $(relpath)?.tile?.fileChanged?()
+
+    @onFileUnlink: (p) => 
+        log "Cache.@onFileUnlink #{p}"
+        relpath = relative p, @musicDir
+        @del relpath
+        post.emit 'update', path.dirname relpath
+        $(relpath)?.tile?.del?()
+    
+    @watch: (p) ->
+        @unwatch()
+        absPath = path.join @musicDir, p
+        @watcher = chokidar.watch absPath,
             ignored:        /(^|[\/\\])\../
             ignoreInitial:  true
             usePolling:     false
@@ -54,21 +69,12 @@ class Cache
             .on 'change', @onFileChange
             .on 'unlink', @onFileUnlink
             .on 'error' , (err) -> log 'chokidar error', err
-            
-    @onFileChange: (p) => 
-        log "Cache.@onFileChange #{p}"
-        relpath = relative p, @musicDir
-        @del relpath
-        $(relpath)?.tile?.fileChanged?()
-
-    @onFileUnlink: (p) => 
-        log "Cache.@onFileUnlink #{p}"
-        relpath = relative p, @musicDir
-        @del relpath
-        $(relpath)?.tile?.del?()
-    
-    @watch:   (p) -> @watcher.add path.join @musicDir, p
-    @unwatch: () -> @watcher.unwatch '*'
+        
+        # log 'watch:', absPath, @watcher?.getWatched()
+        
+    @unwatch: () -> 
+        @watcher?.close()
+        delete @watcher
         
     @get:  (key, value) -> @store.get key, value
     @set:  (key, value) -> @store.set key, value

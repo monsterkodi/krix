@@ -113,6 +113,7 @@ class Wave
         
     clear: () =>
         @elem.style.backgroundImage = 'none'
+        @line.style.left = "0"
 
     #  0000000  00000000  00000000  000   000  
     # 000       000       000       000  000   
