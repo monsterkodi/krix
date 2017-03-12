@@ -264,7 +264,6 @@ class Brws
         if num
             @setTileNum num
         else if not @tileSize? or @tileSize > MIN_TILE_SIZE
-            log 'adjust', @tileSize
             @adjustTileNum() 
 
     resized: => @adjustTiles()

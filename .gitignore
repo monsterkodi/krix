@@ -6,3 +6,4 @@ krix-darwin-x64
 *.html
 bin/dmg.json
 krix-*.dmg
+bin/github-release

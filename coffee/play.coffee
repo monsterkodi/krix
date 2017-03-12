@@ -62,8 +62,9 @@ class Play
         post.emit 'connected'
 
     onServerChange: (change) =>
-        if change == 'player' then @onCurrent()
+        if change == 'player'          then @onCurrent()
         if change == 'stored_playlist' then @updatePlaylists()
+        if change == 'playlist'        then delete @playlists['']; @playlistInfo ''
         @onRefresh()
         
     onClientError: (err) =>
@@ -142,7 +143,6 @@ class Play
     playlistInfo: (name, opt) => 
         
         if not opt?.update and @playlists[name]?.count?
-            # log "cached playlist #{name} #{@playlists[name].count} #{@playlists[name].files.length}"
             if opt?.cb?
                 opt.cb @playlists[name]
             else
@@ -151,8 +151,6 @@ class Play
             
         if not @playlists[name]? 
             @playlists[name] = name: name, date: ''
-
-        # log "get info #{name}"
 
         cmd = mpd.cmd 'listplaylistinfo', [name] 
         cmd = mpd.cmd 'playlistinfo', [] if name == ''
@@ -178,7 +176,6 @@ class Play
             @playlists[name].secs  = time
             @playlists[name].time  = moment.duration(time, 'seconds').humanize()
             @playlists[name].files = files
-            # log "loaded #{name} #{files.length}"
             if opt?.cb?
                 opt.cb @playlists[name]
             else
