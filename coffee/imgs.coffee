@@ -46,7 +46,7 @@ class Imgs
         extname = path.extname(file).toLowerCase()
         if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
             coverFile = swapExt file, '.jpg'
-            childp.exec "convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
+            childp.exec "/usr/local/bin/convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
         else
             log "[ERROR] unknown image format: #{extname}"
     
@@ -83,7 +83,7 @@ class Imgs
                         absFile = path.join dir, file 
                         extname = path.extname(file).toLowerCase()
                         if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
-                            childp.exec "convert \"#{absFile}\" \"#{krixFile}\"", (err) ->
+                            childp.exec "/usr/local/bin/convert \"#{absFile}\" \"#{krixFile}\"", (err) ->
                                 if not err
                                     @cloneDirTileImage tile
                                 else

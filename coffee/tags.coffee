@@ -35,9 +35,11 @@ class Tags
                     tile.setTag cache.get tile.file
                     Tags.dequeue()
             else
-                jsmediatags.read tile.absFilePath(), 
-                    onSuccess: Tags.tagLoaded
-                    onError:   Tags.tagError
+                readTags = ->
+                    jsmediatags.read tile.absFilePath(), 
+                        onSuccess: Tags.tagLoaded
+                        onError:   Tags.tagError
+                setTimeout readTags, 100
 
     @tagLoaded: (tag) ->
         if tile = Tags.queue.shift()
@@ -73,9 +75,10 @@ class Tags
                     log "[ERROR] can't save tmp image", tmpFile
                     Tags.setTag tile, tag
                 else
-                    childp.exec "convert \"#{tmpFile}\" \"#{coverFile}\"", (err) =>
+                    childp.exec "/usr/local/bin/convert \"#{tmpFile}\" \"#{coverFile}\"", (err) =>
                         if err?
                             log "[ERROR] can't convert cover for", tile.file
+                            log "        \"#{tmpFile}\" -> \"#{coverFile}\""
                             Tags.setTag tile, tag
                         else
                             Tags.setTag tile, tag, coverFile

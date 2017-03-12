@@ -55,11 +55,13 @@ class Tile
     
         if @isFile()
             art.classList.add 'tileArtist'
+            tit.classList.add 'tileTitle'
             art.innerHTML = path.basename @file
             sqr.classList.add "tileSqrFile"
         else if @isDir()
-            tit.innerHTML = path.basename @file
-            tit.classList.add 'tileName'
+            art.innerHTML = path.basename @file
+            art.classList.add 'tileName'
+            tit.classList.add 'tileChild'
             img.classList.add "tileImgDir"
             sqr.classList.add "tileSqrDir"
             @pad.classList.add "tilePadDir"
@@ -107,12 +109,10 @@ class Tile
     setText: (top, sub, info) -> 
         artist = @pad.firstChild.firstChild.firstChild
         title = artist.nextSibling
+        inf = @pad.firstChild.lastChild
         artist.innerHTML = top
-        if sub?
-            title.innerHTML = sub
-        if info?
-            inf = @pad.firstChild.lastChild
-            inf.innerHTML = info
+        if sub? then title.innerHTML = sub
+        if info? then inf.innerHTML = info
         
     setTag: (@tag) =>
         @setText @tag.artist, @tag.title

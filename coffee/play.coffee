@@ -51,6 +51,8 @@ class Play
         @client.on 'error',  @onClientError
         @client.on 'system', @onServerChange
         @client.on 'ready',  @onClientReady
+    
+    @isConnected: -> Play.instance.mpcc?
             
     onClientReady: =>
         log 'connected to mpd'
@@ -68,7 +70,7 @@ class Play
         if err.code == 'ECONNREFUSED'
             if not @server
                 log 'spawning mpd server'
-                @server = childp.spawn 'mpd', ['--no-daemon', '--stderr']
+                @server = childp.spawn '/usr/local/bin/mpd', ['--no-daemon', '--stderr']
                 @server.on 'error', (err)  -> log "[ERROR] can't spawn mpd server", err
                 @server.on 'close', (code) -> log "mpd server closed", code
                 @server.on 'data',  (data) -> log "mpd server data", data

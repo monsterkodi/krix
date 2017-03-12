@@ -1,6 +1,6 @@
 title  krix
-icon   img/krix.icns
-background  img/dmg.png
+icon   ../img/krix.icns
+background  ../img/dmg.png
 contents
     .
         x   416
@@ -11,4 +11,4 @@ contents
         x   94
         y   94
         type  file 
-        path  krix-darwin-x64/krix.app
+        path  ../krix-darwin-x64/krix.app

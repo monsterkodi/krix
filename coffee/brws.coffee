@@ -34,6 +34,7 @@ class Brws
         @tiles.classList.add 'tiles'
         @view.appendChild @tiles
                 
+        @dirLoaded = false
         @tilesDir = @musicDir
         Tile.musicDir = @musicDir
         
@@ -53,6 +54,7 @@ class Brws
         post.on 'up',          @goUp
         post.on 'connected',   @connected
         post.on 'trashed',     @onTrashed
+        post.on 'adjustTiles', @adjustTiles
         
     del: -> @tiles.remove()
         
@@ -78,8 +80,12 @@ class Brws
     clear: ->
         @walker?.stop()
         tags.clearQueue()
+        imgs.clearQueue()
         post.emit 'unfocus'
-        @tiles.firstChild?.tile.del()
+        if @inMusicDir() 
+            tile.del() for tile in @getTiles()
+        else
+            @tiles.firstChild?.tile.del()
         @tiles.innerHTML = ''
         @focusTile = null
 
@@ -113,8 +119,8 @@ class Brws
         tile.setFocus()
         
     connected: () =>
-        post.removeListener 'connected', @loadPlaylists
-        @loadPlaylists()
+        post.removeListener 'connected', @connected
+        @loadPlaylists() if @dirLoaded
         
     loadPlaylists: ->
         Play.mpc 'listplaylists', (playlists) =>
@@ -125,7 +131,6 @@ class Brws
             @adjustTiles()
 
     newPlaylist: (name='new playlist') =>
-        log 'new playlist', @dir
         return if @dir != ''
         Play.newPlaylist name, (playlist) =>
             tile = new Tile playlist, @tiles, playlist: playlist
@@ -145,6 +150,8 @@ class Brws
     loadDir: (@dir, @highlight) =>
         cache.watch @dir
         delete @playlist
+        delete @tileSize
+        @dirLoaded = false
         @clear()
         @tilesDir = path.join @musicDir, @dir
         
@@ -175,12 +182,15 @@ class Brws
             if musicPath == @highlight
                 tile.setFocus()
                 
-        @walker.on 'done', =>
+        @walker.on 'end', =>                
+            @dirLoaded = true
+            if @inMusicDir() 
+                if Play.isConnected()
+                    @loadPlaylists()
             if prefs.get "expanded:#{@dir}", false
                 @expandAllTiles()
-                
-            if @inMusicDir() then @loadPlaylists()
-            else @adjustTiles()
+            else            
+                @adjustTiles()
 
     inMusicDir: => @tilesDir == @musicDir
             
@@ -253,7 +263,8 @@ class Brws
         num = prefs.get "tileNum:#{@playlist ? @dir}"
         if num
             @setTileNum num
-        else
+        else if not @tileSize? or @tileSize > MIN_TILE_SIZE
+            log 'adjust', @tileSize
             @adjustTileNum() 
 
     resized: => @adjustTiles()
