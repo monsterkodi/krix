@@ -16,6 +16,7 @@ chokidar = require 'chokidar'
 class Cache
     
     @store    = null
+    @hashes   = null
     @imgDir   = null
     @waveDir  = null
     @cacheDir = null
@@ -25,7 +26,8 @@ class Cache
         
         @cacheDir = path.join @musicDir, '.krix'
         
-        @store   = new Store timeout: 10000, file: path.join @cacheDir, 'cache.noon'
+        @store   = new Store timeout: 2000, file: path.join @cacheDir, 'cache.noon'
+        @hashes  = new Store timeout: 2000, file: path.join @cacheDir, 'hashes.noon'
         @imgDir  = path.join @cacheDir, 'img' 
         @waveDir = path.join @cacheDir, 'wave' 
         

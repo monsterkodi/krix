@@ -89,12 +89,13 @@ class Tags
         cache.set "#{tile.file}:artist", tag.artist
         cache.set "#{tile.file}:title",  tag.title
         if cover?
-            cache.set "#{tile.file}:cover", cover 
-            imgs.didSetFileCover tile.file, cover            
-            tag.cover = cover
+            imgs.setFileCover tile.file, cover, (cachedCover) -> 
+                tag.cover = cachedCover
+                tile.setTag tag
+                Tags.dequeue()
         else
             delete tag.cover
-        tile.setTag tag
-        Tags.dequeue()
+            tile.setTag tag
+            Tags.dequeue()
                             
 module.exports = Tags

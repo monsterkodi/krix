@@ -9,6 +9,7 @@ swapExt
 log     = require './tools/log'
 cache   = require './cache'
 fs      = require 'fs'
+crypto  = require 'crypto'
 fsextra = require 'fs-extra'
 path    = require 'path'
 childp  = require 'child_process'
@@ -50,10 +51,29 @@ class Imgs
         else
             log "[ERROR] unknown image format: #{extname}"
     
-    @didSetFileCover: (file, cover) ->
-        relDir = path.dirname file
-        if not cache.get "#{relDir}:cover"
-            cache.set "#{relDir}:cover", cover        
+    @setFileCover: (file, cover, cb) ->
+        if cover != cache.get "#{file}:cover"
+            cache.set "#{file}:cover", cover
+            hash = crypto.createHash 'md5'
+            size = 0
+            stream = fs.createReadStream cover
+            stream.on 'data', (data) -> 
+                hash.update data, 'utf8' 
+                size += data.length
+            stream.on 'end', () -> 
+                checksum = hash.digest 'hex'
+                cachedCover = cache.hashes.get "_#{checksum}"
+                if cachedCover
+                    cache.set "#{file}:cover", cachedCover
+                    cb cachedCover
+                    fs.unlink cover, ->
+                else
+                    cache.hashes.set "_#{checksum}", cover
+                    cb cover
+            stream.on 'error', -> 
+                log '[ERROR] while reading image for checksum', cover
+                cb cover
+        else cb cover
         
     @setDirTileImageData: (tile, data) -> 
         if data?.length
@@ -65,7 +85,7 @@ class Imgs
         coverFile = @coverForTile tile
         krixFile  = @krixForTile  tile
         fsextra.copy krixFile, coverFile, (err) ->
-            if not err
+            if not err?
                 cache.set "#{tile.file}:cover", coverFile
                 tile.setCover coverFile
             else
@@ -78,28 +98,29 @@ class Imgs
             krixFile  = @krixForTile  tile
             cache.set "#{tile.file}:cover", false
             fs.readdir dir, (err, files) ->
-                if not err
-                    for file in files
-                        absFile = path.join dir, file 
-                        extname = path.extname(file).toLowerCase()
-                        if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
-                            childp.exec "/usr/local/bin/convert \"#{absFile}\" \"#{krixFile}\"", (err) ->
-                                if not err
-                                    @cloneDirTileImage tile
-                                else
-                                    log "[ERROR] converting #{absFile} to #{krixFile}: #{err}"
-                            return
-                        else if extname in ['.jpg', '.jpeg']
-                            if file == '.krix.jpg'
-                                cache.set "#{tile.file}:cover", coverFile
-                                tile.setCover coverFile
+                if err?
+                    log "[ERROR] can't read dir #{dir}"
+                    return
+                for file in files
+                    absFile = path.join dir, file 
+                    extname = path.extname(file).toLowerCase()
+                    if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
+                        childp.exec "/usr/local/bin/convert \"#{absFile}\" \"#{krixFile}\"", (err) ->
+                            if not err
+                                Imgs.cloneDirTileImage tile
                             else
-                                fs.rename absFile, krixFile, (err) ->
-                                    if not err
-                                        @cloneDirTileImage tile
-                                    else
-                                        log "[ERROR] moving #{absFile} to #{krixFile}: #{err}"
-                            return
+                                log "[ERROR] converting #{absFile} to #{krixFile}: #{err}"
+                        return
+                    else if extname in ['.jpg', '.jpeg']
+                        if file == '.krix.jpg'
+                            Imgs.cloneDirTileImage tile
+                        else
+                            fs.rename absFile, krixFile, (err) ->
+                                if not err?
+                                    Imgs.cloneDirTileImage tile
+                                else
+                                    log "[ERROR] moving #{absFile} to #{krixFile}: #{err}"
+                        return
         
     @imgFound: (img) ->
         if tile = @queue.shift()
