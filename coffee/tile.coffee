@@ -12,10 +12,10 @@ resolve,
 last,
 $}      = require './tools/tools'
 log     = require './tools/log'
+prefs   = require './tools/prefs'
 post    = require './post'
 tags    = require './tags'
 imgs    = require './imgs'
-prefs   = require './prefs'
 popup   = require './popup'
 childp  = require 'child_process'
 path    = require 'path'

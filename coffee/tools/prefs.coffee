@@ -4,7 +4,7 @@
 # 000        000   000  000       000            000
 # 000        000   000  00000000  000       0000000 
 
-log   = require './tools/log'
+log   = require './log'
 Store = require './store' 
 
 class Prefs

@@ -10,8 +10,8 @@ dirExists,
 fileExists,
 resolve}      = require './tools/tools'
 log           = require './tools/log'
+prefs         = require './tools/prefs'
 pkg           = require '../package.json'
-prefs         = require './prefs'
 MainMenu      = require './mainmenu'
 _             = require 'lodash'
 fs            = require 'fs'

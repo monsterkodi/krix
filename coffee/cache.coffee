@@ -7,10 +7,10 @@
 relative,
 $ }      = require './tools/tools'
 log      = require './tools/log'
-Store    = require './store'
+Store    = require './tools/store'
 post     = require './post'
+fs       = require 'fs-extra'
 path     = require 'path'
-mkpath   = require 'mkpath'
 chokidar = require 'chokidar'
 
 class Cache
@@ -30,12 +30,12 @@ class Cache
         @waveDir = path.join @cacheDir, 'wave' 
         
         try
-            mkpath.sync @imgDir
+            fs.mkdirsSync @imgDir
         catch err
             log "[ERROR] can't create image cache directory #{@imgDir}", err
             @imgDir = null
         try
-            mkpath.sync @waveDir
+            fs.mkdirsSync @waveDir
         catch err
             log "[ERROR] can't create wave cache directory @{waveDir}", err
             @waveDir = null

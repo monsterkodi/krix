@@ -4,12 +4,11 @@
 #      000     000     000   000  000   000  000       
 # 0000000      000      0000000   000   000  00000000  
 
-log    = require './tools/log'
+log    = require './log'
 _      = require 'lodash'
-fs     = require 'fs'
+fs     = require 'fs-extra'
 noon   = require 'noon'
 path   = require 'path'
-mkpath = require 'mkpath'
 atomic = require 'write-file-atomic'
 
 class Store
@@ -87,9 +86,9 @@ class Store
         return if not @file
         clearTimeout @timer if @timer
         @timer = null
-        mkpath path.dirname(@file), (err) =>
+        fs.mkdirs path.dirname(@file), (err) =>
             if err?
-                log "[ERROR] can't mkpath", path.dirname(@file), err if err?
+                log "[ERROR] can't create directory", path.dirname(@file), err if err?
                 cb? !err?
             else
                 str = noon.stringify @data, {indent: 2, maxalign: 8}

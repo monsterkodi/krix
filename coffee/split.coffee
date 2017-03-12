@@ -6,7 +6,7 @@
 
 { $ } = require './tools/tools'
 log   = require './tools/log'
-prefs = require './prefs'
+prefs = require './tools/prefs'
 event = require 'events'
 spljs = require 'split.js'
 
