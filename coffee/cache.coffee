@@ -87,5 +87,8 @@ class Cache
     @save: (cb)         -> @store.save cb
     @prune: (dir)       -> 
         log 'prune', dir
+        for key in Object.keys @store.data
+            if key.startsWith dir
+                @store.del "#{dir}:cover" if false == @store.get "#{dir}:cover"
 
 module.exports = Cache

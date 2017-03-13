@@ -34,6 +34,8 @@ class Tags
                 if tile = Tags.queue.shift()
                     tile.setTag cache.get tile.file
                     Tags.dequeue()
+                    if cache.get("#{tile.file}:cover") and false == cache.get "#{path.dirname tile.file}:cover"
+                        cache.set "#{path.dirname tile.file}:cover", cache.get "#{tile.file}:cover"
             else
                 readTags = ->
                     jsmediatags.read tile.absFilePath(), 
@@ -93,6 +95,8 @@ class Tags
                 tag.cover = cachedCover
                 tile.setTag tag
                 Tags.dequeue()
+                if false == cache.get "#{path.dirname tile.file}:cover"
+                    cache.set "#{path.dirname tile.file}:cover", cachedCover
         else
             delete tag.cover
             tile.setTag tag

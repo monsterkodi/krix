@@ -34,6 +34,7 @@ class Store
     #  0000000   00000000     000   
         
     get: (key, value) ->
+        return value if not key?.split?
         keypath = key.split @sep
         object = @data
         while keypath.length
@@ -48,7 +49,7 @@ class Store
     # 0000000   00000000     000     
     
     set: (key, value) ->
-        
+        return if not key?.split?
         clearTimeout @timer if @timer
         @timer = setTimeout @save, @timeout
 
