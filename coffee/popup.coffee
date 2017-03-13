@@ -5,29 +5,24 @@
 # 000         0000000   000         0000000   000      
 
 log     = require './tools/log'
+elem    = require './tools/elem'
 keyinfo = require './tools/keyinfo'
 
 class Popup
     
     constructor: (opt) ->
         @focus = document.activeElement
-        @items = document.createElement 'div'
-        @items.classList.add 'popup'
+        @items = elem class: 'popup', tabindex: 3
         @items.style.left = "#{opt.x}px"
         @items.style.top  = "#{opt.y}px"
-        @items.setAttribute 'tabindex', 3
         
         for item in opt.items
             continue if item.hide
-            div = document.createElement 'div'
-            div.classList.add 'popupItem'
-            div.textContent = item.text
+            div = elem class: 'popupItem', text: item.text
             div.item = item
             div.addEventListener 'click', @onClick
             if item.combo?
-                combo = document.createElement 'span'
-                combo.classList.add 'popupCombo'
-                combo.textContent = item.combo
+                combo = elem 'span', class: 'popupCombo', text: item.combo
                 div.appendChild combo
             @items.appendChild div
 

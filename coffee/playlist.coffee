@@ -8,6 +8,7 @@ queue,
 escapePath
 $}      = require './tools/tools'
 log     = require './tools/log'
+elem    = require './tools/elem'
 Folder  = require './folder'
 Tile    = require './tile'
 post    = require './post'
@@ -72,8 +73,7 @@ class Playlist extends Folder
         return if @file == ""
         title = $('.playlistName', @div)
         title.textContent = ""
-        @input = document.createElement 'input'
-        @input.classList.add 'tileInput'
+        @input = elem 'input', class: 'tileInput'
         @input.value = @file
         title.appendChild @input
         @input.addEventListener 'change',   @onNameChange

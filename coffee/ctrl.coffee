@@ -6,6 +6,7 @@
 {
 style,
 $ }  = require './tools/tools'
+elem = require './tools/elem'
 log  = require './tools/log'
 post = require './post'
 Song = require './song'
@@ -15,8 +16,7 @@ class Ctrl
     
     constructor: (@view) ->
         
-        @elem = document.createElement 'div'
-        @elem.classList.add 'ctrl'
+        @elem = elem class: 'ctrl'
         @view.appendChild @elem
         @song = new Song @elem
         @initButtons()
@@ -32,38 +32,31 @@ class Ctrl
 
     initButtons: ->
         
-        @buttons = document.createElement 'div'
-        @buttons.classList.add "buttons"
+        @buttons = elem class: 'buttons'
         @elem.appendChild @buttons
         
-        @button id: 'prev',     icon: 'step-backward fa-2x', cb: -> post.emit 'prevSong'
-        @button id: 'play',     icon: 'play fa-3x',          cb: @onPlayButton
-        @button id: 'next',     icon: 'step-forward fa-2x',  cb: -> post.emit 'nextSong'
-        @buttons.appendChild document.createElement 'br'
-        @button id: 'random',   icon: 'random fa-1x',        cb: -> post.emit 'random'
-        @button id: 'repeat',   icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
-        @button id: 'song',     icon: 'music fa-1x',         cb: @showDirOfCurrentSong
-        @label  id: 'songid', $('song')
-        @buttons.appendChild document.createElement 'br'
+        @button id: 'prev',      icon: 'step-backward fa-2x', cb: -> post.emit 'prevSong'
+        @button id: 'play',      icon: 'play fa-3x',          cb: @onPlayButton
+        @button id: 'next',      icon: 'step-forward fa-2x',  cb: -> post.emit 'nextSong'
+        @buttons.appendChild elem 'br'
+        @button id: 'random',    icon: 'random fa-1x',        cb: -> post.emit 'random'
+        @button id: 'repeat',    icon: 'repeat fa-1x',        cb: -> post.emit 'repeat'
+        @button id: 'songindex', icon: 'music fa-1x',         cb: @showDirOfCurrentSong
+        @label  id: 'songid', $('songindex')
+        @buttons.appendChild elem 'br'
         @button id: 'home',     icon: 'home fa-1x',          cb: -> post.emit 'home'
         @button id: 'up',       icon: 'arrow-up fa-1x',      cb: -> post.emit 'up'
         @button id: 'playlist', icon: 'bars fa-1x',          cb: @showCurrentPlaylist
         @label  id: 'playlistlength', $('playlist')
 
     label: (opt, parent) ->
-        labl = document.createElement 'span'
-        labl.id = opt.id
-        labl.classList.add 'label'
-        labl.classList.add 'highlight'
-        parent.appendChild labl
+        parent?.appendChild? elem 'span', id: opt.id, class: 'label highlight'
         
     button: (opt) ->
-        bttn = document.createElement 'div'
-        bttn.id = opt.id
-        bttn.classList.add 'button'
+        bttn = elem id: opt.id, class: 'button'
         
         if opt.icon
-            bttn.innerHTML = "<span class=\"fa fa-#{opt.icon}\"></span>"
+            bttn.appendChild elem 'span', class: "fa fa-#{opt.icon}"
         else
             bttn.innerHTML = opt.text or opt.id
             

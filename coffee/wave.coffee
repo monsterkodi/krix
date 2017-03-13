@@ -8,28 +8,26 @@ encodePath,
 escapePath
 }       = require './tools/tools'
 log     = require './tools/log'
+elem    = require './tools/elem'
 drag    = require './tools/drag'
+post    = require './post'
+cache   = require './cache'
 childp  = require 'child_process'
 process = require 'process'
 path    = require 'path'
 fs      = require 'fs'
-post    = require './post'
-cache   = require './cache'
 
 class Wave
     
     constructor: (@view) ->
         
-        @elem = document.createElement 'div'
-        @elem.classList.add 'wave'
+        @elem = elem class: 'wave'
         @view.appendChild @elem
         
-        @line = document.createElement 'div'
-        @line.classList.add 'waveLine'
+        @line = elem class: 'waveLine'
         @view.appendChild @line
 
-        @blnd = document.createElement 'div'
-        @blnd.classList.add 'waveBlend'
+        @blnd = elem class: 'waveBlend'
         @elem.appendChild @blnd
         
         post.on 'status', @onStatus

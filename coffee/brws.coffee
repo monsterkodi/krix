@@ -12,6 +12,7 @@ path     = require 'path'
 childp   = require 'child_process'
 _        = require 'lodash'
 log      = require './tools/log'
+elem     = require './tools/elem'
 prefs    = require './tools/prefs'
 Playlist = require './playlist'
 Folder   = require './folder'
@@ -30,8 +31,7 @@ class Brws
     
     constructor: (@view, @musicDir) ->
         
-        @tiles = document.createElement 'div'
-        @tiles.classList.add 'tiles'
+        @tiles = elem class: 'tiles'
         @view.appendChild @tiles
                 
         @dirLoaded = false

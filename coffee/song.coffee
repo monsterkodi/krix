@@ -6,6 +6,7 @@
 {
 style
 }      = require './tools/tools'
+elem   = require './tools/elem'
 Tile   = require './tile'
 Wave   = require './wave'
 post   = require './post'
@@ -17,22 +18,18 @@ class Song
     
     constructor: (@view) ->
         
-        @elem = document.createElement 'div'
-        @elem.classList.add 'song'
+        @elem = elem id: 'song', class: 'song'
         @view.appendChild @elem
         
         @wave = new Wave @elem
     
-        @info = document.createElement 'div'
-        @info.classList.add 'songInfo'
+        @info = elem class: 'songInfo'
         @elem.appendChild @info
         
-        @infoElapsed = document.createElement 'div'
-        @infoElapsed.classList.add 'songElapsed'
+        @infoElapsed = elem class: 'songElapsed'
         @info.appendChild @infoElapsed
 
-        @infoDuration = document.createElement 'div'
-        @infoDuration.classList.add 'songDuration'
+        @infoDuration = elem class: 'songDuration'
         @info.appendChild @infoDuration
         
         tileSize = 160
@@ -87,15 +84,14 @@ class Song
     # 000 0 000  000   000  000   000       000  000       
     # 000   000   0000000    0000000   0000000   00000000  
 
-    onDblClick: (event) => @tileForEvent(event)?.onDblClick event
-    onHover: (event) => @tileForEvent(event)?.onHover event
-    onClick: => @tileForEvent(event)?.onClick event
+    onDblClick:    (event) => @tileForEvent(event)?.onDblClick event
+    onHover:       (event) => @tileForEvent(event)?.onHover event
+    onClick:       (event) => @tileForEvent(event)?.onClick event
     onContextMenu: (event) => @tile?.onContextMenu event
-
-    tileForEvent: (event) -> @tileForElem event.target
-    tileForElem: (elem) -> 
-        if elem.tile? then return elem.tile
-        if elem.parentNode? then return @tileForElem elem.parentNode
+    tileForEvent:  (event) => @tileForElem event.target
+    tileForElem:   (e) -> 
+        if e.tile? then return e.tile
+        if e.parentNode? then return @tileForElem e.parentNode
 
     resized: => @wave?.resized()        
         

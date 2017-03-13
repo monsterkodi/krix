@@ -11,6 +11,7 @@ escapePath,
 resolve,
 last,
 $}      = require './tools/tools'
+elem    = require './tools/elem'
 log     = require './tools/log'
 prefs   = require './tools/prefs'
 post    = require './post'
@@ -26,27 +27,19 @@ class Tile
     @scrollLock = false
     @musicDir = null
     
-    constructor: (@file, elem, @opt) ->
+    constructor: (@file, view, @opt) ->
         
         @file = @file.substr(Tile.musicDir.length+1) if @file.startsWith Tile.musicDir
             
-        @id = @file
-        @div = document.createElement 'div'
+        @id  = @file
+        @div = elem id: @id, class: 'tile', child: @pad = elem class: 'tilePad'
         @div.tile = @
-        @div.id = @id
-        @div.className = "tile"
         
-        @pad = document.createElement 'div'
-        @pad.className = "tilePad"
-        @div.appendChild @pad
+        img = elem class: 'tileImg'
 
-        img = document.createElement 'div'
-        img.classList.add "tileImg"
-        img.style.overflow = "hidden"
-
-        sqr = document.createElement 'div'
-        art = document.createElement 'div'
-        tit = document.createElement 'div'
+        sqr = elem()
+        art = elem()
+        tit = elem()
         sqr.appendChild art
         sqr.appendChild tit
         img.appendChild sqr
@@ -69,16 +62,14 @@ class Tile
             art.addEventListener 'click', @onNameClick
             art.classList.add 'playlistName'
             art.innerHTML = @file
-            inf = document.createElement 'div'
-            inf.classList.add 'playlistInfo'
-            img.appendChild inf
+            img.appendChild elem class: 'playlistInfo'
             
             img.classList.add "tileImgPlaylist"
             sqr.classList.add "tileSqrPlaylist"
             @pad.classList.add "tilePadPlaylist"
              
         @pad.appendChild img
-        elem.appendChild @div
+        view.appendChild @div
 
         if @opt?.item?
             @setTag @opt.item
