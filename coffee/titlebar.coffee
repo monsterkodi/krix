@@ -11,7 +11,7 @@ post = require './post'
 class Titlebar
     
     constructor: () ->
-        @elem = $('.titlebar')
+        @elem = $('titlebar')
         @elem.ondblclick = (event) => 
             win = window.browserWin
             if win?.isMaximized()

@@ -217,7 +217,8 @@ class Brws
     onTrashed: (file) =>
         if file == @focusTile?.file
             @focusTile.focusNeighbor 'right', 'left'
-        $(file, @tiles)?.tile?.del()
+        # $(file, @tiles)?.tile?.del()
+        document.querySelector(".tiles .tile[file='#{file.hash()}']")?.tile?.del()
 
     collapseFocusTile: =>
         return if not @focusTile?

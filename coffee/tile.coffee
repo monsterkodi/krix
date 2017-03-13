@@ -31,8 +31,7 @@ class Tile
         
         @file = @file.substr(Tile.musicDir.length+1) if @file.startsWith Tile.musicDir
             
-        @id  = @file
-        @div = elem id: @id, class: 'tile', child: @pad = elem class: 'tilePad'
+        @div = elem class: 'tile', file: @file.hash(), child: @pad = elem class: 'tilePad'
         @div.tile = @
         
         img = elem class: 'tileImg'
@@ -82,6 +81,7 @@ class Tile
             imgs.enqueue @
             
     del: =>
+        log 'del', @file
         @unFocus() if @hasFocus()
         @div?.remove()
         
@@ -160,6 +160,7 @@ class Tile
     hasFocus: -> @pad.classList.contains 'tilePadFocus'
         
     unFocus: => 
+        log 'unFocus', @file, @pad.className
         @pad?.classList.remove 'tilePadFocus'
         post.removeListener 'unfocus', @unFocus
     
@@ -167,6 +168,7 @@ class Tile
         if not @hasFocus() 
             post.emit 'unfocus'
             @pad.classList.add 'tilePadFocus'
+            log 'setFocus', @file, @pad.className
             post.on 'unfocus', @unFocus
             @pad.scrollIntoViewIfNeeded() if not @isParentClipping()
         post.emit 'tileFocus', @

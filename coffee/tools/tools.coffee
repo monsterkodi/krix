@@ -214,9 +214,9 @@ module.exports =
     # 000   000  000   000  000 0 000
     # 0000000     0000000   000   000
         
-    $: (idOrClass,e=document) -> 
-        if idOrClass.startsWith '.'
-            e.getElementsByClassName(idOrClass.substr(1).split('.').join " ")[0]
+    $: (idOrClass, e=document) -> 
+        if idOrClass[0] in ['.', "#"] or e != document
+            e.querySelector idOrClass
         else
             document.getElementById idOrClass
 
