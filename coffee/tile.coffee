@@ -70,10 +70,7 @@ class Tile
         @pad.appendChild img
         view.appendChild @div
 
-        if @opt?.item?
-            @setTag @opt.item
-            tags.enqueue @ if not @opt.item.cover?
-        else if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
+        if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
             tags.enqueue @
         else if @isPlaylist()
             # post.emit "playlistInfo", @file
@@ -120,7 +117,7 @@ class Tile
     isFile:         -> true
     isPlaylist:     -> false
     isDir:          -> false
-    isPlaylistItem: -> @opt?.item?
+    isPlaylistItem: -> @opt?.playlist? and @isFile()
     isUp:           -> @opt?.openDir?
     
     absFilePath:      -> path.join Tile.musicDir, @file
