@@ -69,6 +69,7 @@ class Tags
                     log "[ERROR] can't save cover image for", tile.file
                     Tags.setTag tile, tag
                 else
+                    # console.log 'set tag with jpg cover', coverFile
                     Tags.setTag tile, tag, coverFile
         else        
             tmpFile = path.join process.env.TMPDIR, path.basename swapExt coverFile, picExt
@@ -83,6 +84,7 @@ class Tags
                             log "        \"#{tmpFile}\" -> \"#{coverFile}\""
                             Tags.setTag tile, tag
                         else
+                            # console.log 'set tag with converted cover', coverFile
                             Tags.setTag tile, tag, coverFile
                         fs.unlink tmpFile, ->
 
@@ -93,6 +95,7 @@ class Tags
         if cover?
             imgs.setFileCover tile.file, cover, (cachedCover) -> 
                 tag.cover = cachedCover
+                # console.log 'setTag cachedCover', cachedCover
                 tile.setTag tag
                 Tags.dequeue()
                 if false == cache.get "#{path.dirname tile.file}:cover"

@@ -66,7 +66,8 @@ class Imgs
                 if cachedCover
                     cache.set "#{file}:cover", cachedCover
                     cb cachedCover
-                    fs.unlink cover, ->
+                    if cover != cachedCover
+                        fs.unlink cover, ->
                 else
                     cache.hashes.set "_#{checksum}", cover
                     cb cover

@@ -81,7 +81,7 @@ class Tile
             imgs.enqueue @
             
     del: =>
-        log 'del', @file
+        # log 'del', @file
         @unFocus() if @hasFocus()
         @div?.remove()
         
@@ -91,7 +91,7 @@ class Tile
     # 000       000   000     000     000       000   000
     #  0000000   0000000       0      00000000  000   000
         
-    setCover: (coverFile) ->
+    setCover: (coverFile) ->        
         @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @isUp()
@@ -145,7 +145,6 @@ class Tile
         else @open()
                 
     fileChanged: -> 
-        log 'Tile.fileChanged', @file
         if @isFile()
             tags.enqueue @
         else if @isDir()
@@ -160,7 +159,6 @@ class Tile
     hasFocus: -> @pad.classList.contains 'tilePadFocus'
         
     unFocus: => 
-        log 'unFocus', @file, @pad.className
         @pad?.classList.remove 'tilePadFocus'
         post.removeListener 'unfocus', @unFocus
     
@@ -168,7 +166,6 @@ class Tile
         if not @hasFocus() 
             post.emit 'unfocus'
             @pad.classList.add 'tilePadFocus'
-            log 'setFocus', @file, @pad.className
             post.on 'unfocus', @unFocus
             @pad.scrollIntoViewIfNeeded() if not @isParentClipping()
         post.emit 'tileFocus', @
