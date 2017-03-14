@@ -1,12 +1,16 @@
 #!/usr/bin/env bash
 cd `dirname $0`/..
 
-killall krix
+NAME=`sds productName`
+
+killall $NAME
+killall $NAME
+
 konrad --run
 
-node_modules/electron-packager/cli.js . --overwrite --icon=img/krix.icns #krix --platform=darwin --arch=x64 --prune --app-bundle-id=net.monsterkodi.krix
+node_modules/electron-packager/cli.js . --overwrite --icon=img/$NAME.icns
 
-rm krix-darwin-x64/LICENSE*
-rm krix-darwin-x64/version
+rm $NAME-darwin-x64/LICENSE*
+rm $NAME-darwin-x64/version
 
-open krix-darwin-x64/krix.app 
+# open $NAME-darwin-x64/$NAME.app 

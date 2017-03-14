@@ -110,6 +110,8 @@ class Ctrl
             when 'n' then post.emit 'nextSong'
             when 'b' then post.emit 'prevSong'
             when 'c' then post.emit 'focusSong'
+            when 'r' then post.emit 'random'
+            when 'h' then post.emit 'home'
             when 'p' then @onPlayButton()
             when 'f' then @showDirOfCurrentSong()
             when 'v' then @showCurrentPlaylist()
