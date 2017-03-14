@@ -354,7 +354,7 @@ class Brws
             electron = require 'electron'
             nativeImage = electron.nativeImage
             clipboard = electron.clipboard
-            image = nativeImage.createFromPath cache.get "#{tile.file}:cover"
+            image = nativeImage.createFromPath imgs.coverForHash cache.get "#{tile.file}:cover"
             clipboard.writeImage image
 
     # 000   000  00000000  000   000

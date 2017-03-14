@@ -81,7 +81,6 @@ class Tile
             imgs.enqueue @
             
     del: =>
-        # log 'del', @file
         @unFocus() if @hasFocus()
         @div?.remove()
         
@@ -91,7 +90,7 @@ class Tile
     # 000       000   000     000     000       000   000
     #  0000000   0000000       0      00000000  000   000
         
-    setCover: (coverFile) ->        
+    setCover: (coverFile) ->    
         @pad.firstChild.style.backgroundImage = "url(\"file://#{encodePath(coverFile)}\")"
         @pad.firstChild.style.backgroundSize = "100% 100%"
         @pad.firstChild.firstChild.classList.add 'tileSqrCover' if not @isUp()
@@ -110,7 +109,7 @@ class Tile
         if @isCurrentSong()
             post.emit 'titleSong', @tag
         if @tag.cover?
-            @setCover @tag.cover
+            @setCover imgs.coverForHash @tag.cover
 
     # 00000000  000  000      00000000
     # 000       000  000      000     

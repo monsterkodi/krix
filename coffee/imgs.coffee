@@ -24,12 +24,13 @@ class Imgs
         cover = cache.get "#{tile.file}:cover"
         if cover? 
             if cover
-                tile.setCover cover
+                tile.setCover @coverForHash cover
         else
             @queue.push tile
             @dequeue() if @queue.length == 1
     
-    @coverForTile: (tile) -> path.join cache.imgDir, tile.file.hash() + '.jpg'
+    @coverForHash: (hash) -> path.join cache.imgDir, "#{hash}.jpg"
+    @coverForTile: (tile) -> @coverForHash tile.file.hash()
     @krixForTile:  (tile) -> path.join tile.absFilePath(), '.krix.jpg'
         
     @dequeue: ->
@@ -43,38 +44,32 @@ class Imgs
                     @checkDirForCover()
                 @dequeue()
     
-    @convertToJPG: (file, cb) ->
-        extname = path.extname(file).toLowerCase()
-        if extname in ['.gif', '.tif', '.tiff', '.png', '.bmp']
-            coverFile = swapExt file, '.jpg'
-            childp.exec "/usr/local/bin/convert \"#{file}\" \"#{coverFile}\"", (err) -> cb? err
-        else
-            log "[ERROR] unknown image format: #{extname}"
-    
-    @setFileCover: (file, cover, cb) ->
-        if cover != cache.get "#{file}:cover"
-            cache.set "#{file}:cover", cover
+    @setFileCover: (file, coverFile, cb) ->
+        coverHash = file.hash()
+        if coverHash != cache.get "#{file}:cover"
+            cache.set "#{file}:cover", coverHash
             hash = crypto.createHash 'md5'
             size = 0
-            stream = fs.createReadStream cover
+            stream = fs.createReadStream coverFile
             stream.on 'data', (data) -> 
                 hash.update data, 'utf8' 
                 size += data.length
             stream.on 'end', () -> 
                 checksum = hash.digest 'hex'
-                cachedCover = cache.hashes.get "_#{checksum}"
-                if cachedCover
-                    cache.set "#{file}:cover", cachedCover
-                    cb cachedCover
-                    if cover != cachedCover
-                        fs.unlink cover, ->
+                cachedHash = cache.hashes.get "_#{checksum}"
+                if cachedHash
+                    cachedFile = Imgs.coverForHash cachedHash
+                    cache.set "#{file}:cover", cachedHash
+                    cb cachedHash
+                    if coverFile != cachedFile
+                        fs.unlink coverFile, ->
                 else
-                    cache.hashes.set "_#{checksum}", cover
-                    cb cover
+                    cache.hashes.set "_#{checksum}", coverHash
+                    cb coverHash
             stream.on 'error', -> 
-                log '[ERROR] while reading image for checksum', cover
-                cb cover
-        else cb cover
+                log '[ERROR] while reading checksum of file ', coverFile
+                cb coverHash
+        else cb coverHash
         
     @setDirTileImageData: (tile, data) -> 
         if data?.length
@@ -87,7 +82,7 @@ class Imgs
         krixFile  = @krixForTile  tile
         fsextra.copy krixFile, coverFile, (err) ->
             if not err?
-                cache.set "#{tile.file}:cover", coverFile
+                cache.set "#{tile.file}:cover", tile.file.hash()
                 tile.setCover coverFile
             else
                 log "[ERROR] copying #{krixFile} to #{coverFile}: #{err}"
@@ -125,7 +120,7 @@ class Imgs
         
     @imgFound: (img) ->
         if tile = @queue.shift()
-            cache.set "#{tile.file}:cover", img
+            cache.set "#{tile.file}:cover", tile.file.hash()
             tile.setCover img
         
 module.exports = Imgs

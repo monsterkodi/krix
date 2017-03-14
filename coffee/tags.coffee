@@ -88,18 +88,18 @@ class Tags
                             Tags.setTag tile, tag, coverFile
                         fs.unlink tmpFile, ->
 
-    @setTag: (tile, tag, cover) ->
+    @setTag: (tile, tag, coverFile) ->
             
         cache.set "#{tile.file}:artist", tag.artist
         cache.set "#{tile.file}:title",  tag.title
-        if cover?
-            imgs.setFileCover tile.file, cover, (cachedCover) -> 
-                tag.cover = cachedCover
-                # console.log 'setTag cachedCover', cachedCover
+        if coverFile?
+            imgs.setFileCover tile.file, coverFile, (coverHash) -> 
+                tag.cover = coverHash
+                # console.log 'setTag coverHash', coverHash
                 tile.setTag tag
                 Tags.dequeue()
                 if false == cache.get "#{path.dirname tile.file}:cover"
-                    cache.set "#{path.dirname tile.file}:cover", cachedCover
+                    cache.set "#{path.dirname tile.file}:cover", coverHash
         else
             delete tag.cover
             tile.setTag tag
