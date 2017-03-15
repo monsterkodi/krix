@@ -33,7 +33,7 @@ class Brws
         
         @tiles = elem class: 'tiles'
         @view.appendChild @tiles
-                
+
         @dirLoaded = false
         @tilesDir = @musicDir
         Tile.musicDir = @musicDir
@@ -55,6 +55,7 @@ class Brws
         post.on 'connected',   @connected
         post.on 'trashed',     @onTrashed
         post.on 'adjustTiles', @adjustTiles
+        post.on 'playlistLoaded', @onPlaylistLoaded
         
     del: -> @tiles.remove()
         
@@ -77,6 +78,11 @@ class Brws
         
     goHome: => @loadDir ''
 
+    beforeClear: ->
+        key = @playlist ? @dir
+        prefs.set "tileHint:#{key}", @tileNum
+        cache.del "#{key}:page"
+        
     clear: ->
         @walker?.stop()
         tags.clearQueue()
@@ -88,6 +94,11 @@ class Brws
             @tiles.firstChild?.tile.del()
         @tiles.innerHTML = ''
         @focusTile = null
+        
+        key = @playlist ? @dir 
+        num = prefs.get "tileNum:#{key}", prefs.get "tileHint:#{key}"
+        log "clear #{num}"
+        if num then @setTileNum num, false
 
     showFile: (file) =>
         if not path.isAbsolute file
@@ -100,23 +111,74 @@ class Brws
             '-e', 'end tell']
         childp.spawn 'osascript', args
 
+    # 000       0000000    0000000   0000000    0000000    000  00000000   
+    # 000      000   000  000   000  000   000  000   000  000  000   000  
+    # 000      000   000  000000000  000   000  000   000  000  0000000    
+    # 000      000   000  000   000  000   000  000   000  000  000   000  
+    # 0000000   0000000   000   000  0000000    0000000    000  000   000  
+             
+    loadDir: (dir, @highlight) =>
+        @beforeClear()
+        @dir = dir
+        cache.watch @dir
+        delete @playlist
+        delete @tileSize
+        @dirLoaded = false
+        @clear()
+        @tilesDir = path.join @musicDir, @dir
+        
+        @expanded = prefs.get "expanded:#{@dir}", false
+                            
+        if @dir.length and @dir != '.'
+            tile = new Folder @dir, @tiles, openDir: path.dirname @dir
+            tile.setText path.dirname(@dir), path.basename(@dir)
+            tile.setFocus()
+
+        @walker = new walk @tilesDir
+        
+        @walker.on 'file', (file) =>
+            return if path.basename(file).startsWith '.'
+            musicPath = file.substr @musicDir.length+1
+            tile = new Tile musicPath, @tiles
+            if musicPath == @highlight
+                tile.setFocus()
+                          
+        @walker.on 'directory', (dir) =>
+            dirname = path.basename(dir)
+            return if dirname.startsWith('.') or dirname == 'iTunes'
+            musicPath = dir.substr @musicDir.length+1
+            tile = new Folder musicPath, @tiles
+            tile.setFocus() if not @focusTile
+            tile.expand() if @expanded
+            if musicPath == @highlight
+                tile.setFocus()
+                
+        @walker.on 'end', =>                
+            @dirLoaded = true
+            if @inMusicDir() 
+                if Play.isConnected()
+                    @loadPlaylists()
+            @adjustTiles()            
+
+    inMusicDir: => @tilesDir == @musicDir
+
     # 00000000   000       0000000   000   000  000      000   0000000  000000000
     # 000   000  000      000   000   000 000   000      000  000          000   
     # 00000000   000      000000000    00000    000      000  0000000      000   
     # 000        000      000   000     000     000      000       000     000   
     # 000        0000000  000   000     000     0000000  000  0000000      000   
         
-    showPlaylist: (@playlist, @highlight) =>
+    showPlaylist: (playlist, @highlight) =>
+        @beforeClear()
+        @playlist = playlist
         cache.unwatch()
         delete @dir        
         @clear()
-        
-        num = prefs.get "tileNum:#{@playlist}", -1
-        if num != -1 and @tileNum != num
-            @setTileNum num
-        
+                
         tile = new Playlist @playlist, @tiles, playlist: @playlist, openDir: '.', highlight: @highlight
         tile.setFocus()
+
+    onPlaylistLoaded: => @adjustTiles()
         
     connected: () =>
         post.removeListener 'connected', @connected
@@ -140,60 +202,7 @@ class Brws
         return if not @playlist?
         return if not @focusTile?
         @focusTile.delFromPlaylist()
-        
-    # 000       0000000    0000000   0000000    0000000    000  00000000   
-    # 000      000   000  000   000  000   000  000   000  000  000   000  
-    # 000      000   000  000000000  000   000  000   000  000  0000000    
-    # 000      000   000  000   000  000   000  000   000  000  000   000  
-    # 0000000   0000000   000   000  0000000    0000000    000  000   000  
-        
-    loadDir: (@dir, @highlight) =>
-        cache.watch @dir
-        delete @playlist
-        delete @tileSize
-        @dirLoaded = false
-        @clear()
-        @tilesDir = path.join @musicDir, @dir
-        
-        num = prefs.get "tileNum:#{@dir}", -1
-        if num != -1 and @tileNum != num
-            @setTileNum num
-        
-        if @dir.length and @dir != '.'
-            tile = new Folder @dir, @tiles, openDir: path.dirname @dir
-            tile.setText path.dirname(@dir), path.basename(@dir)
-            tile.setFocus()
-
-        @walker = new walk @tilesDir
-        
-        @walker.on 'file', (file) =>
-            return if path.basename(file).startsWith '.'
-            musicPath = file.substr @musicDir.length+1
-            tile = new Tile musicPath, @tiles
-            if musicPath == @highlight
-                tile.setFocus()
-            
-        @walker.on 'directory', (dir) =>
-            dirname = path.basename(dir)
-            return if dirname.startsWith('.') or dirname == 'iTunes'
-            musicPath = dir.substr @musicDir.length+1
-            tile = new Folder musicPath, @tiles
-            tile.setFocus() if not @focusTile
-            if musicPath == @highlight
-                tile.setFocus()
-                
-        @walker.on 'end', =>                
-            @dirLoaded = true
-            if @inMusicDir() 
-                if Play.isConnected()
-                    @loadPlaylists()
-            if prefs.get "expanded:#{@dir}", false
-                @expandAllTiles()
-            else            
-                @adjustTiles()
-
-    inMusicDir: => @tilesDir == @musicDir
-            
+                    
     # 000000000  000  000      00000000   0000000
     #    000     000  000      000       000     
     #    000     000  000      0000000   0000000 
@@ -248,11 +257,11 @@ class Brws
         style '.tiles .tileInput',    "font-size: #{fontSize}px; width: #{@tileSize-12}px;"
         style '.tiles .tileImg',      "width: #{@tileSize}px; height: #{@tileSize}px;"
 
-    setTileNum: (num) ->
+    setTileNum: (num, save=true) ->
         @tileNum = Math.max 1, Math.min Math.floor(@tilesWidth()/MIN_TILE_SIZE), num
-        prefs.set "tileNum:#{@playlist ? @dir}", @tileNum
+        if save then prefs.set "tileNum:#{@playlist ? @dir}", @tileNum
         @setTileSize parseInt (@tilesWidth()-12)/@tileNum-12
-    
+        
     #  0000000   0000000          000  000   000   0000000  000000000  
     # 000   000  000   000        000  000   000  000          000     
     # 000000000  000   000        000  000   000  0000000      000     
@@ -262,7 +271,7 @@ class Brws
     adjustTiles: =>
         num = prefs.get "tileNum:#{@playlist ? @dir}"
         if num
-            @setTileNum num
+            @setTileNum num, false
         else if not @tileSize? or @tileSize > MIN_TILE_SIZE
             @adjustTileNum() 
 
@@ -292,7 +301,9 @@ class Brws
         else num = Math.floor num
 
         @setTileNum num
-        prefs.del "tileNum:#{@playlist ? @dir}"
+        key = @playlist ? @dir
+        prefs.del "tileNum:#{key}"
+        prefs.set "tileHint:#{key}", num
                 
     onScroll: =>
         Tile.scrollLock = true

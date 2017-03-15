@@ -37,8 +37,9 @@ class Playlist extends Folder
             @onPlaylistInfo @info
             if @opt.openDir == '.' 
                 files = _.clone @info.files
-                adjust = -> post.emit 'adjustTiles'
-                queue files, batch: 500, timeout: 0, batched: adjust, done: adjust, cb: (item) =>
+                loaded = -> post.emit 'playlistLoaded'
+                adjust = -> #post.emit 'adjustTiles'
+                queue files, batch: 500, timeout: 0, batched: adjust, done: loaded, cb: (item) =>
                     return 'stop' if not @div.parentNode
                     tile = new Tile item.file, @div.parentNode, playlist: @file
                     tile.setFocus() if item.file == @opt.highlight
