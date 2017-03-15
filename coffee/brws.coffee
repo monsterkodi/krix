@@ -343,10 +343,13 @@ class Brws
     
     pasteCover: ->
         tile = @focusTile
+        electron = require 'electron'
+        clipboard = electron.clipboard
+        jpg = clipboard.readImage()?.toJPEG 95
         if tile?.isDir()
-            electron = require 'electron'
-            clipboard = electron.clipboard
-            imgs.setDirTileImageData tile, clipboard.readImage()?.toJPEG 95
+            imgs.setDirTileImageData tile, jpg
+        else if tile?.isFile()
+            tags.saveJpgData tile, jpg
 
     copyCover: ->
         tile = @activeTile
@@ -390,6 +393,8 @@ class Brws
             when 'command+left'          then @collapseFocusTile()
             when 'command+backspace'     then @activeTile?.delete()
             when 'command+alt+backspace' then if not @inMusicDir() then @focusTile?.delete(trashDir:true)
+            when '.'                     then @focusTile?.focusNeighbor 'page down'
+            when ','                     then @focusTile?.focusNeighbor 'page up'
             when 'left', 'right', 'up', 'down', 'page up', 'page down'  
                 @focusTile?.focusNeighbor key
             when 'command+u' 

@@ -60,8 +60,8 @@ class Tags
         format    = last (picture.format ? picture.data.format).toLowerCase().split '/'
         format    = 'jpg' if format == 'jpeg'
         picExt    = '.' + format
-        coverFile = imgs.coverForTile tile
         data      = picture.data.data ? picture.data 
+        coverFile = imgs.coverForTile tile
                 
         if format == 'jpg'
             fs.writeFile coverFile, Buffer.from(data), (err) =>
@@ -69,7 +69,6 @@ class Tags
                     log "[ERROR] can't save cover image for", tile.file
                     Tags.setTag tile, tag
                 else
-                    # console.log 'set tag with jpg cover', coverFile
                     Tags.setTag tile, tag, coverFile
         else        
             tmpFile = path.join process.env.TMPDIR, path.basename swapExt coverFile, picExt
@@ -84,10 +83,20 @@ class Tags
                             log "        \"#{tmpFile}\" -> \"#{coverFile}\""
                             Tags.setTag tile, tag
                         else
-                            # console.log 'set tag with converted cover', coverFile
                             Tags.setTag tile, tag, coverFile
                         fs.unlink tmpFile, ->
 
+    @saveJpgData: (tile, jpgData) ->
+        coverFile = imgs.coverForTile tile   
+        fs.writeFile coverFile, Buffer.from(jpgData), (err) =>
+            if err?
+                log "[ERROR] can't save jpg image for", tile.file
+            else
+                imgs.setFileCover tile.file, coverFile, (coverHash) -> 
+                    tile.setCover imgs.coverForHash coverHash
+                    if false == cache.get "#{path.dirname tile.file}:cover"
+                        cache.set "#{path.dirname tile.file}:cover", coverHash
+    
     @setTag: (tile, tag, coverFile) ->
             
         cache.set "#{tile.file}:artist", tag.artist
@@ -95,7 +104,6 @@ class Tags
         if coverFile?
             imgs.setFileCover tile.file, coverFile, (coverHash) -> 
                 tag.cover = coverHash
-                # console.log 'setTag coverHash', coverHash
                 tile.setTag tag
                 Tags.dequeue()
                 if false == cache.get "#{path.dirname tile.file}:cover"
