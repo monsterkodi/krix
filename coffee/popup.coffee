@@ -62,8 +62,11 @@ class Popup
             when 'home', 'page up'  then @select @items.firstChild
             when 'enter'            then @activate @selected
             when 'esc', 'space'     then @close()
-            when 'down'             then @select @selected?.nextSibling
+            when 'down'             then @select @selected?.nextSibling ? @items.firstChild 
             when 'up'               then @select @selected?.previousSibling ? @items.lastChild 
+            when 'right'            then @select @selected?.nextSibling
+            when 'left'             then @select @selected?.previousSibling
+            
         event.stopPropagation()
      
     onClick: (e) => @activate e.target

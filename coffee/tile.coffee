@@ -159,13 +159,13 @@ class Tile
         post.removeListener 'unfocus', @unFocus
     
     setFocus: =>
-        if not @hasFocus() 
+        if not @hasFocus()
             post.emit 'unfocus'
             @pad.classList.add 'tilePadFocus'
             post.on 'unfocus', @unFocus
             @pad.scrollIntoViewIfNeeded() if not @isParentClipping()
+            $("main").focus()
         post.emit 'tileFocus', @
-        $("main").focus()
        
     focusNeighbor: (nb, bn) ->
         tile = @neighbor nb
