@@ -1,7 +1,7 @@
 name            krix
 productName     krix
 author          monsterkodi
-version         0.3.1
+version         0.3.2
 description     minimal music player / mpd client
 license         Unlicense
 main            js/app.js

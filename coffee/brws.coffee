@@ -130,10 +130,10 @@ class Brws
                     tile.setFocus()
             @adjustTiles()
 
-    newPlaylist: (name='new playlist') =>
-        return if @dir != ''
-        Play.newPlaylist name, (playlist) =>
-            tile = new Tile playlist, @tiles, playlist: playlist
+    newPlaylist: =>
+        return if not @inMusicDir()
+        Play.newPlaylist 'new playlist', (playlist) =>
+            tile = new Playlist playlist, @tiles, playlist: playlist
             tile.setFocus()
 
     delPlaylistItem: ->

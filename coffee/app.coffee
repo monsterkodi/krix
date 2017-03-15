@@ -205,7 +205,6 @@ class Main
             useContentSize:  true
             fullscreenable:  true
             show:            false
-            hasShadow:       false
             backgroundColor: '#000'
             titleBarStyle:   'hidden'
 
