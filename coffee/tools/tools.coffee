@@ -201,6 +201,7 @@ module.exports =
             if rule.selectorText == selector
                 rule.style[key] = value
                 return
+        document.styleSheets[ssid].insertRule "#{selector} { #{key}: #{value} }", document.styleSheets[ssid].cssRules.length
 
     getStyle: (selector, key, value, ssid=0) ->
         for rule in document.styleSheets[ssid].cssRules
