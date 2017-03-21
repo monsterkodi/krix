@@ -27,7 +27,7 @@ window.winID  = 1
 saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browserWin.getBounds()
 loadPrefs     = ->
     app = electron.remote.app
-    prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon"
+    prefs.init "#{app.getPath('userData')}/#{pkg.productName}.noon"
 
 # 000  00000000    0000000
 # 000  000   000  000     
