@@ -6,7 +6,6 @@
 {
 escapePath,
 keyinfo,
-queue,
 elem,
 post,
 log,
@@ -14,6 +13,7 @@ $}      = require 'kxk'
 Folder  = require './folder'
 Tile    = require './tile'
 Play    = require './play'
+queue   = require './queue'
 childp  = require 'child_process'
 path    = require 'path'
 _       = require 'lodash'
