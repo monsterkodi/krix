@@ -4,8 +4,7 @@
 #000      000   000  000   000
 #0000000   0000000    0000000 
 
-str    = require './str'
-childp = require 'child_process'
+str = require './str'
 
 log = -> 
     console.log (str(s) for s in [].slice.call arguments, 0).join " "
@@ -13,8 +12,6 @@ log = ->
 logScroll = -> 
     s = (str(s) for s in [].slice.call arguments, 0).join " "
     console.log s
-    # msg = s.replace /([\`"'])/g, '\\$1'
-    # childp.execSync "syslog -s -l Notice \"krix #{msg}\""
     window.logview?.appendText?(s)
 
 if window?

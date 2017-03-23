@@ -4,13 +4,9 @@
 #   000   000  000        000      
 #   000   000  000        000      
 {
-first,
-fileList,
-dirExists,
-fileExists,
-resolve}      = require './tools/tools'
-log           = require './tools/log'
-prefs         = require './tools/prefs'
+about,
+prefs, 
+log}          = require 'kxk'
 pkg           = require '../package.json'
 MainMenu      = require './mainmenu'
 _             = require 'lodash'
@@ -65,12 +61,11 @@ if args.verbose
 # 000        000   000  000       000            000
 # 000        000   000  00000000  000       0000000 
 
-prefs.init "#{app.getPath('appData')}/#{pkg.productName}/#{pkg.productName}.noon"
+prefs.init()
 
 if args.prefs
     log colors.yellow.bold 'prefs'
-    if fileExists prefs.file
-        log noon.stringify noon.load(prefs.file), colors:true
+    log noon.stringify prefs.store, colors:true
 
 # 000   000  000  000   000   0000000
 # 000 0 000  000  0000  000  000     
@@ -250,22 +245,7 @@ class Main
         app.exit 0
         process.exit 0
         
-    #  0000000   0000000     0000000   000   000  000000000
-    # 000   000  000   000  000   000  000   000     000   
-    # 000000000  0000000    000   000  000   000     000   
-    # 000   000  000   000  000   000  000   000     000   
-    # 000   000  0000000     0000000    0000000      000   
-    
-    showAbout: =>    
-        w = new BrowserWindow
-            show:            true
-            center:          true
-            resizable:       false
-            frame:           false
-            backgroundColor: '#000'            
-            width:           400
-            height:          400
-        w.loadURL "file://#{__dirname}/../about.html"
+    showAbout: => about img: "#{__dirname}/../img/about.png", pkg: pkg
 
 #  0000000   00000000   00000000         0000000   000   000
 # 000   000  000   000  000   000       000   000  0000  000
