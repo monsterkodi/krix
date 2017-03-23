@@ -3,10 +3,10 @@
 #    000     000     000     000      0000000   0000000    000000000  0000000  
 #    000     000     000     000      000       000   000  000   000  000   000
 #    000     000     000     0000000  00000000  0000000    000   000  000   000
-
-{$}  = require './tools/tools'
-log  = require './tools/log'
-post = require './post'
+{
+post,
+log,
+$}  = require 'kxk'
 
 class Titlebar
     

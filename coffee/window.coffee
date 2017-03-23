@@ -4,15 +4,15 @@
 # 000   000  000  000  0000  000   000  000   000  000   000
 # 00     00  000  000   000  0000000     0000000   00     00
 {
-sw,sh,$
-}           = require './tools/tools'
+keyinfo,
+prefs,
+sw,sh,
+log,
+$}          = require 'kxk'
 Split       = require './split'
 LogView     = require './logview'
 Titlebar    = require './titlebar'
 Main        = require './main'
-keyinfo     = require './tools/keyinfo'
-log         = require './tools/log'
-prefs       = require './tools/prefs'
 _           = require 'lodash'
 fs          = require 'fs'
 path        = require 'path'

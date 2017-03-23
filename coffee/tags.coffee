@@ -6,9 +6,9 @@
 {
 swapExt,
 first,
-last
-}           = require './tools/tools'
-log         = require './tools/log'
+last,
+log
+}           = require 'kxk'
 imgs        = require './imgs'
 cache       = require './cache'
 jsmediatags = require 'jsmediatags'

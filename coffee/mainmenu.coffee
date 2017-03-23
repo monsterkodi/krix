@@ -4,9 +4,9 @@
 # 000 0 000  000   000  000  000  0000  000 0 000  000       000  0000  000   000
 # 000   000  000   000  000  000   000  000   000  00000000  000   000   0000000 
 {
-unresolve
-}     = require './tools/tools'
-log   = require './tools/log'
+unresolve,
+log
+}     = require 'kxk'
 pkg   = require '../package.json'
 Menu  = require('electron').Menu
 

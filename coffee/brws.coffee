@@ -6,14 +6,15 @@
 {
 resolve,
 style,
-$ }      = require './tools/tools'
+prefs,
+post,
+elem,
+log,
+$ }      = require 'kxk'
 fs       = require 'fs'
 path     = require 'path'
 childp   = require 'child_process'
 _        = require 'lodash'
-log      = require './tools/log'
-elem     = require './tools/elem'
-prefs    = require './tools/prefs'
 Playlist = require './playlist'
 Folder   = require './folder'
 Tile     = require './tile'
@@ -22,7 +23,6 @@ cache    = require './cache'
 tags     = require './tags' 
 imgs     = require './imgs'
 walk     = require './walk'
-post     = require './post'
 
 MIN_TILE_SIZE = 50
 MAX_TILE_SIZE = 500

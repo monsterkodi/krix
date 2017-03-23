@@ -4,9 +4,9 @@
 # 000  000 0 000  000   000       000
 # 000  000   000   0000000   0000000 
 {
-swapExt
-}       = require './tools/tools'
-log     = require './tools/log'
+swapExt,
+log
+}       = require 'kxk'
 cache   = require './cache'
 fs      = require 'fs'
 crypto  = require 'crypto'

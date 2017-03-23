@@ -9,15 +9,15 @@ childIndex,
 encodePath,
 escapePath,
 resolve,
+popup,
+elem,
+prefs,
+post,
 last,
-$}      = require './tools/tools'
-elem    = require './tools/elem'
-log     = require './tools/log'
-prefs   = require './tools/prefs'
-post    = require './post'
+log,
+$}      = require 'kxk'
 tags    = require './tags'
 imgs    = require './imgs'
-popup   = require './popup'
 childp  = require 'child_process'
 path    = require 'path'
 fs      = require 'fs'

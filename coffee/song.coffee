@@ -4,13 +4,13 @@
 #      000  000   000  000  0000  000   000
 # 0000000    0000000   000   000   0000000 
 {
-style
-}      = require './tools/tools'
-elem   = require './tools/elem'
+style,
+elem,
+post,
+log
+}      = require 'kxk'
 Tile   = require './tile'
 Wave   = require './wave'
-post   = require './post'
-log    = require './tools/log'
 moment = require 'moment'
 require 'moment-duration-format'
 

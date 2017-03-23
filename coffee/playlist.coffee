@@ -4,16 +4,16 @@
 # 000        000      000   000     000     000      000       000     000   
 # 000        0000000  000   000     000     0000000  000  0000000      000   
 {
+escapePath,
+keyinfo,
 queue,
-escapePath
-$}      = require './tools/tools'
-log     = require './tools/log'
-elem    = require './tools/elem'
+elem,
+post,
+log,
+$}      = require 'kxk'
 Folder  = require './folder'
 Tile    = require './tile'
-post    = require './post'
 Play    = require './play'
-keyinfo = require './tools/keyinfo'
 childp  = require 'child_process'
 path    = require 'path'
 _       = require 'lodash'

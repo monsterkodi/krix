@@ -5,10 +5,10 @@
 #  0000000     000     000   000  0000000
 {
 style,
-$ }  = require './tools/tools'
-elem = require './tools/elem'
-log  = require './tools/log'
-post = require './post'
+elem,
+post,
+log,
+$ }  = require 'kxk'
 Song = require './song'
 path = require 'path'
 

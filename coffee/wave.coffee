@@ -5,12 +5,12 @@
 # 00     00  000   000      0      00000000
 {
 encodePath,
-escapePath
-}       = require './tools/tools'
-log     = require './tools/log'
-elem    = require './tools/elem'
-drag    = require './tools/drag'
-post    = require './post'
+escapePath,
+post,
+elem,
+drag,
+log
+}       = require 'kxk'
 cache   = require './cache'
 childp  = require 'child_process'
 process = require 'process'

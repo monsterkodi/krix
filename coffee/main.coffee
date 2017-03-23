@@ -5,14 +5,14 @@
 #   000 0 000  000   000  000  000  0000
 #   000   000  000   000  000  000   000
 {
-resolve
-}       = require './tools/tools'
-keyinfo = require './tools/keyinfo'
-log     = require './tools/log'
+resolve,
+keyinfo,
+post,
+log
+}       = require 'kxk'
 Brws    = require './brws'
 Ctrl    = require './ctrl'
 Play    = require './play'
-post    = require './post'
 cache   = require './cache'
 path    = require 'path'
 

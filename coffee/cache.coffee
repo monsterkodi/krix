@@ -5,10 +5,10 @@
 #  0000000  000   000   0000000  000   000  00000000
 {
 relative,
-$ }      = require './tools/tools'
-log      = require './tools/log'
-Store    = require './tools/store'
-post     = require './post'
+store,
+post,
+log,
+$ }      = require 'kxk'
 fs       = require 'fs-extra'
 path     = require 'path'
 chokidar = require 'chokidar'
@@ -26,8 +26,8 @@ class Cache
         
         @cacheDir = path.join @musicDir, '.krix'
         
-        @store   = new Store timeout: 2000, file: path.join @cacheDir, 'cache.noon'
-        @hashes  = new Store timeout: 2000, file: path.join @cacheDir, 'hashes.noon'
+        @store   = new store timeout: 2000, file: path.join @cacheDir, 'cache.noon'
+        @hashes  = new store timeout: 2000, file: path.join @cacheDir, 'hashes.noon'
         @imgDir  = path.join @cacheDir, 'img' 
         @waveDir = path.join @cacheDir, 'wave' 
         

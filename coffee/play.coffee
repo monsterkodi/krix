@@ -5,10 +5,10 @@
 # 000        000      000   000     000   
 # 000        0000000  000   000     000   
 {
-last
-}         = require './tools/tools'
-log       = require './tools/log'
-post      = require './post'
+last,
+post,
+log
+}         = require 'kxk'
 _         = require 'lodash'
 moment    = require 'moment'
 childp    = require 'child_process' 
