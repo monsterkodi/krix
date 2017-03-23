@@ -7,3 +7,4 @@ krix-darwin-x64
 bin/dmg.json
 krix-*.dmg
 bin/github-release
+yarn.lock
