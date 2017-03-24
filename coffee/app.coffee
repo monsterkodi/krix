@@ -33,7 +33,7 @@ args  = require('karg') """
 
 #{pkg.productName}
 
-    show      . ? open window on startup  . = true
+    show      . ? open window on startup  . = false
     prefs     . ? show preferences        . = false
     noprefs   . ? don't load preferences  . = false
     verbose   . ? log more                . = false
@@ -213,10 +213,11 @@ class Main
             win.webContents.send 'setWinID', win.id
             
         winReadyToShow = =>
-            win.show()
-            win.focus()
-            
-            if args.DevTools then win.webContents.openDevTools()
+            if args.show
+                win.show()
+                win.focus()
+                 
+                if args.DevTools then win.webContents.openDevTools()
                         
         win.webContents.on 'dom-ready', winReady
         win.on 'ready-to-show', winReadyToShow
