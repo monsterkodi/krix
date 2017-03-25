@@ -3,12 +3,12 @@ html(lang="en")
     head
         meta(charset='utf-8')
         title krix
-        link(rel='stylesheet' href='css/style.css'  type='text/css')
-        link(rel='stylesheet' href='node_modules/font-awesome/css/font-awesome.css')
+        link(rel='stylesheet' href='./css/style.css'  type='text/css')
+        link(rel='stylesheet' href='../node_modules/font-awesome/css/font-awesome.css')
     body.body
         #titlebar.titlebar
         #split.split
             #main.main(tabindex="0")
             #logview.logview(tabindex="1")
     script.
-        require('./js/window.js')
+        require('./window')

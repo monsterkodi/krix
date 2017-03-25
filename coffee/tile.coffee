@@ -5,6 +5,7 @@
 #    000     000  000      000     
 #    000     000  0000000  00000000
 {
+popupWindow,
 childIndex,
 encodePath,
 escapePath,
@@ -15,12 +16,13 @@ prefs,
 post,
 last,
 log,
-$}      = require 'kxk'
-tags    = require './tags'
-imgs    = require './imgs'
-childp  = require 'child_process'
-path    = require 'path'
-fs      = require 'fs'
+$}       = require 'kxk'
+tags     = require './tags'
+imgs     = require './imgs'
+childp   = require 'child_process'
+path     = require 'path'
+fs       = require 'fs'
+electron = require 'electron'
         
 class Tile
     
@@ -289,7 +291,9 @@ class Tile
             hide:  @isDir() and path.dirname(@file) == '.'
             cb:    @delete
         ]
-        popup.menu opt
+        opt.win = electron.remote.getCurrentWindow()
+        opt.stylesheet = "#{__dirname}/css/style.css"
+        popupWindow.show opt
 
     # 00000000   000       0000000   000   000  000      000   0000000  000000000  
     # 000   000  000      000   000   000 000   000      000  000          000     

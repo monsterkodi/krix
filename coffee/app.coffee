@@ -6,22 +6,22 @@
 {
 about,
 prefs, 
-log}          = require 'kxk'
-pkg           = require '../package.json'
-MainMenu      = require './mainmenu'
-_             = require 'lodash'
-fs            = require 'fs'
-noon          = require 'noon'
-colors        = require 'colors'
-electron      = require 'electron'
-childp        = require 'child_process'
-app           = electron.app
-BrowserWindow = electron.BrowserWindow
-Tray          = electron.Tray
-Menu          = electron.Menu
-ipc           = electron.ipcMain
-main          = undefined # < created in app.on 'ready'
-tray          = undefined # < created in Main.constructor
+log}     = require 'kxk'
+pkg      = require '../package.json'
+MainMenu = require './mainmenu'
+_        = require 'lodash'
+fs       = require 'fs'
+noon     = require 'noon'
+colors   = require 'colors'
+electron = require 'electron'
+childp   = require 'child_process'
+app      = electron.app
+Browser  = electron.BrowserWindow
+Tray     = electron.Tray
+Menu     = electron.Menu
+ipc      = electron.ipcMain
+main     = undefined # < created in app.on 'ready'
+tray     = undefined # < created in Main.constructor
 
 #  0000000   00000000    0000000    0000000
 # 000   000  000   000  000        000     
@@ -73,8 +73,8 @@ if args.prefs
 # 000   000  000  000  0000       000
 # 00     00  000  000   000  0000000 
 
-wins        = -> BrowserWindow.getAllWindows().sort (a,b) -> a.id - b.id 
-activeWin   = -> BrowserWindow.getFocusedWindow()
+wins        = -> Browser.getAllWindows().sort (a,b) -> a.id - b.id 
+activeWin   = -> Browser.getFocusedWindow()
 visibleWins = -> (w for w in wins() when w?.isVisible() and not w?.isMinimized())
 winWithID   = (winID) ->
     wid = parseInt winID
@@ -190,7 +190,7 @@ class Main
             bounds.x = parseInt (w-bounds.width)/2
             bounds.y = 0
             
-        win = new BrowserWindow
+        win = new Browser
             x:               bounds.x
             y:               bounds.y
             width:           bounds.width
@@ -203,7 +203,7 @@ class Main
             backgroundColor: '#000'
             titleBarStyle:   'hidden'
 
-        win.loadURL "file://#{__dirname}/../index.html"
+        win.loadURL "file://#{__dirname}/index.html"
         app.dock.show()
         win.on 'close',  @onCloseWin
         win.on 'move',   @onMoveWin

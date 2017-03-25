@@ -1,5 +1,0 @@
-ignore      
-    /krix-darwin-x64/
-    
-pug     . ext html . replace .. pug/     ./
-styl    . ext css  . replace .. styl/    css/
