@@ -15,6 +15,7 @@ elem,
 prefs,
 post,
 last,
+pos,
 log,
 $}       = require 'kxk'
 tags     = require './tags'
@@ -244,13 +245,14 @@ class Tile
     # 000       000   000  000  0000     000     000        000 000      000      
     #  0000000   0000000   000   000     000     00000000  000   000     000     
     
-    onContextMenu: (event) => @showContextMenu x:event.clientX, y:event.clientY
+    onContextMenu: (event) => @showContextMenu pos event
               
-    showContextMenu: (opt={}) =>
+    showContextMenu: (absPos) =>
         
-        opt.x ?= @div.getBoundingClientRect().left
-        opt.y ?= @div.getBoundingClientRect().top
-        opt.items = [ # ⇧⌥⌘⏎
+        if not absPos?
+            absPos = pos @div.getBoundingClientRect().left, @div.getBoundingClientRect().top
+        
+        opt = items: [ # ⇧⌥⌘⏎
             text:  'Add to Queue'
             combo: 'Q' 
             cb:    @addToCurrent
@@ -291,7 +293,11 @@ class Tile
             hide:  @isDir() and path.dirname(@file) == '.'
             cb:    @delete
         ]
-        opt.win = electron.remote.getCurrentWindow()
+        
+        win = electron.remote.getCurrentWindow()
+        opt.winID      = win.id
+        opt.x          = absPos.x + win.getBounds().x
+        opt.y          = absPos.y + win.getBounds().y
         opt.stylesheet = "#{__dirname}/css/style.css"
         popupWindow.show opt
 

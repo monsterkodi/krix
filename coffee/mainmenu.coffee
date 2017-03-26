@@ -65,7 +65,7 @@ class MainMenu
             ,                            
                 label:       'Close Window'
                 accelerator: 'Cmd+W'
-                click:       main.closeWindows
+                click:       (i,win) -> win.close()
             ,
                 label:       'Close Other Windows'
                 accelerator: 'CmdOrCtrl+Shift+w'

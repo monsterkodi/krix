@@ -73,7 +73,7 @@ if args.prefs
 # 000   000  000  000  0000       000
 # 00     00  000  000   000  0000000 
 
-wins        = -> Browser.getAllWindows().sort (a,b) -> a.id - b.id 
+wins        = -> Browser.getAllWindows()
 activeWin   = -> Browser.getFocusedWindow()
 visibleWins = -> (w for w in wins() when w?.isVisible() and not w?.isMinimized())
 winWithID   = (winID) ->
@@ -254,7 +254,8 @@ class Main
 # 000   000  000        000        000  000   000  000  0000
 # 000   000  000        000        000   0000000   000   000
 
-app.on 'ready', => main = new Main
+app.on 'ready', -> main = new Main
+app.on 'window-all-closed', ->
     
 app.setName pkg.productName
 
