@@ -21,8 +21,10 @@ pkg         = require '../package.json'
 
 ipc           = electron.ipcRenderer
 remote        = electron.remote
-BrowserWindow = remote.BrowserWindow
-window.winID  = 1
+Browser       = remote.BrowserWindow
+win           = remote.getCurrentWindow()
+window.winID  = win.id
+window.browserWin = win
 
 saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browserWin.getBounds()
 loadPrefs     = ->
@@ -34,19 +36,23 @@ loadPrefs     = ->
 # 000  00000000   000     
 # 000  000        000     
 # 000  000         0000000
+        
+ipc.on 'saveBounds', saveBounds
+ipc.on 'popupModKeyCombo', (e,mod,key,combo) -> window.main.onModKeyCombo mod,key,combo
 
-ipc.on 'setWinID', (event, id) => 
-    window.winID = id
-    window.browserWin = BrowserWindow.fromId id
+# 000   000  000  000   000  00     00   0000000   000  000   000  
+# 000 0 000  000  0000  000  000   000  000   000  000  0000  000  
+# 000000000  000  000 0 000  000000000  000000000  000  000 0 000  
+# 000   000  000  000  0000  000 0 000  000   000  000  000  0000  
+# 00     00  000  000   000  000   000  000   000  000  000   000  
+
+winMain = ->    
     loadPrefs()
     window.titlebar = new Titlebar
     window.main     = new Main $('main')
     window.logview  = new LogView $('logview')
     window.split    = new Split()
     window.split.resized()
-        
-ipc.on 'saveBounds', saveBounds
-ipc.on 'popupModKeyCombo', (e,mod,key,combo) -> window.main.onModKeyCombo mod,key,combo
 
 # 00000000   00000000   0000000  000  0000000  00000000
 # 000   000  000       000       000     000   000     
@@ -70,7 +76,7 @@ window.onunload = -> prefs.save()
 #0000000    0000000  000   000  00000000  00000000  000   000  0000000   000   000   0000000      000   
 
 screenShot = ->
-    win = BrowserWindow.fromId winID 
+    win = Browser.fromId winID 
     win.capturePage (img) ->
         file = 'screenShot.png'
         remote.require('fs').writeFile file, img.toPng(), (err) -> 
@@ -99,4 +105,5 @@ document.onkeydown = (event) ->
         when 'command+alt+i'      then return ipc.send 'toggleDevTools', winID
         when 'command+alt+k'      then return window.split.toggleLog()
         when 'command+alt+ctrl+k' then return window.split.showOrClearLog()
-        
+ 
+ winMain()       

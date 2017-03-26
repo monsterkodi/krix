@@ -115,11 +115,11 @@ class Ctrl
             when 'p' then @onPlayButton()
             when 'f' then @showDirOfCurrentSong()
             when 'v' then @showCurrentPlaylist()
-                    
+
         if @song?.tile?.hasFocus()
             switch combo                    
                 when 'left', 'right' then post.emit 'seek', key == 'left' and '-20' or '+20'
                 when 'command+right' then post.emit 'nextSong'
                 when 'command+left'  then post.emit 'prevSong'
-                
+        
 module.exports = Ctrl

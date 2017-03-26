@@ -76,10 +76,7 @@ if args.prefs
 wins        = -> Browser.getAllWindows()
 activeWin   = -> Browser.getFocusedWindow()
 visibleWins = -> (w for w in wins() when w?.isVisible() and not w?.isMinimized())
-winWithID   = (winID) ->
-    wid = parseInt winID
-    for w in wins()
-        return w if w.id == wid
+winWithID   = (winID) -> Browser.fromId winID
 
 hideDock = -> app.dock.hide() if app.dock
 
@@ -125,11 +122,6 @@ class Main
     # 000   000  000  000  0000  000   000  000   000  000   000       000
     # 00     00  000  000   000  0000000     0000000   00     00  0000000 
 
-    wins:        wins
-    winWithID:   winWithID
-    activeWin:   activeWin
-    visibleWins: visibleWins
-        
     reloadWin: (win) -> win?.webContents.reloadIgnoringCache()
 
     toggleMaximize: (win) ->
@@ -148,6 +140,7 @@ class Main
             else
                 @showWindows()
         else
+            args.show = true
             @createWindow()
 
     hideWindows: =>
@@ -209,9 +202,6 @@ class Main
         win.on 'move',   @onMoveWin
         win.on 'resize', @onResizeWin
                                
-        winReady = => 
-            win.webContents.send 'setWinID', win.id
-            
         winReadyToShow = =>
             if args.show
                 win.show()
@@ -219,7 +209,6 @@ class Main
                  
                 if args.DevTools then win.webContents.openDevTools()
                         
-        win.webContents.on 'dom-ready', winReady
         win.on 'ready-to-show', winReadyToShow
         win 
     
