@@ -46,6 +46,7 @@ ipc.on 'setWinID', (event, id) =>
     window.split.resized()
         
 ipc.on 'saveBounds', saveBounds
+ipc.on 'popupModKeyCombo', (e,mod,key,combo) -> window.main.onModKeyCombo mod,key,combo
 
 # 00000000   00000000   0000000  000  0000000  00000000
 # 000   000  000       000       000     000   000     

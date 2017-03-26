@@ -295,7 +295,6 @@ class Tile
         ]
         
         win = electron.remote.getCurrentWindow()
-        opt.winID      = win.id
         opt.x          = absPos.x + win.getBounds().x
         opt.y          = absPos.y + win.getBounds().y
         opt.stylesheet = "#{__dirname}/css/style.css"

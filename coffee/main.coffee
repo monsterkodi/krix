@@ -36,6 +36,9 @@ class Main
     
     onKeyDown: (event) =>
         {mod, key, combo} = keyinfo.forEvent event
+        @onModKeyCombo mod, key, combo, event
+        
+    onModKeyCombo: (mod, key, combo, event) =>
         return if not combo
         return if key == 'right click' # weird right command key
         @ctrl?.modKeyComboEventDown mod, key, combo, event
