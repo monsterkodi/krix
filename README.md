@@ -1,6 +1,8 @@
 ![krix](img/banner.png)
 
-![screenshot](img/krix1.png)
+![dark](img/krix1.png)
+
+![bright](img/krix2.png)
 
 ### about
 
