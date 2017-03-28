@@ -1,0 +1,149 @@
+
+// 0000000     0000000   00000000   000   000  
+// 000   000  000   000  000   000  000  000   
+// 000   000  000000000  0000000    0000000    
+// 000   000  000   000  000   000  000  000   
+// 0000000    000   000  000   000  000   000  
+
+frameColor            = #222
+frameBorder           = 6px solid frameColor
+
+body
+    color               #fff
+    
+.titlebar
+    background          #333
+    color               #aaa
+
+#split
+    border-left         frameBorder
+    border-right        frameBorder
+    
+.gutter
+    background          #222
+    
+.logview
+.main
+    background          #000
+    color               #ddd 
+
+.logview
+    border-bottom       frameBorder
+
+.ctrl
+    background          #222
+
+.button     
+    color               #444
+    background          #111
+
+.fa-play 
+    color               #666
+
+.buttonActive     
+    color               #fa0
+.buttonInactive     
+    color               #444
+
+.fa-play:hover    
+.button:hover            
+    color               #fff
+.button:active           
+    background          #222
+    
+.label
+    color               #444
+    
+.popup
+    background-color    #222
+
+.popupWindow
+    background-color    #222
+    
+.popupItem
+    color               #888
+    &:not(:last-child)
+        border-bottom       1px solid #222
+    &.selected
+        color           #fff
+
+.popupItem:active
+    color               #ff0
+
+.popupCombo
+    color               #333
+
+.tiles
+    background          #000
+
+.tileSqrDir                 
+    background-color    rgba(0,0,0,0.7)
+.tileSqrPlaylist
+    background-color    rgba(255,0,0,0.5)
+    
+// focus tile border color
+    
+.tilePadFocus               
+    background-color        #44a
+    &.tilePadDir    
+        background-color    #333
+    &.tilePadPlaylist 
+        background-color    #a00
+    
+.tileArtist                 
+    color               #88f
+
+.tileChild
+    color               #fa0
+    
+.playlistInfo
+    color               #b00
+    
+.tileImg
+    background-color    rgba(0,0,100,0.5)
+
+.tileImgDir                
+    background-color    rgba(0,0,0,0.5)
+    
+.tileImgPlaylist
+    background-color    rgba(100,0,0,0.7)
+    
+.tileSqrFile                
+    background-color    rgba(0,0,100,0.7)
+    
+.tileInput
+    color               #fff
+    background-color    rgba(0,0,0,0)
+
+.song
+    background-color    #000
+    
+.songInfo
+    background          rgba(0,0,0,0)
+    
+.songElapsed
+.songDuration
+    color               #333
+    background          #000
+
+.waveLine 
+    background-color    rgba(255,255,255,0.14)
+
+.waveBlend
+    background-color    rgba(19,19,19,0.6)
+        
+@keyframes highlight
+    0%,100%   
+        color           rgb(16,16,16)
+    50%  
+        color           rgb(255,255,255)
+    
+::-webkit-scrollbar-corner
+    background-color        #222
+
+::-webkit-scrollbar-thumb
+    background-color        #333
+
+::-webkit-scrollbar-thumb:hover
+    background-color        #b00
+    

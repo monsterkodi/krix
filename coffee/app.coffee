@@ -61,7 +61,7 @@ if args.verbose
 # 000        000   000  000       000            000
 # 000        000   000  00000000  000       0000000 
 
-prefs.init()
+prefs.init shortcut: 'F4'
 
 if args.prefs
     log colors.yellow.bold 'prefs'
@@ -110,7 +110,7 @@ class Main
                                 
         app.setName pkg.productName
                                 
-        electron.globalShortcut.register prefs.get('shortcut', 'F4'), @toggleWindows
+        electron.globalShortcut.register prefs.get('shortcut'), @toggleWindows
             
         @createWindow()
 

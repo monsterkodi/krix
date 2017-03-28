@@ -5,6 +5,7 @@
 # 00     00  000  000   000  0000000     0000000   00     00
 {
 keyinfo,
+scheme,
 prefs,
 sw,sh,
 log,
@@ -29,7 +30,8 @@ window.browserWin = win
 saveBounds    = -> if window.browserWin? then prefs.set 'bounds', window.browserWin.getBounds()
 loadPrefs     = ->
     app = electron.remote.app
-    prefs.init "#{app.getPath('userData')}/#{pkg.productName}.noon"
+    prefs.init()
+    scheme.set prefs.get 'scheme', 'dark'
 
 # 000  00000000    0000000
 # 000  000   000  000     
@@ -101,9 +103,10 @@ document.onkeydown = (event) ->
     {mod, key, combo} = keyinfo.forEvent event
 
     switch combo
-        when 'f6'                 then return screenShot()
-        when 'command+alt+i'      then return ipc.send 'toggleDevTools', winID
-        when 'command+alt+k'      then return window.split.toggleLog()
-        when 'command+alt+ctrl+k' then return window.split.showOrClearLog()
+        when 'f6'                 then screenShot()
+        when 'command+alt+i'      then ipc.send 'toggleDevTools', winID
+        when 'command+i', 'i'     then scheme.toggle()
+        when 'command+alt+k'      then window.split.toggleLog()
+        when 'command+alt+ctrl+k' then window.split.showOrClearLog()
  
  winMain()       
