@@ -2,7 +2,7 @@
 
 ![dark](img/krix1.png)
 
-![bright](img/krix2.png)
+![bright](img/krix_briht.png)
 
 ### about
 
