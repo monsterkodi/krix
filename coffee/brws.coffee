@@ -97,7 +97,6 @@ class Brws
         
         key = @playlist ? @dir 
         num = prefs.get "tileNum:#{key}", prefs.get "tileHint:#{key}"
-        log "clear #{num}"
         if num then @setTileNum num, false
 
     showFile: (file) =>

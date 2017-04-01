@@ -43,21 +43,21 @@ class Cache
             @waveDir = null
                         
     @onFileChange: (p) => 
-        log "Cache.@onFileChange #{p}"
+        # log "Cache.@onFileChange #{p}"
         relpath = relative p, @musicDir
         @del relpath
         post.emit 'update', path.dirname relpath
         $(relpath)?.tile?.fileChanged?()
 
     @onFileUnlink: (p) => 
-        log "Cache.@onFileUnlink #{p}"
+        # log "Cache.@onFileUnlink #{p}"
         relpath = relative p, @musicDir
         @del relpath
         post.emit 'update', path.dirname relpath
         $(relpath)?.tile?.del?()
     
     @watch: (p) ->
-        return
+        return # <- watch is deactivated!
         @unwatch()
         absPath = path.join @musicDir, p
         @watcher = chokidar.watch absPath,
@@ -88,8 +88,6 @@ class Cache
     @prune: (dir)       => 
         for key in Object.keys @store.data
             if key.startsWith dir
-                if false == @store.get "#{key}:cover"
-                    log "clear #{key}:cover"
-                    @store.del "#{key}:cover" 
-
+                @store.del key
+                
 module.exports = Cache
