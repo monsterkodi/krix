@@ -5,7 +5,6 @@
 # 000        000      000   000     000   
 # 000        0000000  000   000     000   
 {
-last,
 post,
 log
 }         = require 'kxk'
@@ -166,11 +165,11 @@ class Play
                 [key, val] = l.split(': ', 2)
                 switch key 
                     when 'file'   then files.push file: val
-                    when 'Artist' then last(files).artist = val
-                    when 'Title'  then last(files).title = val
+                    when 'Artist' then _.last(files).artist = val
+                    when 'Title'  then _.last(files).title = val
                     when 'Time'   
                         secs = parseInt val
-                        last(files).time = secs
+                        _.last(files).time = secs
                         time += secs
             @playlists[name].count = files.length
             @playlists[name].secs  = time

@@ -14,7 +14,6 @@ popup,
 elem,
 prefs,
 post,
-last,
 pos,
 log,
 $}       = require 'kxk'

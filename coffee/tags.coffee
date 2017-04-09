@@ -5,8 +5,6 @@
 #    000     000   000   0000000   0000000 
 {
 swapExt,
-first,
-last,
 log
 }           = require 'kxk'
 imgs        = require './imgs'
@@ -15,6 +13,7 @@ jsmediatags = require 'jsmediatags'
 childp      = require 'child_process'
 path        = require 'path'
 fs          = require 'fs'
+_           = require 'lodash'
 
 class Tags
             
@@ -56,8 +55,8 @@ class Tags
                       
     @saveCover: (tile, tag) ->
 
-        picture   = first(tag.APIC) ? tag.picture 
-        format    = last (picture.format ? picture.data.format).toLowerCase().split '/'
+        picture   = _.first(tag.APIC) ? tag.picture 
+        format    = _.last (picture.format ? picture.data.format).toLowerCase().split '/'
         format    = 'jpg' if format == 'jpeg'
         picExt    = '.' + format
         data      = picture.data.data ? picture.data 
