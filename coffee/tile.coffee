@@ -4,24 +4,11 @@
 #    000     000  000      0000000 
 #    000     000  000      000     
 #    000     000  0000000  00000000
-{
-popupWindow,
-childIndex,
-encodePath,
-escapePath,
-resolve,
-popup,
-elem,
-prefs,
-post,
-pos,
-log,
-$}       = require 'kxk'
+
+{ popupWindow, childIndex, encodePath, escapePath, resolve, popup, slash, elem, prefs, post, pos, childp, fs, log, $} = require 'kxk'
+
 tags     = require './tags'
 imgs     = require './imgs'
-childp   = require 'child_process'
-path     = require 'path'
-fs       = require 'fs'
 electron = require 'electron'
         
 class Tile
@@ -53,7 +40,7 @@ class Tile
             art.innerHTML = path.basename @file
             sqr.classList.add "tileSqrFile"
         else if @isDir()
-            art.innerHTML = path.basename @file
+            art.innerHTML = slash.basename @file
             art.classList.add 'tileName'
             tit.classList.add 'tileChild'
             img.classList.add "tileImgDir"
@@ -72,7 +59,7 @@ class Tile
         @pad.appendChild img
         view.appendChild @div
 
-        if @isFile() and path.extname(@file).toLowerCase() not in [".wav", ".aif"]
+        if @isFile() and slash.extname(@file).toLowerCase() not in [".wav", ".aif"]
             tags.enqueue @
         else if @isPlaylist()
             # post.emit "playlistInfo", @file
@@ -122,7 +109,7 @@ class Tile
     isPlaylistItem: -> @opt?.playlist? and @isFile()
     isUp:           -> @opt?.openDir?
     
-    absFilePath:      -> path.join Tile.musicDir, @file
+    absFilePath:      -> slash.join Tile.musicDir, @file
     isParentClipping: -> @div.parentNode?.clientHeight < @div.clientHeight  
     isCurrentSong:    -> @div.parentNode?.classList.contains "song"
 
@@ -132,7 +119,7 @@ class Tile
             @focusNeighbor 'right', 'left'
             post.emit 'delPlaylist', @file, @del
             return
-        fs.rename @absFilePath(), path.join(resolve('~/.Trash'), path.basename(@absFilePath())), (err) => 
+        fs.rename @absFilePath(), slash.join(resolve('~/.Trash'), slash.basename(@absFilePath())), (err) => 
             if err
                 log "[ERROR] trashing file #{@absFilePath()} failed!", err
             else
@@ -274,7 +261,7 @@ class Tile
         ,
             text:  'New Playlist'
             combo: '⌘N'
-            hide:  @isUp() or path.dirname(@file) != '.'
+            hide:  @isUp() or slash.dirname(@file) != '.'
             cb:    -> post.emit 'newPlaylist'
         ,
             text:  'Edit Playlist Name'
