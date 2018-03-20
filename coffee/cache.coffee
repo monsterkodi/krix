@@ -3,13 +3,9 @@
 # 000       000000000  000       000000000  0000000 
 # 000       000   000  000       000   000  000     
 #  0000000  000   000   0000000  000   000  00000000
-{
-relative,
-store,
-post,
-log,
-$ }      = require 'kxk'
-fs       = require 'fs-extra'
+
+{ relative, store, post, log, fs, $ } = require 'kxk'
+
 path     = require 'path'
 chokidar = require 'chokidar'
 
